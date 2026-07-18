@@ -28,8 +28,8 @@ export const MAPS = {
       '#..,,......,,..#',
       '#..............#',
       '#..............#',
-      '#....WWW.......#',
-      '#....abc.......#',
+      '#..............#',
+      '#..............#',
       '#..............#',
       '#..,,......,,..#',
       '#..,,......,,..#',
@@ -38,9 +38,9 @@ export const MAPS = {
     spawn: { x: 7, y: 8 },
     workbench: { x: 6, y: 5 },
     npcs: [
-      { x: 5, y: 6, id: 'prof_lumen', name: 'Professor Lumen', glyph: '\u{1F468}\u{200D}\u{1F3EB}' },
-      { x: 6, y: 6, id: 'prof_mirrors', name: 'Professor Silvers', glyph: '\u{1F469}\u{200D}\u{1F3EB}' },
-      { x: 7, y: 6, id: 'prof_labs', name: 'Professor Gapp', glyph: '\u{1F9D1}\u{200D}\u{1F3EB}' }
+      { x: 5, y: 6, id: 'prof_lumen', name: 'Professor Lumen' },
+      { x: 6, y: 6, id: 'prof_mirrors', name: 'Professor Silvers' },
+      { x: 7, y: 6, id: 'prof_labs', name: 'Professor Gapp' }
     ],
     items: [
       { x: 13, y: 1, material: 'crown_glass' },

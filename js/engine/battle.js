@@ -2,9 +2,13 @@ import { ABILITIES, findAbility } from '../data/abilities.js';
 import { makeEnemyInstance } from '../data/enemies.js';
 import { MATERIALS } from '../data/materials.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
+import { CHARACTER_SPRITES } from '../data/pixelArt.js';
+import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex } from './state.js';
 import { saveGame } from './save.js';
+
+const PORTRAIT_PX = 5;
 
 function logMsg(game, msg) {
   const log = game.battle.log;
@@ -216,7 +220,15 @@ export function renderBattle(game) {
   const player = game.state.player;
   const d = game.dom;
 
-  d.battleEnemyGlyph.textContent = enemy.glyph;
+  const enemySprite = CHARACTER_SPRITES[enemy.id];
+  d.battleEnemyCtx.clearRect(0, 0, d.battleEnemyCanvas.width, d.battleEnemyCanvas.height);
+  if (enemySprite) {
+    const px = enemy.isBoss ? PORTRAIT_PX * 1.15 : PORTRAIT_PX;
+    drawSprite(d.battleEnemyCtx, enemySprite.shape, enemySprite.palette, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, px);
+  }
+  d.battlePlayerCtx.clearRect(0, 0, d.battlePlayerCanvas.width, d.battlePlayerCanvas.height);
+  drawSprite(d.battlePlayerCtx, 'humanoid', 'player', d.battlePlayerCanvas.width / 2, d.battlePlayerCanvas.height / 2 + 6, PORTRAIT_PX);
+
   d.battleEnemyName.textContent = enemy.isBoss ? enemy.name + ' (?!)' : enemy.name;
   const enemyPct = Math.max(0, Math.round((enemy.curHp / enemy.hp) * 100));
   d.battleEnemyHpBar.style.width = enemyPct + '%';

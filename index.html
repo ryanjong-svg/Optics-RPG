@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prism & Photon — An Optics RPG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,13 +40,13 @@
   <div id="battle-panel" class="panel hidden">
     <div class="battle-row">
       <div class="combatant">
-        <div id="battle-enemy-glyph" class="glyph-lg">👾</div>
+        <canvas id="battle-enemy-canvas" class="portrait-canvas" width="100" height="120"></canvas>
         <div id="battle-enemy-name">Enemy</div>
         <div class="bar-wrap"><div id="battle-enemy-hp-bar" class="bar-fill hp"></div></div>
         <div id="battle-enemy-hp-text" class="bar-text">0/0</div>
       </div>
       <div class="combatant">
-        <div class="glyph-lg">🧙</div>
+        <canvas id="battle-player-canvas" class="portrait-canvas" width="100" height="120"></canvas>
         <div id="battle-player-level">Lv.1</div>
         <div class="bar-wrap"><div id="battle-player-hp-bar" class="bar-fill hp"></div></div>
         <div id="battle-player-hp-text" class="bar-text">0/0</div>

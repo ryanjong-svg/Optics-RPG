@@ -1,6 +1,7 @@
 import { MAPS } from '../data/maps.js';
 import { MATERIALS } from '../data/materials.js';
-import { ENEMIES } from '../data/enemies.js';
+import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
+import { drawSprite } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startQuiz } from './dialogueUI.js';
@@ -8,6 +9,7 @@ import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 
 const TILE = 32;
+const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels on the overworld
 
 const ZONE_ENCOUNTERS = {
   village: ['wisp', 'puddle_imp'],
@@ -16,8 +18,6 @@ const ZONE_ENCOUNTERS = {
   fiber: ['signal_wisp'],
   lab: []
 };
-
-const TILE_COLORS = { '#': '#1b1330', '.': '#2a2050', ',': '#25733f' };
 
 function tileAt(map, x, y) {
   if (y < 0 || y >= map.rows.length) return '#';
@@ -39,6 +39,65 @@ function npcAt(map, x, y) {
   return (map.npcs || []).find(n => n.x === x && n.y === y);
 }
 
+// Deterministic pseudo-randomness for texture speckling — same tile always looks the same.
+function hashPixel(x, y, salt) {
+  const v = Math.sin(x * 12.9898 + y * 78.233 + salt * 37.719) * 43758.5453;
+  return v - Math.floor(v);
+}
+
+function drawWallTile(ctx2d, px, py) {
+  ctx2d.fillStyle = '#4a2f26';
+  ctx2d.fillRect(px, py, TILE, TILE);
+  ctx2d.fillStyle = '#3a231b';
+  const brickH = TILE / 4;
+  for (let row = 0; row < 4; row++) {
+    const offset = row % 2 === 0 ? 0 : TILE / 2;
+    ctx2d.fillRect(px, py + row * brickH, TILE, 2);
+    ctx2d.fillRect(px + offset, py + row * brickH, 2, brickH);
+  }
+  ctx2d.strokeStyle = '#1f120d';
+  ctx2d.lineWidth = 2;
+  ctx2d.strokeRect(px + 1, py + 1, TILE - 2, TILE - 2);
+}
+
+function drawFloorTile(ctx2d, px, py, x, y) {
+  ctx2d.fillStyle = '#9a9aab';
+  ctx2d.fillRect(px, py, TILE, TILE);
+  ctx2d.strokeStyle = '#7c7c8c';
+  ctx2d.lineWidth = 1;
+  ctx2d.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+  ctx2d.fillStyle = '#848494';
+  for (let i = 0; i < 3; i++) {
+    const rx = px + 3 + Math.floor(hashPixel(x, y, i) * (TILE - 8));
+    const ry = py + 3 + Math.floor(hashPixel(x, y, i + 10) * (TILE - 8));
+    ctx2d.fillRect(rx, ry, 2, 2);
+  }
+}
+
+function drawGrassTile(ctx2d, px, py, x, y) {
+  ctx2d.fillStyle = '#3a7d44';
+  ctx2d.fillRect(px, py, TILE, TILE);
+  ctx2d.fillStyle = '#2c5e33';
+  for (let i = 0; i < 6; i++) {
+    const bx = px + 2 + Math.floor(hashPixel(x, y, i) * (TILE - 6));
+    const by = py + 2 + Math.floor(hashPixel(x, y, i + 20) * (TILE - 6));
+    ctx2d.fillRect(bx, by, 2, 4);
+  }
+  ctx2d.fillStyle = '#4d9a57';
+  for (let i = 0; i < 3; i++) {
+    const bx = px + 2 + Math.floor(hashPixel(x, y, i + 40) * (TILE - 6));
+    const by = py + 2 + Math.floor(hashPixel(x, y, i + 50) * (TILE - 6));
+    ctx2d.fillRect(bx, by, 2, 3);
+  }
+}
+
+function drawTile(ctx2d, type, x, y) {
+  const px = x * TILE, py = y * TILE;
+  if (type === '#') drawWallTile(ctx2d, px, py);
+  else if (type === ',') drawGrassTile(ctx2d, px, py, x, y);
+  else drawFloorTile(ctx2d, px, py, x, y);
+}
+
 export function renderOverworld(game) {
   const { ctx2d, canvas } = game.dom;
   const map = MAPS[game.state.currentMap];
@@ -48,43 +107,42 @@ export function renderOverworld(game) {
 
   for (let y = 0; y < map.rows.length; y++) {
     for (let x = 0; x < map.rows[y].length; x++) {
-      const t = map.rows[y][x];
-      ctx2d.fillStyle = TILE_COLORS[t] || '#2a2050';
-      ctx2d.fillRect(x * TILE, y * TILE, TILE, TILE);
-      ctx2d.strokeStyle = 'rgba(255,255,255,0.03)';
-      ctx2d.strokeRect(x * TILE, y * TILE, TILE, TILE);
+      drawTile(ctx2d, map.rows[y][x], x, y);
     }
   }
 
-  ctx2d.font = '22px "Segoe UI Emoji", sans-serif';
-  ctx2d.textAlign = 'center';
-  ctx2d.textBaseline = 'middle';
-
   (map.items || []).forEach(it => {
     if (isItemTaken(state, map.id, it.x, it.y)) return;
-    const mat = MATERIALS[it.material];
-    drawGlyph(ctx2d, mat.glyph, it.x, it.y);
+    const sprite = itemSprite(it.material);
+    drawTileSprite(ctx2d, sprite.shape, sprite.palette, it.x, it.y);
   });
 
-  if (map.workbench) drawGlyph(ctx2d, '\u{1F6E0}\u{FE0F}', map.workbench.x, map.workbench.y);
+  if (map.workbench) drawTileSprite(ctx2d, 'toolbox', 'toolbox', map.workbench.x, map.workbench.y);
 
-  (map.npcs || []).forEach(n => drawGlyph(ctx2d, n.glyph, n.x, n.y));
+  (map.npcs || []).forEach(n => {
+    const sprite = CHARACTER_SPRITES[n.id];
+    if (sprite) drawTileSprite(ctx2d, sprite.shape, sprite.palette, n.x, n.y);
+  });
 
   if (map.guardian && !state.flags.guardianDefeated[map.id]) {
-    drawGlyph(ctx2d, ENEMIES[map.guardian.enemyId].glyph, map.guardian.x, map.guardian.y);
+    const sprite = CHARACTER_SPRITES[map.guardian.enemyId];
+    drawTileSprite(ctx2d, sprite.shape, sprite.palette, map.guardian.x, map.guardian.y);
   }
 
   if (map.boss && !state.flags.bossDefeated) {
-    drawGlyph(ctx2d, ENEMIES[map.boss.enemyId].glyph, map.boss.x, map.boss.y);
+    const sprite = CHARACTER_SPRITES[map.boss.enemyId];
+    drawTileSprite(ctx2d, sprite.shape, sprite.palette, map.boss.x, map.boss.y, 2.4);
   }
 
-  drawGlyph(ctx2d, '\u{1F9D9}', state.pos.x, state.pos.y);
+  drawTileSprite(ctx2d, 'humanoid', 'player', state.pos.x, state.pos.y);
 
   game.dom.mapLabel.textContent = map.name;
 }
 
-function drawGlyph(ctx2d, glyph, x, y) {
-  ctx2d.fillText(glyph, x * TILE + TILE / 2, y * TILE + TILE / 2 + 1);
+function drawTileSprite(ctx2d, shape, palette, x, y, scale = 1) {
+  const cx = x * TILE + TILE / 2;
+  const cy = y * TILE + TILE / 2 + 2;
+  drawSprite(ctx2d, shape, palette, cx, cy, SPRITE_PX * scale);
 }
 
 export function handleMove(game, dx, dy) {

@@ -26,7 +26,10 @@ const dom = {
   dialogueNext: q('dialogue-next'),
 
   battlePanel: q('battle-panel'),
-  battleEnemyGlyph: q('battle-enemy-glyph'),
+  battleEnemyCanvas: q('battle-enemy-canvas'),
+  battleEnemyCtx: q('battle-enemy-canvas').getContext('2d'),
+  battlePlayerCanvas: q('battle-player-canvas'),
+  battlePlayerCtx: q('battle-player-canvas').getContext('2d'),
   battleEnemyName: q('battle-enemy-name'),
   battleEnemyHpBar: q('battle-enemy-hp-bar'),
   battleEnemyHpText: q('battle-enemy-hp-text'),

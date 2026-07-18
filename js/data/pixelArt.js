@@ -1,0 +1,190 @@
+// Hand-authored 8-bit-style sprites, River City Ransom-esque: chunky, thick-outlined,
+// symmetric silhouettes. Each shape is defined as its LEFT HALF only (one char per
+// pixel column, left edge -> center); the renderer mirrors it to build the full sprite.
+// '.' = transparent, 'K' = outline, everything else is a palette key resolved per instance.
+export const SHAPES = {
+  humanoid: [
+    '....KH',
+    '...KHH',
+    '..KHHH',
+    '..KSSS',
+    '..KSES',
+    '...KSS',
+    '....KS',
+    '.KJJJJ',
+    '.KJJJJ',
+    '.KJJJG',
+    '.KJJJJ',
+    '..KJJJ',
+    '...KPP',
+    '...KP.',
+    '...KP.',
+    '..KPP.'
+  ],
+  ghost: [
+    '....KA',
+    '...KAA',
+    '..KAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAEAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '...KAA',
+    '....KA',
+    '.....K'
+  ],
+  imp: [
+    '....KC',
+    '...KCC',
+    '..KAAA',
+    '.KAEAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '..KAAA',
+    '...KAA',
+    '...K.A',
+    '...K.A',
+    '...K..'
+  ],
+  golem: [
+    '..KAAA',
+    '.KAAAA',
+    '.KADAA',
+    '.KAAAA',
+    '..KAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KABAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '..KAAA',
+    '..KAAA',
+    '...KAA'
+  ],
+  wraith: [
+    '.....K',
+    '....KA',
+    '...KAA',
+    '..KAAA',
+    '..KAEA',
+    '..KAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '..KAAA',
+    '...KAA',
+    '....KA'
+  ],
+  slug: [
+    '..KAAA',
+    '.KAEAA',
+    '.KAAAA',
+    'KAAAAA',
+    'KAAAAA',
+    'KAAAAA',
+    '.KAAAA',
+    '..KAAA'
+  ],
+  voidling: [
+    '......K',
+    '.....KA',
+    '...KAAA',
+    '..KAAAA',
+    '.KAAAAA',
+    '.KAAAAA',
+    'KAAAEAA',
+    'KAAAEAA',
+    '.KAAAAA',
+    '.KAAAAA',
+    '..KAAAA',
+    '..KAAAA',
+    '...KAAA',
+    '....KAA'
+  ],
+  gem: [
+    '..K.',
+    '.KDA',
+    'KAAA',
+    '.KAA',
+    '..K.'
+  ],
+  toolbox: [
+    '..KAAA',
+    '.KAAAA',
+    'KAAAAA',
+    'KABAAA',
+    'KAAAAA',
+    'KAAAAA',
+    '.KAAAA',
+    '..KAAA'
+  ]
+};
+
+const OUTLINE = '#100a1a';
+
+export const PALETTES = {
+  player: { K: OUTLINE, H: '#5a3a22', S: '#f2c18c', E: '#151018', J: '#2e8b57', G: '#ffd166', P: '#2b4c8c' },
+  prof_lumen: { K: OUTLINE, H: '#d8d8e6', S: '#f2c18c', E: '#151018', J: '#7c4dff', G: '#ffe28a', P: '#3a2f5c' },
+  prof_mirrors: { K: OUTLINE, H: '#2a2020', S: '#e8b384', E: '#151018', J: '#26a69a', G: '#dff7f4', P: '#1f4d48' },
+  prof_labs: { K: OUTLINE, H: '#161616', S: '#c98a5b', E: '#151018', J: '#ff7043', G: '#ffe0b3', P: '#5c3a1f' },
+
+  wisp: { K: OUTLINE, A: '#dfe9ff', E: '#1a1a2e' },
+  signal_wisp: { K: OUTLINE, A: '#7dfcff', E: '#0a2a2e' },
+
+  puddle_imp: { K: OUTLINE, A: '#3aa0ff', C: '#1a5fb4', E: '#0a1a2e' },
+  prism_sprite: { K: OUTLINE, A: '#c084fc', C: '#f472b6', E: '#2a0a2e' },
+
+  mirror_golem: { K: OUTLINE, A: '#b8bfc7', B: '#6b7280', D: '#eaf6ff' },
+  photon_sentinel: { K: OUTLINE, A: '#2a2a55', B: '#39ff88', D: '#c6ff5c' },
+
+  reflection_wraith: { K: OUTLINE, A: '#241b3a', E: '#e8f0ff' },
+  chroma_beast: { K: '#2a0a1a', A: '#8b3fae', E: '#5cf0ff' },
+
+  attenuation_slug: { K: OUTLINE, A: '#6b7a3a', E: '#c0392b' },
+
+  null_medium: { K: '#3a2a5c', A: '#0a0612', E: '#ffffff' },
+
+  toolbox: { K: OUTLINE, A: '#8a5a2e', B: '#c0c0c0' },
+
+  gem_water: { K: OUTLINE, A: '#4aa3ff', D: '#eaf6ff' },
+  gem_crown_glass: { K: OUTLINE, A: '#cfe8ff', D: '#ffffff' },
+  gem_flint_glass: { K: OUTLINE, A: '#e0a457', D: '#fff2d9' },
+  gem_quartz: { K: OUTLINE, A: '#f0c6e0', D: '#ffffff' },
+  gem_diamond: { K: OUTLINE, A: '#eaf6ff', D: '#ffffff' },
+  gem_silicon: { K: OUTLINE, A: '#5a6270', D: '#c6d0e0' },
+  gem_silver: { K: OUTLINE, A: '#cfd4da', D: '#ffffff' },
+  gem_aluminum: { K: OUTLINE, A: '#9fb2c4', D: '#eef4fa' },
+  gem_polaroid: { K: OUTLINE, A: '#5c4a8a', D: '#c9b8ff' },
+  gem_sapphire: { K: OUTLINE, A: '#2e5fd6', D: '#bcd4ff' }
+};
+
+// enemyId/npcId -> { shape, palette }
+export const CHARACTER_SPRITES = {
+  player: { shape: 'humanoid', palette: 'player' },
+  prof_lumen: { shape: 'humanoid', palette: 'prof_lumen' },
+  prof_mirrors: { shape: 'humanoid', palette: 'prof_mirrors' },
+  prof_labs: { shape: 'humanoid', palette: 'prof_labs' },
+
+  wisp: { shape: 'ghost', palette: 'wisp' },
+  signal_wisp: { shape: 'ghost', palette: 'signal_wisp' },
+  puddle_imp: { shape: 'imp', palette: 'puddle_imp' },
+  prism_sprite: { shape: 'imp', palette: 'prism_sprite' },
+  mirror_golem: { shape: 'golem', palette: 'mirror_golem' },
+  photon_sentinel: { shape: 'golem', palette: 'photon_sentinel' },
+  reflection_wraith: { shape: 'wraith', palette: 'reflection_wraith' },
+  chroma_beast: { shape: 'wraith', palette: 'chroma_beast' },
+  attenuation_slug: { shape: 'slug', palette: 'attenuation_slug' },
+  null_medium: { shape: 'voidling', palette: 'null_medium' }
+};
+
+export function itemSprite(materialId) {
+  return { shape: 'gem', palette: `gem_${materialId}` };
+}
