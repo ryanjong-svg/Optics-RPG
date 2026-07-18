@@ -15,6 +15,7 @@ export function showMessages(game, lines, onDone) {
 export function startQuiz(game, npcId) {
   const questions = QUIZZES[npcId] || [];
   if (!questions.length) return;
+  game.state.flags.metNpc[npcId] = true;
   const q = questions[Math.floor(Math.random() * questions.length)];
   game.dialogue = {
     kind: 'quiz', phase: 'intro',

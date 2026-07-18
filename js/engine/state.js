@@ -19,7 +19,9 @@ export function newGameState() {
       seenIntro: false,
       guardianDefeated: {},
       bossDefeated: false,
-      takenItems: {}
+      takenItems: {},
+      visitedMaps: { village: true },
+      metNpc: {}
     },
     codexUnlocked: {}
   };

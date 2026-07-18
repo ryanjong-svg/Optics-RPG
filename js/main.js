@@ -3,6 +3,7 @@ import { loadGame, saveGame } from './engine/save.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
+import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 
@@ -12,6 +13,7 @@ const dom = {
   canvas: q('overworld-canvas'),
   ctx2d: q('overworld-canvas').getContext('2d'),
   mapLabel: q('map-label'),
+  mapExits: q('map-exits'),
 
   hudLevel: q('hud-level'),
   hudHpBar: q('hud-hp-bar'),
@@ -19,6 +21,7 @@ const dom = {
   hudXpBar: q('hud-xp-bar'),
   hudXpText: q('hud-xp-text'),
   btnCodex: q('btn-codex'),
+  btnChronicle: q('btn-chronicle'),
 
   dialoguePanel: q('dialogue-panel'),
   dialogueText: q('dialogue-text'),
@@ -50,12 +53,16 @@ const dom = {
   codexList: q('codex-list'),
   codexClose: q('codex-close'),
 
+  chroniclePanel: q('chronicle-panel'),
+  chronicleList: q('chronicle-list'),
+  chronicleClose: q('chronicle-close'),
+
   victoryPanel: q('victory-panel'),
   victoryStats: q('victory-stats'),
   victoryContinue: q('victory-continue')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'victory-panel', 'dialogue-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -66,7 +73,7 @@ const game = {
   showPanel(name) {
     PANELS.forEach(id => document.getElementById(id).classList.add('hidden'));
     if (name === 'overworld') return;
-    const map = { battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', victory: 'victory-panel', dialogue: 'dialogue-panel' };
+    const map = { battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel', victory: 'victory-panel', dialogue: 'dialogue-panel' };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
   },
@@ -104,6 +111,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 dom.btnCodex.addEventListener('click', () => openCodex(game));
+dom.btnChronicle.addEventListener('click', () => openChronicle(game));
+dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
 dom.craftClose.addEventListener('click', () => closeCraft(game));
 dom.codexClose.addEventListener('click', () => closeCodex(game));
 dom.dialogueNext.addEventListener('click', () => advanceDialogue(game));

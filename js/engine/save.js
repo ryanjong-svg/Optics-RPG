@@ -14,7 +14,13 @@ export function loadGame() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const state = JSON.parse(raw);
+    // Backfill fields added after this save was written, so older saves don't crash.
+    if (state.flags) {
+      if (!state.flags.visitedMaps) state.flags.visitedMaps = { [state.currentMap]: true };
+      if (!state.flags.metNpc) state.flags.metNpc = {};
+    }
+    return state;
   } catch (e) {
     console.warn('Load failed', e);
     return null;

@@ -116,6 +116,15 @@ export const SHAPES = {
     '.KAA',
     '..K.'
   ],
+  signpost: [
+    '..KA.',
+    '.KAAA',
+    '.KAAA',
+    '..KB.',
+    '..KB.',
+    '..KB.',
+    '..KB.'
+  ],
   toolbox: [
     '..KAAA',
     '.KAAAA',
@@ -153,6 +162,7 @@ export const PALETTES = {
   null_medium: { K: '#3a2a5c', A: '#0a0612', E: '#ffffff' },
 
   toolbox: { K: OUTLINE, A: '#8a5a2e', B: '#c0c0c0' },
+  signpost: { K: OUTLINE, A: '#e8e0c8', B: '#7a4a2b' },
 
   gem_water: { K: OUTLINE, A: '#4aa3ff', D: '#eaf6ff' },
   gem_crown_glass: { K: OUTLINE, A: '#cfe8ff', D: '#ffffff' },

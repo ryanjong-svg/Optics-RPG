@@ -1,15 +1,29 @@
-import { MAPS } from '../data/maps.js';
+import { MAPS, mapWidth, mapHeight } from '../data/maps.js';
 import { MATERIALS } from '../data/materials.js';
+import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
-import { drawSprite } from './pixelSprites.js';
+import { drawSprite, spriteSize } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startQuiz } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 
-const TILE = 32;
-const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels on the overworld
+const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
+
+// Isometric projection constants (2:1 diamond tiles, XCOM/tactical-grid style).
+const ISO_W = 48;
+const ISO_H = 24;
+const WALL_ELEVATION = 22;
+const ORIGIN_X = 290;
+const ORIGIN_Y = 70;
+
+function toScreen(x, y) {
+  return {
+    sx: ORIGIN_X + (x - y) * (ISO_W / 2),
+    sy: ORIGIN_Y + (x + y) * (ISO_H / 2)
+  };
+}
 
 const ZONE_ENCOUNTERS = {
   village: ['wisp', 'puddle_imp'],
@@ -17,6 +31,16 @@ const ZONE_ENCOUNTERS = {
   prism: ['prism_sprite'],
   fiber: ['signal_wisp'],
   lab: []
+};
+
+// Each zone gets a distinct raised-block palette (top/left/right face shading)
+// so a glance at the walls alone tells you which area you're in.
+const ZONE_WALL_COLORS = {
+  village: { top: '#6b4530', left: '#4a2f22', right: '#34201a' },
+  mirrors: { top: '#7c8790', left: '#5c6570', right: '#3f4750' },
+  prism: { top: '#7a5296', left: '#5a3a6e', right: '#432a54' },
+  fiber: { top: '#3f7d7d', left: '#2f5c5c', right: '#234545' },
+  lab: { top: '#3c4f7d', left: '#2a3a5c', right: '#1f2c45' }
 };
 
 function tileAt(map, x, y) {
@@ -45,57 +69,117 @@ function hashPixel(x, y, salt) {
   return v - Math.floor(v);
 }
 
-function drawWallTile(ctx2d, px, py) {
-  ctx2d.fillStyle = '#4a2f26';
-  ctx2d.fillRect(px, py, TILE, TILE);
-  ctx2d.fillStyle = '#3a231b';
-  const brickH = TILE / 4;
-  for (let row = 0; row < 4; row++) {
-    const offset = row % 2 === 0 ? 0 : TILE / 2;
-    ctx2d.fillRect(px, py + row * brickH, TILE, 2);
-    ctx2d.fillRect(px + offset, py + row * brickH, 2, brickH);
-  }
-  ctx2d.strokeStyle = '#1f120d';
-  ctx2d.lineWidth = 2;
-  ctx2d.strokeRect(px + 1, py + 1, TILE - 2, TILE - 2);
+function diamondPath(ctx2d, sx, sy) {
+  ctx2d.beginPath();
+  ctx2d.moveTo(sx, sy - ISO_H / 2);
+  ctx2d.lineTo(sx + ISO_W / 2, sy);
+  ctx2d.lineTo(sx, sy + ISO_H / 2);
+  ctx2d.lineTo(sx - ISO_W / 2, sy);
+  ctx2d.closePath();
 }
 
-function drawFloorTile(ctx2d, px, py, x, y) {
+function drawFloorTile(ctx2d, sx, sy, x, y) {
+  diamondPath(ctx2d, sx, sy);
   ctx2d.fillStyle = '#9a9aab';
-  ctx2d.fillRect(px, py, TILE, TILE);
+  ctx2d.fill();
   ctx2d.strokeStyle = '#7c7c8c';
   ctx2d.lineWidth = 1;
-  ctx2d.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+  ctx2d.stroke();
   ctx2d.fillStyle = '#848494';
-  for (let i = 0; i < 3; i++) {
-    const rx = px + 3 + Math.floor(hashPixel(x, y, i) * (TILE - 8));
-    const ry = py + 3 + Math.floor(hashPixel(x, y, i + 10) * (TILE - 8));
-    ctx2d.fillRect(rx, ry, 2, 2);
+  for (let i = 0; i < 2; i++) {
+    const ox = (hashPixel(x, y, i) - 0.5) * (ISO_W * 0.4);
+    const oy = (hashPixel(x, y, i + 10) - 0.5) * (ISO_H * 0.4);
+    ctx2d.fillRect(sx + ox, sy + oy, 2, 2);
   }
 }
 
-function drawGrassTile(ctx2d, px, py, x, y) {
+function drawGrassTile(ctx2d, sx, sy, x, y) {
+  diamondPath(ctx2d, sx, sy);
   ctx2d.fillStyle = '#3a7d44';
-  ctx2d.fillRect(px, py, TILE, TILE);
+  ctx2d.fill();
+  ctx2d.strokeStyle = '#2c5e33';
+  ctx2d.lineWidth = 1;
+  ctx2d.stroke();
   ctx2d.fillStyle = '#2c5e33';
-  for (let i = 0; i < 6; i++) {
-    const bx = px + 2 + Math.floor(hashPixel(x, y, i) * (TILE - 6));
-    const by = py + 2 + Math.floor(hashPixel(x, y, i + 20) * (TILE - 6));
-    ctx2d.fillRect(bx, by, 2, 4);
+  for (let i = 0; i < 3; i++) {
+    const ox = (hashPixel(x, y, i) - 0.5) * (ISO_W * 0.5);
+    const oy = (hashPixel(x, y, i + 20) - 0.5) * (ISO_H * 0.5);
+    ctx2d.fillRect(sx + ox, sy + oy, 2, 3);
   }
   ctx2d.fillStyle = '#4d9a57';
-  for (let i = 0; i < 3; i++) {
-    const bx = px + 2 + Math.floor(hashPixel(x, y, i + 40) * (TILE - 6));
-    const by = py + 2 + Math.floor(hashPixel(x, y, i + 50) * (TILE - 6));
-    ctx2d.fillRect(bx, by, 2, 3);
+  for (let i = 0; i < 2; i++) {
+    const ox = (hashPixel(x, y, i + 40) - 0.5) * (ISO_W * 0.5);
+    const oy = (hashPixel(x, y, i + 50) - 0.5) * (ISO_H * 0.5);
+    ctx2d.fillRect(sx + ox, sy + oy, 2, 2);
   }
 }
 
-function drawTile(ctx2d, type, x, y) {
-  const px = x * TILE, py = y * TILE;
-  if (type === '#') drawWallTile(ctx2d, px, py);
-  else if (type === ',') drawGrassTile(ctx2d, px, py, x, y);
-  else drawFloorTile(ctx2d, px, py, x, y);
+// Elevated 3-face block, like XCOM's raised cover/terrain tiles.
+function drawWallBlock(ctx2d, sx, sy, zone) {
+  const c = ZONE_WALL_COLORS[zone] || ZONE_WALL_COLORS.village;
+  const hw = ISO_W / 2, hh = ISO_H / 2;
+  const topY = sy - WALL_ELEVATION;
+
+  ctx2d.beginPath();
+  ctx2d.moveTo(sx, topY - hh);
+  ctx2d.lineTo(sx + hw, topY);
+  ctx2d.lineTo(sx, topY + hh);
+  ctx2d.lineTo(sx - hw, topY);
+  ctx2d.closePath();
+  ctx2d.fillStyle = c.top;
+  ctx2d.fill();
+  ctx2d.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx2d.lineWidth = 1;
+  ctx2d.stroke();
+
+  ctx2d.beginPath();
+  ctx2d.moveTo(sx - hw, topY);
+  ctx2d.lineTo(sx, topY + hh);
+  ctx2d.lineTo(sx, sy + hh);
+  ctx2d.lineTo(sx - hw, sy);
+  ctx2d.closePath();
+  ctx2d.fillStyle = c.left;
+  ctx2d.fill();
+  ctx2d.stroke();
+
+  ctx2d.beginPath();
+  ctx2d.moveTo(sx + hw, topY);
+  ctx2d.lineTo(sx, topY + hh);
+  ctx2d.lineTo(sx, sy + hh);
+  ctx2d.lineTo(sx + hw, sy);
+  ctx2d.closePath();
+  ctx2d.fillStyle = c.right;
+  ctx2d.fill();
+  ctx2d.stroke();
+}
+
+// Draws a sprite standing on the tile (feet anchored at the ground point) and
+// returns the sprite's top-edge y, so callers can float a label above it.
+function drawIsoSprite(ctx2d, shape, palette, sx, sy, scale = 1) {
+  const px = SPRITE_PX * scale;
+  const { h } = spriteSize(shape, px);
+  const cy = sy - h / 2 + 2;
+  drawSprite(ctx2d, shape, palette, sx, cy, px);
+  return cy - h / 2;
+}
+
+// Small readable tag floating above a sprite — answers "where does this lead /
+// what is this" before the player commits to a step.
+function drawLabel(ctx2d, text, sx, topY, color = '#ffd166') {
+  const bottomY = topY - 4;
+  ctx2d.font = 'bold 9px "Segoe UI", sans-serif';
+  ctx2d.textAlign = 'center';
+  ctx2d.textBaseline = 'bottom';
+  const padX = 4;
+  const w = ctx2d.measureText(text).width + padX * 2;
+  const h = 12;
+  ctx2d.fillStyle = 'rgba(8,5,16,0.85)';
+  ctx2d.fillRect(sx - w / 2, bottomY - h, w, h);
+  ctx2d.strokeStyle = '#000';
+  ctx2d.lineWidth = 1;
+  ctx2d.strokeRect(sx - w / 2 + 0.5, bottomY - h + 0.5, w - 1, h - 1);
+  ctx2d.fillStyle = color;
+  ctx2d.fillText(text, sx, bottomY - 2);
 }
 
 export function renderOverworld(game) {
@@ -105,44 +189,84 @@ export function renderOverworld(game) {
 
   ctx2d.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < map.rows.length; y++) {
-    for (let x = 0; x < map.rows[y].length; x++) {
-      drawTile(ctx2d, map.rows[y][x], x, y);
-    }
-  }
+  const entities = new Map();
+  const labelQueue = [];
+  const putEntity = (x, y, drawFn) => entities.set(`${x},${y}`, drawFn);
+
+  (map.exits || []).forEach(exit => {
+    putEntity(exit.x, exit.y, (sx, sy) => {
+      const topY = drawIsoSprite(ctx2d, 'signpost', 'signpost', sx, sy);
+      labelQueue.push(() => drawLabel(ctx2d, `→ ${exit.label}`, sx, topY));
+    });
+  });
 
   (map.items || []).forEach(it => {
     if (isItemTaken(state, map.id, it.x, it.y)) return;
     const sprite = itemSprite(it.material);
-    drawTileSprite(ctx2d, sprite.shape, sprite.palette, it.x, it.y);
+    putEntity(it.x, it.y, (sx, sy) => drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy));
   });
 
-  if (map.workbench) drawTileSprite(ctx2d, 'toolbox', 'toolbox', map.workbench.x, map.workbench.y);
+  if (map.workbench) {
+    putEntity(map.workbench.x, map.workbench.y, (sx, sy) => {
+      const topY = drawIsoSprite(ctx2d, 'toolbox', 'toolbox', sx, sy);
+      labelQueue.push(() => drawLabel(ctx2d, 'Workbench', sx, topY, '#7dffb0'));
+    });
+  }
 
   (map.npcs || []).forEach(n => {
     const sprite = CHARACTER_SPRITES[n.id];
-    if (sprite) drawTileSprite(ctx2d, sprite.shape, sprite.palette, n.x, n.y);
+    if (sprite) putEntity(n.x, n.y, (sx, sy) => drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy));
   });
 
   if (map.guardian && !state.flags.guardianDefeated[map.id]) {
     const sprite = CHARACTER_SPRITES[map.guardian.enemyId];
-    drawTileSprite(ctx2d, sprite.shape, sprite.palette, map.guardian.x, map.guardian.y);
+    putEntity(map.guardian.x, map.guardian.y, (sx, sy) => {
+      const topY = drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy);
+      labelQueue.push(() => drawLabel(ctx2d, `⚠ ${ENEMIES[map.guardian.enemyId].name}`, sx, topY, '#ff8b8b'));
+    });
   }
 
   if (map.boss && !state.flags.bossDefeated) {
     const sprite = CHARACTER_SPRITES[map.boss.enemyId];
-    drawTileSprite(ctx2d, sprite.shape, sprite.palette, map.boss.x, map.boss.y, 2.4);
+    const locked = map.boss.requiresGuardian && !state.flags.guardianDefeated[map.id];
+    putEntity(map.boss.x, map.boss.y, (sx, sy) => {
+      const topY = drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy, 2.4);
+      labelQueue.push(() => drawLabel(ctx2d, locked ? '??? (locked)' : `⚠ ${ENEMIES[map.boss.enemyId].name}`, sx, topY, '#ff8b8b'));
+    });
   }
 
-  drawTileSprite(ctx2d, 'humanoid', 'player', state.pos.x, state.pos.y);
+  putEntity(state.pos.x, state.pos.y, (sx, sy) => drawIsoSprite(ctx2d, 'humanoid', 'player', sx, sy));
+
+  const maxDepth = (mapWidth() - 1) + (mapHeight() - 1);
+  for (let d = 0; d <= maxDepth; d++) {
+    for (let y = 0; y < mapHeight(); y++) {
+      const x = d - y;
+      if (x < 0 || x >= mapWidth()) continue;
+      if (y >= map.rows.length || x >= map.rows[y].length) continue;
+      const tile = map.rows[y][x];
+      const { sx, sy } = toScreen(x, y);
+      if (tile === '#') drawWallBlock(ctx2d, sx, sy, map.zone);
+      else if (tile === ',') drawGrassTile(ctx2d, sx, sy, x, y);
+      else drawFloorTile(ctx2d, sx, sy, x, y);
+      const entityFn = entities.get(`${x},${y}`);
+      if (entityFn) entityFn(sx, sy);
+    }
+  }
+
+  labelQueue.forEach(fn => fn());
 
   game.dom.mapLabel.textContent = map.name;
+  renderExitsHint(game, map);
 }
 
-function drawTileSprite(ctx2d, shape, palette, x, y, scale = 1) {
-  const cx = x * TILE + TILE / 2;
-  const cy = y * TILE + TILE / 2 + 2;
-  drawSprite(ctx2d, shape, palette, cx, cy, SPRITE_PX * scale);
+function renderExitsHint(game, map) {
+  const exits = map.exits || [];
+  if (!exits.length) {
+    game.dom.mapExits.textContent = '';
+    return;
+  }
+  const label = exits.length === 1 ? 'Exit' : 'Exits';
+  game.dom.mapExits.textContent = `${label}: ${exits.map(e => e.label).join('  •  ')}`;
 }
 
 export function handleMove(game, dx, dy) {
@@ -195,6 +319,7 @@ export function handleMove(game, dx, dy) {
     const target = MAPS[exit.to];
     state.currentMap = target.id;
     state.pos = { ...target.spawn };
+    state.flags.visitedMaps[target.id] = true;
     saveGame(state);
     renderOverworld(game);
     return;

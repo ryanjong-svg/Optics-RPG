@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prism & Photon — An Optics RPG</title>
+<title>Prism &amp; Photon: Candela's Reach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
-  <header id="hud">
+  <header id="hud" class="bracketed">
     <div class="hud-title">Prism &amp; Photon</div>
     <div class="hud-stats">
       <span id="hud-level">Lv.1</span>
@@ -20,15 +20,17 @@
       <div class="bar-wrap small"><div id="hud-xp-bar" class="bar-fill xp"></div></div>
       <span id="hud-xp-text" class="bar-text">0/20 XP</span>
     </div>
+    <button id="btn-chronicle" class="action-btn ghost">Chronicle</button>
     <button id="btn-codex" class="action-btn ghost">Codex</button>
   </header>
 
   <div id="map-label">Lumen Village</div>
+  <div id="map-exits"></div>
 
   <div id="stage">
-    <canvas id="overworld-canvas" width="512" height="352"></canvas>
+    <canvas id="overworld-canvas" width="700" height="420"></canvas>
 
-    <div id="dialogue-panel" class="panel hidden">
+    <div id="dialogue-panel" class="panel bracketed hidden">
       <p id="dialogue-text"></p>
       <div id="dialogue-choices" class="choice-list"></div>
       <button id="dialogue-next" class="action-btn primary">Next</button>
@@ -37,16 +39,16 @@
 
   <p class="hint">Move with Arrow Keys / WASD. Walk into people, chests, and doors to interact.</p>
 
-  <div id="battle-panel" class="panel hidden">
+  <div id="battle-panel" class="panel bracketed hidden">
     <div class="battle-row">
       <div class="combatant">
-        <canvas id="battle-enemy-canvas" class="portrait-canvas" width="100" height="120"></canvas>
+        <canvas id="battle-enemy-canvas" class="portrait-canvas bracketed" width="100" height="120"></canvas>
         <div id="battle-enemy-name">Enemy</div>
         <div class="bar-wrap"><div id="battle-enemy-hp-bar" class="bar-fill hp"></div></div>
         <div id="battle-enemy-hp-text" class="bar-text">0/0</div>
       </div>
       <div class="combatant">
-        <canvas id="battle-player-canvas" class="portrait-canvas" width="100" height="120"></canvas>
+        <canvas id="battle-player-canvas" class="portrait-canvas bracketed" width="100" height="120"></canvas>
         <div id="battle-player-level">Lv.1</div>
         <div class="bar-wrap"><div id="battle-player-hp-bar" class="bar-fill hp"></div></div>
         <div id="battle-player-hp-text" class="bar-text">0/0</div>
@@ -56,7 +58,7 @@
     <div id="battle-actions" class="action-grid"></div>
   </div>
 
-  <div id="craft-panel" class="panel hidden">
+  <div id="craft-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Optics Workbench</h2><button id="craft-close" class="action-btn ghost">Close</button></div>
     <h3>Materials</h3>
     <div id="craft-materials" class="mat-grid"></div>
@@ -66,15 +68,20 @@
     <div id="craft-recipes" class="recipe-list"></div>
   </div>
 
-  <div id="codex-panel" class="panel hidden">
+  <div id="codex-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Codex of Light</h2><button id="codex-close" class="action-btn ghost">Close</button></div>
     <div id="codex-progress" class="codex-progress"></div>
     <div id="codex-list" class="codex-list"></div>
   </div>
 
-  <div id="victory-panel" class="panel hidden">
-    <h2>The Null Medium Understands Now.</h2>
-    <p>You proved, one concept at a time, that every material property it borrowed had a real answer — reflection, refraction, dispersion, and the photoelectric threshold.</p>
+  <div id="chronicle-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Chronicle of the Reach</h2><button id="chronicle-close" class="action-btn ghost">Close</button></div>
+    <div id="chronicle-list" class="codex-list"></div>
+  </div>
+
+  <div id="victory-panel" class="panel bracketed hidden">
+    <h2>The Bending Is Finished.</h2>
+    <p>The Null Medium borrowed reflection, refraction, dispersion, and the photoelectric effect from you, one phase at a time — and each time, the real answer caught up with it. The last unresolved boundary in Candela's Reach has finally chosen a fate.</p>
     <p id="victory-stats"></p>
     <button id="victory-continue" class="action-btn primary">Keep Exploring</button>
   </div>
