@@ -23,6 +23,7 @@
     <button id="btn-map" class="action-btn ghost">Map</button>
     <button id="btn-chronicle" class="action-btn ghost">Chronicle</button>
     <button id="btn-codex" class="action-btn ghost">Codex</button>
+    <button id="btn-questlog" class="action-btn ghost">Quests</button>
     <button id="btn-completion" class="action-btn ghost">Log</button>
     <button id="btn-mute" class="action-btn ghost" title="Toggle sound">&#128266;</button>
   </header>
@@ -91,6 +92,16 @@
     <div id="chronicle-list" class="codex-list"></div>
   </div>
 
+  <div id="questlog-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Quest Log</h2><button id="questlog-close" class="action-btn ghost">Close</button></div>
+    <h3 class="completion-subhead" style="margin-top:0;border-top:none;padding-top:0;">Active</h3>
+    <div id="questlog-active" class="codex-list"></div>
+    <h3 class="completion-subhead">Undiscovered</h3>
+    <div id="questlog-unstarted" class="codex-list"></div>
+    <h3 class="completion-subhead">Completed</h3>
+    <div id="questlog-completed" class="codex-list"></div>
+  </div>
+
   <div id="map-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Tactical Map</h2><button id="map-close" class="action-btn ghost">Close</button></div>
     <div id="map-diagram"></div>
@@ -102,6 +113,13 @@
     <div id="completion-list"></div>
     <h3 class="completion-subhead">Achievements</h3>
     <div id="completion-achievements" class="codex-list"></div>
+    <h3 class="completion-subhead">Save Data</h3>
+    <div class="save-transfer-row">
+      <button id="btn-export-save" class="action-btn">Export Save</button>
+      <button id="btn-import-save" class="action-btn">Import Save</button>
+      <input id="import-save-input" type="file" accept="application/json" class="hidden" />
+    </div>
+    <div id="save-transfer-msg" class="save-transfer-msg"></div>
   </div>
 
   <div id="victory-panel" class="panel bracketed hidden">
@@ -109,6 +127,8 @@
     <p>The Null Medium borrowed reflection, refraction, dispersion, and the photoelectric effect from you, one phase at a time — and each time, the real answer caught up with it. The last unresolved boundary in Candela's Reach has finally chosen a fate.</p>
     <p id="victory-stats"></p>
     <button id="victory-continue" class="action-btn primary">Keep Exploring</button>
+    <button id="victory-ngplus" class="action-btn">Begin New Game+</button>
+    <p class="ngplus-hint">New Game+ resets every guardian, secret, and quest for a tougher replay (enemies hit harder each cycle) — your level, gear, materials, and Codex/Chronicle knowledge all carry over.</p>
   </div>
 </div>
 <script type="module" src="js/main.js"></script>

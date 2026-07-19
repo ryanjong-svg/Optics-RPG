@@ -46,7 +46,10 @@ export function closeCompletion(game) {
 
 export function renderCompletion(game) {
   const { rows, overallPct } = computeStats(game.state);
-  game.dom.completionOverall.textContent = `${overallPct}% Complete`;
+  const cycle = game.state.flags.ngPlusCycle || 0;
+  game.dom.completionOverall.textContent = cycle > 0
+    ? `${overallPct}% Complete — New Game+ Cycle ${cycle}`
+    : `${overallPct}% Complete`;
   game.dom.completionList.innerHTML = rows.map(r => {
     const pct = r.total ? Math.round((r.done / r.total) * 100) : 0;
     return `

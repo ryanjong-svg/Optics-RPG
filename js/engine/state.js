@@ -26,7 +26,8 @@ export function newGameState() {
       quizAsked: {},
       quests: {},
       secretsFound: {},
-      achievements: {}
+      achievements: {},
+      ngPlusCycle: 0
     },
     codexUnlocked: {}
   };
@@ -53,5 +54,25 @@ export function unlockCodex(state, conceptId, log) {
     state.codexUnlocked[conceptId] = true;
     if (log) log(`New Codex entry unlocked!`);
   }
+}
+
+// Resets exploration progress (guardians, secrets, quests, visited maps,
+// event-flagged achievements) for a fresh, tougher run — level, gear,
+// materials, and all Codex/Chronicle knowledge carry over unchanged.
+export function startNewGamePlus(state) {
+  state.flags.ngPlusCycle = (state.flags.ngPlusCycle || 0) + 1;
+  state.flags.guardianDefeated = {};
+  state.flags.secretsFound = {};
+  state.flags.bossDefeated = false;
+  state.flags.takenItems = {};
+  state.flags.visitedMaps = { village: true };
+  state.flags.metNpc = {};
+  state.flags.quizAsked = {};
+  state.flags.quests = {};
+  state.flags.achievements = {};
+  state.currentMap = 'village';
+  state.pos = { x: 7, y: 8 };
+  state.mode = 'overworld';
+  return state;
 }
 

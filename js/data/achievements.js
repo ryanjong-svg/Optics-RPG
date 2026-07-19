@@ -65,6 +65,11 @@ export const ACHIEVEMENTS = {
     title: 'One Trick',
     desc: 'Defeat a guardian using only a single ability all fight.',
     check: state => !!(state.flags.achievements && state.flags.achievements.one_trick)
+  },
+  cycle_walker: {
+    title: 'Cycle Walker',
+    desc: 'Begin a New Game+.',
+    check: state => (state.flags.ngPlusCycle || 0) >= 1
   }
 };
 

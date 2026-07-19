@@ -1,11 +1,12 @@
-import { newGameState } from './engine/state.js';
-import { loadGame, saveGame } from './engine/save.js';
+import { newGameState, startNewGamePlus } from './engine/state.js';
+import { loadGame, saveGame, exportSaveString, importSaveString } from './engine/save.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
 import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
 import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
+import { openQuestLog, closeQuestLog } from './engine/questLogUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
@@ -65,11 +66,22 @@ const dom = {
   chronicleList: q('chronicle-list'),
   chronicleClose: q('chronicle-close'),
 
+  questlogPanel: q('questlog-panel'),
+  questlogActive: q('questlog-active'),
+  questlogUnstarted: q('questlog-unstarted'),
+  questlogCompleted: q('questlog-completed'),
+  btnQuestlog: q('btn-questlog'),
+  questlogClose: q('questlog-close'),
+
   completionPanel: q('completion-panel'),
   completionOverall: q('completion-overall'),
   completionList: q('completion-list'),
   completionAchievements: q('completion-achievements'),
   completionClose: q('completion-close'),
+  btnExportSave: q('btn-export-save'),
+  btnImportSave: q('btn-import-save'),
+  importSaveInput: q('import-save-input'),
+  saveTransferMsg: q('save-transfer-msg'),
 
   mapPanel: q('map-panel'),
   mapDiagram: q('map-diagram'),
@@ -82,10 +94,11 @@ const dom = {
 
   victoryPanel: q('victory-panel'),
   victoryStats: q('victory-stats'),
-  victoryContinue: q('victory-continue')
+  victoryContinue: q('victory-continue'),
+  victoryNgPlus: q('victory-ngplus')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'completion-panel', 'map-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'victory-panel', 'dialogue-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -98,7 +111,8 @@ const game = {
     if (name === 'overworld') return;
     const map = {
       battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel',
-      completion: 'completion-panel', map: 'map-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
+      questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel', victory: 'victory-panel',
+      dialogue: 'dialogue-panel'
     };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
@@ -150,6 +164,8 @@ document.addEventListener('keydown', (e) => {
 dom.btnCodex.addEventListener('click', () => openCodex(game));
 dom.btnChronicle.addEventListener('click', () => openChronicle(game));
 dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
+dom.btnQuestlog.addEventListener('click', () => openQuestLog(game));
+dom.questlogClose.addEventListener('click', () => closeQuestLog(game));
 dom.btnCompletion.addEventListener('click', () => openCompletion(game));
 dom.completionClose.addEventListener('click', () => closeCompletion(game));
 dom.btnMap.addEventListener('click', () => openMap(game));
@@ -159,6 +175,41 @@ dom.btnMute.addEventListener('click', () => {
   dom.btnMute.innerHTML = muted ? '&#128263;' : '&#128266;';
 });
 dom.craftClose.addEventListener('click', () => closeCraft(game));
+
+function showSaveMsg(text) {
+  dom.saveTransferMsg.textContent = text;
+}
+dom.btnExportSave.addEventListener('click', () => {
+  const data = exportSaveString();
+  if (!data) { showSaveMsg('Nothing to export yet.'); return; }
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'prism-photon-save.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showSaveMsg('Save exported.');
+});
+dom.btnImportSave.addEventListener('click', () => dom.importSaveInput.click());
+dom.importSaveInput.addEventListener('change', () => {
+  const file = dom.importSaveInput.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const ok = importSaveString(String(reader.result));
+    if (ok) {
+      showSaveMsg('Save imported! Reloading...');
+      setTimeout(() => location.reload(), 600);
+    } else {
+      showSaveMsg("That file doesn't look like a valid save.");
+    }
+  };
+  reader.readAsText(file);
+  dom.importSaveInput.value = '';
+});
 
 function tapMove(dx, dy) {
   if (game.state.mode !== 'overworld') return;
@@ -175,6 +226,21 @@ dom.victoryContinue.addEventListener('click', () => {
   game.state.mode = 'overworld';
   game.showPanel('overworld');
   renderOverworld(game);
+  audio.playOverworldMusic();
+  audio.playZoneAmbience(MAPS[game.state.currentMap].zone);
+});
+dom.victoryNgPlus.addEventListener('click', () => {
+  const confirmed = window.confirm(
+    'Begin New Game+? This resets every guardian, secret, and quest for a tougher replay. ' +
+    'Your level, gear, materials, and Codex/Chronicle knowledge carry over. This cannot be undone ' +
+    '(export a save first from the Field Log if you want a backup).'
+  );
+  if (!confirmed) return;
+  startNewGamePlus(game.state);
+  saveGame(game.state);
+  game.showPanel('overworld');
+  renderOverworld(game);
+  renderHud();
   audio.playOverworldMusic();
   audio.playZoneAmbience(MAPS[game.state.currentMap].zone);
 });

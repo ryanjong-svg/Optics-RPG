@@ -292,16 +292,22 @@ canvas#overworld-canvas {
 .codex-entry h3 { margin: 0 0 6px; color: var(--green); font-size: 0.85em; }
 .codex-entry.locked { border-color: #2a3440; }
 .codex-entry.locked h3 { color: var(--text-dim); }
+.codex-entry.quest-ready { border-color: var(--green); box-shadow: 0 0 8px rgba(125,255,176,0.25); }
 .codex-entry p { margin: 0; font-size: 1em; line-height: 1.4; color: var(--text-light); }
 
 #victory-panel { text-align: center; }
 #victory-panel h2 { color: var(--orange); font-size: 1.1em; line-height: 1.6; }
+#victory-ngplus { margin-top: 8px; }
+.ngplus-hint { font-size: 0.85em; color: var(--text-dim); margin-top: 8px; }
 
 /* ---------- Completion / Field Log ---------- */
 .completion-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .completion-row-head { display: flex; justify-content: space-between; font-size: 0.95em; }
 .completion-bar { width: 100%; height: 12px; }
 .completion-subhead { color: var(--orange); font-family: 'Orbitron', sans-serif; font-size: 0.8em; margin: 16px 0 8px; border-top: 1px solid var(--cyan-dim); padding-top: 12px; }
+.save-transfer-row { display: flex; gap: 8px; }
+.save-transfer-row .action-btn { flex: 1; }
+.save-transfer-msg { font-size: 0.85em; color: var(--text-dim); min-height: 1.2em; margin-top: 6px; }
 
 /* ---------- Tactical Map ---------- */
 .map-grid {

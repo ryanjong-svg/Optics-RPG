@@ -65,8 +65,8 @@ function logMsg(game, msg) {
 }
 
 // Random-encounter enemies get a mild stat bump per player level, so early
-// zones don't stay trivial forever — guardians and the boss are untouched,
-// their difficulty is tuned by story position, not player level.
+// zones don't stay trivial forever — guardians and the boss are untouched
+// by this one, their difficulty is tuned by story position, not player level.
 function scaleEnemyToLevel(enemy, level) {
   if (!level || level <= 1) return;
   const hpScale = 1 + (level - 1) * 0.12;
@@ -77,8 +77,21 @@ function scaleEnemyToLevel(enemy, level) {
   enemy.def = Math.round(enemy.def * combatScale);
 }
 
+// New Game+ toughens *every* enemy, including guardians and the boss, unlike
+// the per-level scaling above — each completed cycle is meant to be a full,
+// harder replay, not just "the same fight with a higher-level player."
+export function applyNgPlusScaling(enemy, cycle) {
+  if (!cycle) return;
+  const mult = 1 + cycle * 0.25;
+  enemy.hp = Math.round(enemy.hp * mult);
+  enemy.curHp = enemy.hp;
+  enemy.atk = Math.round(enemy.atk * mult);
+  enemy.def = Math.round(enemy.def * mult);
+}
+
 export function startBattle(game, enemyId, opts = {}) {
   const enemy = makeEnemyInstance(enemyId);
+  applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
   if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
   if (enemy.isBoss) {
     enemy.phaseIdx = 0;
