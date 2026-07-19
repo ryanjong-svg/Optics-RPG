@@ -2,7 +2,7 @@ import { MAPS, mapWidth, mapHeight } from '../data/maps.js';
 import { MATERIALS } from '../data/materials.js';
 import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
-import { drawSprite, spriteSize } from './pixelSprites.js';
+import { drawSprite, spriteSize, drawGroundShadow, idleBob } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startQuiz } from './dialogueUI.js';
@@ -26,10 +26,10 @@ function toScreen(x, y) {
 }
 
 const ZONE_ENCOUNTERS = {
-  village: ['wisp', 'puddle_imp'],
-  mirrors: ['mirror_golem'],
-  prism: ['prism_sprite'],
-  fiber: ['signal_wisp'],
+  village: ['wisp', 'puddle_imp', 'glint_moth'],
+  mirrors: ['mirror_golem', 'fractured_pane'],
+  prism: ['prism_sprite', 'spectral_moth'],
+  fiber: ['signal_wisp', 'drift_echo'],
   lab: []
 };
 
@@ -153,12 +153,33 @@ function drawWallBlock(ctx2d, sx, sy, zone) {
   ctx2d.stroke();
 }
 
+// Pulsing tactical-cursor diamond under the player's tile — the classic
+// XCOM "this is your active unit" selection indicator.
+function drawSelectionCursor(ctx2d, sx, sy) {
+  const pulse = (Math.sin(Date.now() / 260) + 1) / 2; // 0..1
+  const inset = 3 + pulse * 2;
+  const alpha = 0.5 + pulse * 0.4;
+  ctx2d.strokeStyle = `rgba(79,216,255,${alpha.toFixed(2)})`;
+  ctx2d.lineWidth = 2;
+  ctx2d.beginPath();
+  ctx2d.moveTo(sx, sy - ISO_H / 2 + inset);
+  ctx2d.lineTo(sx + ISO_W / 2 - inset, sy);
+  ctx2d.lineTo(sx, sy + ISO_H / 2 - inset);
+  ctx2d.lineTo(sx - ISO_W / 2 + inset, sy);
+  ctx2d.closePath();
+  ctx2d.stroke();
+}
+
 // Draws a sprite standing on the tile (feet anchored at the ground point) and
 // returns the sprite's top-edge y, so callers can float a label above it.
-function drawIsoSprite(ctx2d, shape, palette, sx, sy, scale = 1) {
+// `animate` gives "living" sprites (player/npcs/enemies) a subtle idle bob;
+// the ground shadow stays fixed at the true ground point either way.
+function drawIsoSprite(ctx2d, shape, palette, sx, sy, scale = 1, animate = true) {
+  drawGroundShadow(ctx2d, sx, sy);
+  const bobbedSy = animate ? sy + idleBob(sx * 0.3) : sy;
   const px = SPRITE_PX * scale;
   const { h } = spriteSize(shape, px);
-  const cy = sy - h / 2 + 2;
+  const cy = bobbedSy - h / 2 + 2;
   drawSprite(ctx2d, shape, palette, sx, cy, px);
   return cy - h / 2;
 }
@@ -195,7 +216,7 @@ export function renderOverworld(game) {
 
   (map.exits || []).forEach(exit => {
     putEntity(exit.x, exit.y, (sx, sy) => {
-      const topY = drawIsoSprite(ctx2d, 'signpost', 'signpost', sx, sy);
+      const topY = drawIsoSprite(ctx2d, 'signpost', 'signpost', sx, sy, 1, false);
       labelQueue.push(() => drawLabel(ctx2d, `→ ${exit.label}`, sx, topY));
     });
   });
@@ -203,12 +224,12 @@ export function renderOverworld(game) {
   (map.items || []).forEach(it => {
     if (isItemTaken(state, map.id, it.x, it.y)) return;
     const sprite = itemSprite(it.material);
-    putEntity(it.x, it.y, (sx, sy) => drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy));
+    putEntity(it.x, it.y, (sx, sy) => drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy, 1, false));
   });
 
   if (map.workbench) {
     putEntity(map.workbench.x, map.workbench.y, (sx, sy) => {
-      const topY = drawIsoSprite(ctx2d, 'toolbox', 'toolbox', sx, sy);
+      const topY = drawIsoSprite(ctx2d, 'toolbox', 'toolbox', sx, sy, 1, false);
       labelQueue.push(() => drawLabel(ctx2d, 'Workbench', sx, topY, '#7dffb0'));
     });
   }
@@ -235,7 +256,10 @@ export function renderOverworld(game) {
     });
   }
 
-  putEntity(state.pos.x, state.pos.y, (sx, sy) => drawIsoSprite(ctx2d, 'humanoid', 'player', sx, sy));
+  putEntity(state.pos.x, state.pos.y, (sx, sy) => {
+    drawSelectionCursor(ctx2d, sx, sy);
+    drawIsoSprite(ctx2d, 'humanoid', 'player', sx, sy);
+  });
 
   const maxDepth = (mapWidth() - 1) + (mapHeight() - 1);
   for (let d = 0; d <= maxDepth; d++) {
@@ -329,7 +353,7 @@ export function handleMove(game, dx, dy) {
     const pool = ZONE_ENCOUNTERS[map.zone] || [];
     if (pool.length && Math.random() < 0.16) {
       const enemyId = pool[Math.floor(Math.random() * pool.length)];
-      startBattle(game, enemyId, {});
+      startBattle(game, enemyId, { scaleToLevel: state.player.level });
       return;
     }
   }

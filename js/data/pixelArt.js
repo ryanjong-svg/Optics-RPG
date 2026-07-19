@@ -147,15 +147,19 @@ export const PALETTES = {
 
   wisp: { K: OUTLINE, A: '#dfe9ff', E: '#1a1a2e' },
   signal_wisp: { K: OUTLINE, A: '#7dfcff', E: '#0a2a2e' },
+  drift_echo: { K: OUTLINE, A: '#6b8fff', E: '#0a1030' },
 
   puddle_imp: { K: OUTLINE, A: '#3aa0ff', C: '#1a5fb4', E: '#0a1a2e' },
   prism_sprite: { K: OUTLINE, A: '#c084fc', C: '#f472b6', E: '#2a0a2e' },
+  glint_moth: { K: OUTLINE, A: '#d9e88a', C: '#8fae3a', E: '#1a2408' },
 
   mirror_golem: { K: OUTLINE, A: '#b8bfc7', B: '#6b7280', D: '#eaf6ff' },
   photon_sentinel: { K: OUTLINE, A: '#2a2a55', B: '#39ff88', D: '#c6ff5c' },
+  fractured_pane: { K: OUTLINE, A: '#c9d6e0', B: '#5a6570', D: '#ffffff' },
 
   reflection_wraith: { K: OUTLINE, A: '#241b3a', E: '#e8f0ff' },
   chroma_beast: { K: '#2a0a1a', A: '#8b3fae', E: '#5cf0ff' },
+  spectral_moth: { K: '#2a0a1a', A: '#f4a6d8', E: '#3a0a2a' },
 
   attenuation_slug: { K: OUTLINE, A: '#6b7a3a', E: '#c0392b' },
 
@@ -185,12 +189,16 @@ export const CHARACTER_SPRITES = {
 
   wisp: { shape: 'ghost', palette: 'wisp' },
   signal_wisp: { shape: 'ghost', palette: 'signal_wisp' },
+  drift_echo: { shape: 'ghost', palette: 'drift_echo' },
   puddle_imp: { shape: 'imp', palette: 'puddle_imp' },
   prism_sprite: { shape: 'imp', palette: 'prism_sprite' },
+  glint_moth: { shape: 'imp', palette: 'glint_moth' },
   mirror_golem: { shape: 'golem', palette: 'mirror_golem' },
   photon_sentinel: { shape: 'golem', palette: 'photon_sentinel' },
+  fractured_pane: { shape: 'golem', palette: 'fractured_pane' },
   reflection_wraith: { shape: 'wraith', palette: 'reflection_wraith' },
   chroma_beast: { shape: 'wraith', palette: 'chroma_beast' },
+  spectral_moth: { shape: 'wraith', palette: 'spectral_moth' },
   attenuation_slug: { shape: 'slug', palette: 'attenuation_slug' },
   null_medium: { shape: 'voidling', palette: 'null_medium' }
 };

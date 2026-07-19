@@ -12,11 +12,28 @@ export function showMessages(game, lines, onDone) {
   renderDialogue(game);
 }
 
+// Cycles through every question in the bank once (in random order) before any
+// question repeats, instead of pure random picks which felt repetitive with
+// small banks.
+function pickQuizQuestion(game, npcId, questions) {
+  const flags = game.state.flags;
+  if (!flags.quizAsked[npcId]) flags.quizAsked[npcId] = [];
+  const asked = flags.quizAsked[npcId];
+  let available = questions.map((_, i) => i).filter(i => !asked.includes(i));
+  if (available.length === 0) {
+    asked.length = 0;
+    available = questions.map((_, i) => i);
+  }
+  const idx = available[Math.floor(Math.random() * available.length)];
+  asked.push(idx);
+  return questions[idx];
+}
+
 export function startQuiz(game, npcId) {
   const questions = QUIZZES[npcId] || [];
   if (!questions.length) return;
   game.state.flags.metNpc[npcId] = true;
-  const q = questions[Math.floor(Math.random() * questions.length)];
+  const q = pickQuizQuestion(game, npcId, questions);
   game.dialogue = {
     kind: 'quiz', phase: 'intro',
     introText: NPC_INTRO[npcId] || 'Ready for a question?',

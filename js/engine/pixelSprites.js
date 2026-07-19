@@ -40,3 +40,19 @@ export function spriteSize(shapeKey, px) {
   const rows = SHAPES[shapeKey];
   return { w: rows[0].length * 2 * px, h: rows.length * px };
 }
+
+// A soft ground-contact shadow, drawn at a fixed ground point (it does not
+// bob with the sprite above it) — keeps standing sprites from looking like
+// they're floating.
+export function drawGroundShadow(ctx, sx, sy, radiusX = 14, radiusY = 5) {
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + 3, radiusX, radiusY, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Small deterministic-but-time-varying vertical offset so idle sprites feel
+// alive instead of static. `seed` just staggers phase between sprites.
+export function idleBob(seed = 0, amplitude = 1.6, periodMs = 400) {
+  return Math.sin(Date.now() / periodMs + seed) * amplitude;
+}

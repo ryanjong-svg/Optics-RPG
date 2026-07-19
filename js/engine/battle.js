@@ -16,8 +16,22 @@ function logMsg(game, msg) {
   if (log.length > 60) log.shift();
 }
 
+// Random-encounter enemies get a mild stat bump per player level, so early
+// zones don't stay trivial forever — guardians and the boss are untouched,
+// their difficulty is tuned by story position, not player level.
+function scaleEnemyToLevel(enemy, level) {
+  if (!level || level <= 1) return;
+  const hpScale = 1 + (level - 1) * 0.12;
+  const combatScale = 1 + (level - 1) * 0.08;
+  enemy.hp = Math.round(enemy.hp * hpScale);
+  enemy.curHp = enemy.hp;
+  enemy.atk = Math.round(enemy.atk * combatScale);
+  enemy.def = Math.round(enemy.def * combatScale);
+}
+
 export function startBattle(game, enemyId, opts = {}) {
   const enemy = makeEnemyInstance(enemyId);
+  if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
   if (enemy.isBoss) {
     enemy.phaseIdx = 0;
     enemy.phaseTargetHp = Math.max(1, enemy.hp - Math.ceil((enemy.hp / enemy.phases.length) * (enemy.phaseIdx + 1)));
@@ -233,10 +247,12 @@ export function renderBattle(game) {
   const enemyPct = Math.max(0, Math.round((enemy.curHp / enemy.hp) * 100));
   d.battleEnemyHpBar.style.width = enemyPct + '%';
   d.battleEnemyHpText.textContent = `${Math.max(0, enemy.curHp)} / ${enemy.hp}`;
+  d.battleEnemyHpBar.classList.toggle('critical', enemy.curHp / enemy.hp < 0.25);
 
   d.battlePlayerHpBar.style.width = Math.max(0, Math.round((player.hp / player.maxHp) * 100)) + '%';
   d.battlePlayerHpText.textContent = `${player.hp} / ${player.maxHp}`;
   d.battlePlayerLevel.textContent = `Lv.${player.level}`;
+  d.battlePlayerHpBar.classList.toggle('critical', player.hp / player.maxHp < 0.25);
 
   d.battleLog.innerHTML = battle.log.map(l => `<div>${l}</div>`).join('');
   d.battleLog.scrollTop = d.battleLog.scrollHeight;

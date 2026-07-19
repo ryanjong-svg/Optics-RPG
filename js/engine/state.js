@@ -21,7 +21,8 @@ export function newGameState() {
       bossDefeated: false,
       takenItems: {},
       visitedMaps: { village: true },
-      metNpc: {}
+      metNpc: {},
+      quizAsked: {}
     },
     codexUnlocked: {}
   };

@@ -88,6 +88,7 @@ function renderHud() {
   dom.hudLevel.textContent = `Lv.${p.level}`;
   dom.hudHpBar.style.width = Math.max(0, Math.round((p.hp / p.maxHp) * 100)) + '%';
   dom.hudHpText.textContent = `${p.hp}/${p.maxHp}`;
+  dom.hudHpBar.classList.toggle('critical', p.hp / p.maxHp < 0.25);
   dom.hudXpBar.style.width = Math.max(0, Math.round((p.xp / p.xpToNext) * 100)) + '%';
   dom.hudXpText.textContent = `${p.xp}/${p.xpToNext} XP`;
 }
@@ -136,4 +137,13 @@ function boot() {
 }
 
 boot();
+
+// Continuous idle-bob animation loop — only does work while the overworld is
+// actually visible, so it's free while battling, crafting, reading, etc.
+function animLoop() {
+  if (game.state.mode === 'overworld') renderOverworld(game);
+  requestAnimationFrame(animLoop);
+}
+requestAnimationFrame(animLoop);
+
 window.__opticsGame = game; // handy for debugging in devtools
