@@ -9,7 +9,7 @@ import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
 import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
-import { grantXp, unlockCodex } from './state.js';
+import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
 import { applyConsumable } from './consumables.js';
 import * as audio from './audio.js';
@@ -112,7 +112,7 @@ export function startBattle(game, enemyId, opts = {}) {
   }
   game.battle = {
     enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
-    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false
+    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false, bossEnrageTriggered: false
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
@@ -225,6 +225,9 @@ function enemyTurn(game) {
   player.hp = Math.max(0, player.hp - dmg);
   logMsg(game, `${enemy.name} attacks for ${dmg} damage. ${note}`);
   battle.playerBuff = null;
+  if (player.hp > 0 && player.hp / player.maxHp < 0.25 && claimHint(game.state, 'criticalHp')) {
+    logMsg(game, '💡 Tip: Craft a Photon Salve at the Workbench to heal HP — usable anytime, even mid-battle.');
+  }
   return { dmg };
 }
 
@@ -240,6 +243,20 @@ export function shouldTriggerGuardianPhase2(battle) {
 
 export function applyGuardianPhase2(enemy) {
   enemy.atk = Math.round(enemy.atk * 1.25);
+}
+
+// The boss's climax: cornered at a quarter HP or below, it hits noticeably
+// harder for the rest of the fight — one-time, separate from (and stacks
+// with) its existing ability-phase-matching mechanic.
+export function shouldTriggerBossEnrage(battle) {
+  return !!(
+    battle.enemy.isBoss && !battle.bossEnrageTriggered &&
+    battle.enemy.curHp > 0 && battle.enemy.curHp <= battle.enemy.hp * 0.25
+  );
+}
+
+export function applyBossEnrage(enemy) {
+  enemy.atk = Math.round(enemy.atk * 1.3);
 }
 
 export function chooseAbility(game, abilityId) {
@@ -270,6 +287,13 @@ export function chooseAbility(game, abilityId) {
     battle.phase2Triggered = true;
     applyGuardianPhase2(battle.enemy);
     logMsg(game, `${battle.enemy.name} shudders, wounded but not finished — it hits harder now.`);
+  }
+
+  if (shouldTriggerBossEnrage(battle)) {
+    battle.bossEnrageTriggered = true;
+    applyBossEnrage(battle.enemy);
+    logMsg(game, `Cornered and unraveling, The Null Medium borrows every property at once for one final surge — it hits far harder now.`);
+    pulseEffect(game.dom.battleEnemyCanvas, 'portrait-crit', 700);
   }
 
   const enemyResult = enemyTurn(game);
@@ -361,6 +385,9 @@ function resolveVictory(game) {
     logMsg(game, `The path deeper in feels different now...`);
     if (battle.damageTaken === 0) unlockAchievement(state, 'unscathed', m => logMsg(game, m));
     if (battle.abilitiesUsed.size === 1) unlockAchievement(state, 'one_trick', m => logMsg(game, m));
+    if (claimHint(state, 'firstGuardian')) {
+      logMsg(game, '💡 Tip: Track achievements and overall progress anytime in the Log panel (top bar).');
+    }
   }
   if (enemy.isBoss) {
     state.flags.bossDefeated = true;

@@ -1,7 +1,7 @@
 import { QUIZZES } from '../data/quizzes.js';
 import { NPC_INTRO } from '../data/dialogue.js';
 import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
-import { grantXp } from './state.js';
+import { grantXp, claimHint } from './state.js';
 import { saveGame } from './save.js';
 import * as audio from './audio.js';
 
@@ -53,7 +53,11 @@ export function startNpcInteraction(game, npcId) {
     showMessages(game, [quest.offer], () => {
       state.flags.quests[questId] = 'active';
       saveGame(state);
-      startQuiz(game, npcId);
+      if (claimHint(state, 'firstQuest')) {
+        showMessages(game, ['💡 Tip: Track active quests anytime from the Quests button in the top bar.'], () => startQuiz(game, npcId));
+      } else {
+        startQuiz(game, npcId);
+      }
     });
     return;
   }

@@ -134,6 +134,47 @@ export const SHAPES = {
     'KAAAAA',
     '.KAAAA',
     '..KAAA'
+  ],
+  // A bulkier, broader-shouldered golem variant with a twinned core glow —
+  // reserved for the game's crystalline/lattice guardians (photon_sentinel,
+  // lattice_warden) so its most "monumental" fights stand apart visually.
+  colossus: [
+    '.KAAAA',
+    'KAAAAA',
+    'KAAAAA',
+    'KADDAA',
+    'KAAAAA',
+    'KAAAAA',
+    '.KAAAA',
+    '.KABBA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '..KAAA',
+    '..KAAA',
+    '...KAA'
+  ],
+  // A wraith with a second, fainter silhouette bleeding off its left edge —
+  // reserved for twinned_specter, whose entire identity is birefringence:
+  // one ray splitting into two. The doubling is drawn, not just described.
+  twin_wraith: [
+    '....CK',
+    '...CKA',
+    '..CKAA',
+    '..KAAA',
+    '..KAEA',
+    '..KAAA',
+    '.CKAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '.KAAAA',
+    '..KAAA',
+    '..KAAA',
+    '...KAA',
+    '....KA'
   ]
 };
 
@@ -194,7 +235,7 @@ export const PALETTES = {
 
   split_ray_wisp: { K: OUTLINE, A: '#bfe3ff', E: '#0a2a3a' },
   twin_flicker: { K: OUTLINE, A: '#8fc7e0', C: '#e8f7ff', E: '#0a2a3a' },
-  twinned_specter: { K: OUTLINE, A: '#4a7d94', E: '#eaf7ff' },
+  twinned_specter: { K: OUTLINE, A: '#4a7d94', C: '#2a4d5c', E: '#eaf7ff' },
 
   fire_moth: { K: OUTLINE, A: '#ff8a4a', C: '#ffd166', E: '#3a0a0a' },
   ember_shard: { K: '#3a0a0a', A: '#ff5a2a', E: '#ffd166' },
@@ -229,7 +270,7 @@ export const CHARACTER_SPRITES = {
   prism_sprite: { shape: 'imp', palette: 'prism_sprite' },
   glint_moth: { shape: 'imp', palette: 'glint_moth' },
   mirror_golem: { shape: 'golem', palette: 'mirror_golem' },
-  photon_sentinel: { shape: 'golem', palette: 'photon_sentinel' },
+  photon_sentinel: { shape: 'colossus', palette: 'photon_sentinel' },
   fractured_pane: { shape: 'golem', palette: 'fractured_pane' },
   aperture_sentinel: { shape: 'golem', palette: 'aperture_sentinel' },
   reflection_wraith: { shape: 'wraith', palette: 'reflection_wraith' },
@@ -243,7 +284,7 @@ export const CHARACTER_SPRITES = {
 
   split_ray_wisp: { shape: 'ghost', palette: 'split_ray_wisp' },
   twin_flicker: { shape: 'imp', palette: 'twin_flicker' },
-  twinned_specter: { shape: 'wraith', palette: 'twinned_specter' },
+  twinned_specter: { shape: 'twin_wraith', palette: 'twinned_specter' },
 
   fire_moth: { shape: 'imp', palette: 'fire_moth' },
   ember_shard: { shape: 'wraith', palette: 'ember_shard' },
@@ -255,7 +296,7 @@ export const CHARACTER_SPRITES = {
 
   lattice_wisp: { shape: 'ghost', palette: 'lattice_wisp' },
   forbidden_mote: { shape: 'imp', palette: 'forbidden_mote' },
-  lattice_warden: { shape: 'golem', palette: 'lattice_warden' },
+  lattice_warden: { shape: 'colossus', palette: 'lattice_warden' },
 
   phase_echo: { shape: 'ghost', palette: 'phase_echo' },
   fringe_ghost: { shape: 'wraith', palette: 'fringe_ghost' },

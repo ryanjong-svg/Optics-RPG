@@ -27,7 +27,8 @@ export function newGameState() {
       quests: {},
       secretsFound: {},
       achievements: {},
-      ngPlusCycle: 0
+      ngPlusCycle: 0,
+      hintsShown: {}
     },
     settings: {
       difficulty: 'normal',
@@ -50,6 +51,15 @@ export function grantXp(state, amount, log) {
     p.xpToNext = Math.round(p.xpToNext * 1.4);
     log(`Level up! You are now level ${p.level}. Max HP and Focus increased, HP restored.`);
   }
+}
+
+// One-time onboarding tips (e.g. "the Quests button tracks this"): the first
+// caller for a given hintId gets true and should display the tip; every
+// later call (this run or a future one, since it's saved) gets false.
+export function claimHint(state, hintId) {
+  if (state.flags.hintsShown[hintId]) return false;
+  state.flags.hintsShown[hintId] = true;
+  return true;
 }
 
 export function unlockCodex(state, conceptId, log) {
