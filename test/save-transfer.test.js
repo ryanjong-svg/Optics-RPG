@@ -35,13 +35,26 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.secretsFound, {});
   assert.deepEqual(migrated.flags.achievements, {});
   assert.equal(migrated.flags.ngPlusCycle, 0);
+  assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false });
 });
 
 test('migrateState: leaves already-present fields untouched', () => {
   const state = newGameState();
   state.player.consumables.photon_salve = 3;
   state.flags.ngPlusCycle = 2;
+  state.settings.difficulty = 'hard';
+  state.settings.muted = true;
   const migrated = migrateState(state);
   assert.equal(migrated.player.consumables.photon_salve, 3);
   assert.equal(migrated.flags.ngPlusCycle, 2);
+  assert.equal(migrated.settings.difficulty, 'hard');
+  assert.equal(migrated.settings.muted, true);
+});
+
+test('migrateState: backfills a partially-present settings object (e.g. an older exported save)', () => {
+  const state = newGameState();
+  delete state.settings.difficulty;
+  const migrated = migrateState(state);
+  assert.equal(migrated.settings.difficulty, 'normal');
+  assert.equal(migrated.settings.muted, false);
 });

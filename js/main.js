@@ -1,5 +1,6 @@
 import { newGameState, startNewGamePlus } from './engine/state.js';
-import { loadGame, saveGame, exportSaveString, importSaveString } from './engine/save.js';
+import { loadGame, saveGame, exportSaveString, importSaveString, clearSave } from './engine/save.js';
+import { findDifficulty } from './data/difficulty.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
@@ -87,6 +88,14 @@ const dom = {
   mapDiagram: q('map-diagram'),
   mapClose: q('map-close'),
 
+  settingsPanel: q('settings-panel'),
+  btnSettings: q('btn-settings'),
+  settingsClose: q('settings-close'),
+  settingsDifficulty: q('settings-difficulty'),
+  settingsDifficultyDesc: q('settings-difficulty-desc'),
+  settingsMuteToggle: q('settings-mute-toggle'),
+  settingsResetSave: q('settings-reset-save'),
+
   dpadUp: q('dpad-up'),
   dpadDown: q('dpad-down'),
   dpadLeft: q('dpad-left'),
@@ -98,7 +107,7 @@ const dom = {
   victoryNgPlus: q('victory-ngplus')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'victory-panel', 'dialogue-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -111,8 +120,8 @@ const game = {
     if (name === 'overworld') return;
     const map = {
       battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel',
-      questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel', victory: 'victory-panel',
-      dialogue: 'dialogue-panel'
+      questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel', settings: 'settings-panel',
+      victory: 'victory-panel', dialogue: 'dialogue-panel'
     };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
@@ -170,10 +179,20 @@ dom.btnCompletion.addEventListener('click', () => openCompletion(game));
 dom.completionClose.addEventListener('click', () => closeCompletion(game));
 dom.btnMap.addEventListener('click', () => openMap(game));
 dom.mapClose.addEventListener('click', () => closeMap(game));
-dom.btnMute.addEventListener('click', () => {
-  const muted = audio.toggleMuted();
+
+function syncMuteUI(muted) {
   dom.btnMute.innerHTML = muted ? '&#128263;' : '&#128266;';
-});
+  dom.settingsMuteToggle.textContent = muted ? 'Mute: On' : 'Mute: Off';
+}
+function setMuted(muted) {
+  audio.setMuted(muted);
+  game.state.settings.muted = muted;
+  syncMuteUI(muted);
+  saveGame(game.state);
+}
+dom.btnMute.addEventListener('click', () => setMuted(!audio.isMuted()));
+dom.settingsMuteToggle.addEventListener('click', () => setMuted(!audio.isMuted()));
+
 dom.craftClose.addEventListener('click', () => closeCraft(game));
 
 function showSaveMsg(text) {
@@ -245,10 +264,40 @@ dom.victoryNgPlus.addEventListener('click', () => {
   audio.playZoneAmbience(MAPS[game.state.currentMap].zone);
 });
 
+function renderSettingsDifficultyDesc() {
+  dom.settingsDifficultyDesc.textContent = findDifficulty(game.state.settings.difficulty).desc;
+}
+dom.btnSettings.addEventListener('click', () => {
+  game.state.mode = 'settings';
+  game.showPanel('settings');
+  dom.settingsDifficulty.value = game.state.settings.difficulty;
+  renderSettingsDifficultyDesc();
+});
+dom.settingsClose.addEventListener('click', () => {
+  game.state.mode = 'overworld';
+  game.showPanel('overworld');
+});
+dom.settingsDifficulty.addEventListener('change', () => {
+  game.state.settings.difficulty = dom.settingsDifficulty.value;
+  renderSettingsDifficultyDesc();
+  saveGame(game.state);
+});
+dom.settingsResetSave.addEventListener('click', () => {
+  const confirmed = window.confirm(
+    'Reset your save and start a brand new game? This permanently wipes all progress. ' +
+    'Export a save first from the Field Log if you want a backup.'
+  );
+  if (!confirmed) return;
+  clearSave();
+  location.reload();
+});
+
 function boot() {
   game.showPanel('overworld');
   renderOverworld(game);
   renderHud();
+  audio.setMuted(game.state.settings.muted);
+  syncMuteUI(game.state.settings.muted);
   if (!game.state.flags.seenIntro) {
     game.state.flags.seenIntro = true;
     showMessages(game, INTRO_LINES, () => {

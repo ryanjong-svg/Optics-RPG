@@ -25,6 +25,7 @@
     <button id="btn-codex" class="action-btn ghost">Codex</button>
     <button id="btn-questlog" class="action-btn ghost">Quests</button>
     <button id="btn-completion" class="action-btn ghost">Log</button>
+    <button id="btn-settings" class="action-btn ghost">Settings</button>
     <button id="btn-mute" class="action-btn ghost" title="Toggle sound">&#128266;</button>
   </header>
 
@@ -105,6 +106,24 @@
   <div id="map-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Tactical Map</h2><button id="map-close" class="action-btn ghost">Close</button></div>
     <div id="map-diagram"></div>
+  </div>
+
+  <div id="settings-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Settings</h2><button id="settings-close" class="action-btn ghost">Close</button></div>
+    <h3 class="completion-subhead" style="margin-top:0;border-top:none;padding-top:0;">Difficulty</h3>
+    <select id="settings-difficulty" class="settings-select">
+      <option value="easy">Easy — weaker enemies, more XP</option>
+      <option value="normal">Normal</option>
+      <option value="hard">Hard — tougher enemies, less XP</option>
+    </select>
+    <p id="settings-difficulty-desc" class="ngplus-hint"></p>
+
+    <h3 class="completion-subhead">Sound</h3>
+    <button id="settings-mute-toggle" class="action-btn">Mute: Off</button>
+
+    <h3 class="completion-subhead">Save Data</h3>
+    <button id="settings-reset-save" class="action-btn">Reset Save</button>
+    <p class="ngplus-hint">Wipes all progress and starts a brand new game. Export a save first from the Field Log if you want a backup.</p>
   </div>
 
   <div id="completion-panel" class="panel bracketed hidden">

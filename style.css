@@ -308,6 +308,11 @@ canvas#overworld-canvas {
 .save-transfer-row { display: flex; gap: 8px; }
 .save-transfer-row .action-btn { flex: 1; }
 .save-transfer-msg { font-size: 0.85em; color: var(--text-dim); min-height: 1.2em; margin-top: 6px; }
+.settings-select {
+  width: 100%; background: #0a0e14; color: var(--text-light); border: 1px solid var(--cyan-dim);
+  padding: 6px 8px; font-family: 'Share Tech Mono', monospace; font-size: 1em; margin-bottom: 8px;
+}
+#settings-panel .action-btn { width: 100%; margin-bottom: 8px; }
 
 /* ---------- Tactical Map ---------- */
 .map-grid {

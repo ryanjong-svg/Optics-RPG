@@ -6,6 +6,7 @@ import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
 import { CHARACTER_SPRITES } from '../data/pixelArt.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
+import { findDifficulty } from '../data/difficulty.js';
 import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex } from './state.js';
@@ -89,8 +90,20 @@ export function applyNgPlusScaling(enemy, cycle) {
   enemy.def = Math.round(enemy.def * mult);
 }
 
+// The player's chosen difficulty setting - applies to every enemy (including
+// guardians/the boss) and stacks with both NG+ and per-level scaling.
+export function applyDifficultyScaling(enemy, difficultyId) {
+  const mult = findDifficulty(difficultyId).enemyMult;
+  if (mult === 1) return;
+  enemy.hp = Math.round(enemy.hp * mult);
+  enemy.curHp = enemy.hp;
+  enemy.atk = Math.round(enemy.atk * mult);
+  enemy.def = Math.round(enemy.def * mult);
+}
+
 export function startBattle(game, enemyId, opts = {}) {
   const enemy = makeEnemyInstance(enemyId);
+  applyDifficultyScaling(enemy, game.state.settings.difficulty);
   applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
   if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
   if (enemy.isBoss) {
@@ -99,7 +112,7 @@ export function startBattle(game, enemyId, opts = {}) {
   }
   game.battle = {
     enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
-    damageTaken: 0, abilitiesUsed: new Set()
+    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
@@ -215,6 +228,20 @@ function enemyTurn(game) {
   return { dmg };
 }
 
+// A guardian that drops to half HP or below shudders and hits harder for the
+// rest of the fight — one-time, guardian-only (the boss already has its own
+// ability-phase mechanic and doesn't need a second one layered on top).
+export function shouldTriggerGuardianPhase2(battle) {
+  return !!(
+    battle.opts.guardianMap && !battle.phase2Triggered &&
+    battle.enemy.curHp > 0 && battle.enemy.curHp <= battle.enemy.hp * 0.5
+  );
+}
+
+export function applyGuardianPhase2(enemy) {
+  enemy.atk = Math.round(enemy.atk * 1.25);
+}
+
 export function chooseAbility(game, abilityId) {
   const battle = game.battle;
   if (!battle || battle.over) return;
@@ -237,6 +264,12 @@ export function chooseAbility(game, abilityId) {
     resolveVictory(game);
     renderBattle(game);
     return;
+  }
+
+  if (shouldTriggerGuardianPhase2(battle)) {
+    battle.phase2Triggered = true;
+    applyGuardianPhase2(battle.enemy);
+    logMsg(game, `${battle.enemy.name} shudders, wounded but not finished — it hits harder now.`);
   }
 
   const enemyResult = enemyTurn(game);
@@ -317,7 +350,8 @@ function resolveVictory(game) {
   logMsg(game, `${enemy.name} is defeated!`);
   audio.stopMusic();
   audio.playVictory();
-  grantXpWithSound(state, enemy.xp, m => logMsg(game, m));
+  const xpAward = Math.round(enemy.xp * findDifficulty(state.settings.difficulty).xpMult);
+  grantXpWithSound(state, xpAward, m => logMsg(game, m));
   (enemy.mats || []).forEach(matId => {
     state.player.materials[matId] = (state.player.materials[matId] || 0) + 1;
     logMsg(game, `Gained 1 ${MATERIALS[matId].name}.`);

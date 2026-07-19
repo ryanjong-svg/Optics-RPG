@@ -29,6 +29,10 @@ export function newGameState() {
       achievements: {},
       ngPlusCycle: 0
     },
+    settings: {
+      difficulty: 'normal',
+      muted: false
+    },
     codexUnlocked: {}
   };
 }
