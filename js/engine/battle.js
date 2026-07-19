@@ -7,6 +7,14 @@ import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex } from './state.js';
 import { saveGame } from './save.js';
+import * as audio from './audio.js';
+
+function grantXpWithSound(state, amount, log) {
+  grantXp(state, amount, msg => {
+    if (msg.startsWith('Level up!')) audio.playLevelUp();
+    log(msg);
+  });
+}
 
 const PORTRAIT_PX = 5;
 
@@ -40,6 +48,7 @@ export function startBattle(game, enemyId, opts = {}) {
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  audio.playBattleMusic();
   game.showPanel('battle');
   renderBattle(game);
 }
@@ -51,7 +60,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
   const result = ability.effect(ctx);
   if (ability.id !== neededId) {
     logMsg(game, `${ability.name} passes right through The Null Medium — it hasn't taken on that property yet.`);
-    return;
+    return { isCrit: false, landed: false };
   }
   let dmg = result.dmg != null ? result.dmg : (result.perHit ? result.perHit * (result.hits || 1) : 10);
   dmg = Math.max(1, Math.round(dmg + storedBonus));
@@ -62,6 +71,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
     const nextName = findAbility(enemy.phases[enemy.phaseIdx]).name;
     logMsg(game, `It shudders and takes on a new property — try ${nextName} next.`);
   }
+  return { isCrit: !!result.isCrit, landed: true };
 }
 
 function applyPlayerAction(game, ability, ctx) {
@@ -74,8 +84,7 @@ function applyPlayerAction(game, ability, ctx) {
   }
 
   if (battle.enemy.isBoss && ability.type === 'attack') {
-    applyBossAction(game, ability, ctx, storedBonus);
-    return;
+    return applyBossAction(game, ability, ctx, storedBonus);
   }
 
   const result = ability.effect(ctx);
@@ -98,10 +107,12 @@ function applyPlayerAction(game, ability, ctx) {
       logMsg(game, `${ability.name}: dealt ${Math.max(0, net)} damage. ${result.note || ''}`);
     }
     battle.enemy.curHp = Math.max(0, battle.enemy.curHp - Math.max(0, net));
-  } else {
-    battle.playerBuff = result;
-    logMsg(game, `${ability.name}: ${result.note || 'You brace for the next attack.'}`);
+    return { isCrit: !!result.isCrit, landed: true };
   }
+
+  battle.playerBuff = result;
+  logMsg(game, `${ability.name}: ${result.note || 'You brace for the next attack.'}`);
+  return { isCrit: false, landed: false };
 }
 
 function enemyTurn(game) {
@@ -151,7 +162,11 @@ export function chooseAbility(game, abilityId) {
   const ctx = { player: game.state.player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
 
-  applyPlayerAction(game, ability, ctx);
+  const actionResult = applyPlayerAction(game, ability, ctx);
+  if (actionResult.landed) {
+    if (actionResult.isCrit) audio.playCrit();
+    else audio.playHit();
+  }
 
   if (battle.enemy.curHp <= 0) {
     resolveVictory(game);
@@ -199,7 +214,9 @@ function resolveVictory(game) {
   const state = game.state;
   battle.over = true;
   logMsg(game, `${enemy.name} is defeated!`);
-  grantXp(state, enemy.xp, m => logMsg(game, m));
+  audio.stopMusic();
+  audio.playVictory();
+  grantXpWithSound(state, enemy.xp, m => logMsg(game, m));
   (enemy.mats || []).forEach(matId => {
     state.player.materials[matId] = (state.player.materials[matId] || 0) + 1;
     logMsg(game, `Gained 1 ${MATERIALS[matId].name}.`);
@@ -219,6 +236,8 @@ function resolveDefeat(game) {
   const state = game.state;
   game.battle.over = true;
   logMsg(game, 'You have been overwhelmed! Retreating to the village to recover...');
+  audio.stopMusic();
+  audio.playDefeat();
   state.player.hp = state.player.maxHp;
   state.currentMap = 'village';
   state.pos = { x: 7, y: 8 };
@@ -235,6 +254,7 @@ export function endBattle(game) {
   game.showPanel('overworld');
   game.renderOverworld();
   game.renderHud();
+  audio.playOverworldMusic();
   saveGame(state);
 }
 

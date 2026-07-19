@@ -1,8 +1,16 @@
 import { QUIZZES } from '../data/quizzes.js';
 import { NPC_INTRO } from '../data/dialogue.js';
-import { findQuestForNpc, isObjectiveMet } from '../data/quests.js';
+import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
 import { grantXp } from './state.js';
 import { saveGame } from './save.js';
+import * as audio from './audio.js';
+
+function grantXpWithSound(state, amount, log) {
+  grantXp(state, amount, msg => {
+    if (msg.startsWith('Level up!')) audio.playLevelUp();
+    log(msg);
+  });
+}
 
 // A tiny queued-message dialogue box, reused for intro text, NPC lines, and quizzes.
 // dlg.kind: 'lines' (just text, Next advances/ends) or 'quiz' (intro -> question -> result)
@@ -35,7 +43,7 @@ function pickQuizQuestion(game, npcId, questions) {
 // bump routes through here now instead of calling startQuiz directly.
 export function startNpcInteraction(game, npcId) {
   const state = game.state;
-  const found = findQuestForNpc(npcId);
+  const found = pickQuestToPresent(state, npcId);
   if (!found) { startQuiz(game, npcId); return; }
 
   const { id: questId, quest } = found;
@@ -75,7 +83,8 @@ function completeQuest(game, questId, quest) {
     const { id, count } = quest.reward.material;
     state.player.materials[id] = (state.player.materials[id] || 0) + count;
   }
-  if (quest.reward.xp) grantXp(state, quest.reward.xp, () => {});
+  if (quest.reward.xp) grantXpWithSound(state, quest.reward.xp, () => {});
+  audio.playQuestComplete();
   game.renderHud();
   saveGame(state);
 }
@@ -126,9 +135,11 @@ export function answerQuiz(game, choiceIdx) {
   if (!dlg || dlg.kind !== 'quiz' || dlg.phase !== 'question') return;
   const correct = choiceIdx === dlg.quiz.answer;
   if (correct) {
-    grantXp(game.state, 12, () => {});
+    grantXpWithSound(game.state, 12, () => {});
+    audio.playCorrect();
     dlg.resultText = 'Correct! ' + dlg.quiz.explain + ' (+12 XP)';
   } else {
+    audio.playIncorrect();
     dlg.resultText = 'Not quite. ' + dlg.quiz.explain;
   }
   dlg.phase = 'result';

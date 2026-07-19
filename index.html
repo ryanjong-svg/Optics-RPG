@@ -20,8 +20,11 @@
       <div class="bar-wrap small"><div id="hud-xp-bar" class="bar-fill xp"></div></div>
       <span id="hud-xp-text" class="bar-text">0/20 XP</span>
     </div>
+    <button id="btn-map" class="action-btn ghost">Map</button>
     <button id="btn-chronicle" class="action-btn ghost">Chronicle</button>
     <button id="btn-codex" class="action-btn ghost">Codex</button>
+    <button id="btn-completion" class="action-btn ghost">Log</button>
+    <button id="btn-mute" class="action-btn ghost" title="Toggle sound">&#128266;</button>
   </header>
 
   <div id="map-label">Lumen Village</div>
@@ -29,6 +32,13 @@
 
   <div id="stage">
     <canvas id="overworld-canvas" width="700" height="420"></canvas>
+
+    <div id="dpad" aria-label="Movement controls">
+      <button id="dpad-up" class="dpad-btn dpad-up" aria-label="Move up">&#9650;</button>
+      <button id="dpad-left" class="dpad-btn dpad-left" aria-label="Move left">&#9664;</button>
+      <button id="dpad-down" class="dpad-btn dpad-down" aria-label="Move down">&#9660;</button>
+      <button id="dpad-right" class="dpad-btn dpad-right" aria-label="Move right">&#9654;</button>
+    </div>
 
     <div id="dialogue-panel" class="panel bracketed hidden">
       <p id="dialogue-text"></p>
@@ -77,6 +87,17 @@
   <div id="chronicle-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Chronicle of the Reach</h2><button id="chronicle-close" class="action-btn ghost">Close</button></div>
     <div id="chronicle-list" class="codex-list"></div>
+  </div>
+
+  <div id="map-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Tactical Map</h2><button id="map-close" class="action-btn ghost">Close</button></div>
+    <div id="map-diagram"></div>
+  </div>
+
+  <div id="completion-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Field Log</h2><button id="completion-close" class="action-btn ghost">Close</button></div>
+    <div id="completion-overall" class="codex-progress"></div>
+    <div id="completion-list"></div>
   </div>
 
   <div id="victory-panel" class="panel bracketed hidden">

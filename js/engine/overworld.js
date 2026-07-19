@@ -8,6 +8,7 @@ import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
+import * as audio from './audio.js';
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
 
@@ -336,6 +337,7 @@ export function handleMove(game, dx, dy) {
     state.flags.takenItems[`${map.id}:${nx}:${ny}`] = true;
     state.player.materials[item.material] = (state.player.materials[item.material] || 0) + 1;
     const mat = MATERIALS[item.material];
+    audio.playPickup();
     showMessages(game, [`Picked up ${mat.name}! ${mat.fact}`]);
     game.renderHud();
     saveGame(state);

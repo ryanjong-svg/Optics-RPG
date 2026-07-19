@@ -4,8 +4,11 @@ import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
 import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
+import { openCompletion, closeCompletion } from './engine/completionUI.js';
+import { openMap, closeMap } from './engine/mapUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
+import * as audio from './engine/audio.js';
 
 function q(id) { return document.getElementById(id); }
 
@@ -22,6 +25,9 @@ const dom = {
   hudXpText: q('hud-xp-text'),
   btnCodex: q('btn-codex'),
   btnChronicle: q('btn-chronicle'),
+  btnCompletion: q('btn-completion'),
+  btnMap: q('btn-map'),
+  btnMute: q('btn-mute'),
 
   dialoguePanel: q('dialogue-panel'),
   dialogueText: q('dialogue-text'),
@@ -57,12 +63,26 @@ const dom = {
   chronicleList: q('chronicle-list'),
   chronicleClose: q('chronicle-close'),
 
+  completionPanel: q('completion-panel'),
+  completionOverall: q('completion-overall'),
+  completionList: q('completion-list'),
+  completionClose: q('completion-close'),
+
+  mapPanel: q('map-panel'),
+  mapDiagram: q('map-diagram'),
+  mapClose: q('map-close'),
+
+  dpadUp: q('dpad-up'),
+  dpadDown: q('dpad-down'),
+  dpadLeft: q('dpad-left'),
+  dpadRight: q('dpad-right'),
+
   victoryPanel: q('victory-panel'),
   victoryStats: q('victory-stats'),
   victoryContinue: q('victory-continue')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'completion-panel', 'map-panel', 'victory-panel', 'dialogue-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -73,7 +93,10 @@ const game = {
   showPanel(name) {
     PANELS.forEach(id => document.getElementById(id).classList.add('hidden'));
     if (name === 'overworld') return;
-    const map = { battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel', victory: 'victory-panel', dialogue: 'dialogue-panel' };
+    const map = {
+      battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel',
+      completion: 'completion-panel', map: 'map-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
+    };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
   },
@@ -93,6 +116,13 @@ function renderHud() {
   dom.hudXpText.textContent = `${p.xp}/${p.xpToNext} XP`;
 }
 game.renderHud = renderHud;
+
+function unlockAndStartMusic() {
+  audio.unlockAudio();
+  if (game.state.mode === 'overworld') audio.playOverworldMusic();
+}
+document.addEventListener('keydown', unlockAndStartMusic, { once: true });
+document.addEventListener('pointerdown', unlockAndStartMusic, { once: true });
 
 document.addEventListener('keydown', (e) => {
   const keyMap = {
@@ -114,13 +144,32 @@ document.addEventListener('keydown', (e) => {
 dom.btnCodex.addEventListener('click', () => openCodex(game));
 dom.btnChronicle.addEventListener('click', () => openChronicle(game));
 dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
+dom.btnCompletion.addEventListener('click', () => openCompletion(game));
+dom.completionClose.addEventListener('click', () => closeCompletion(game));
+dom.btnMap.addEventListener('click', () => openMap(game));
+dom.mapClose.addEventListener('click', () => closeMap(game));
+dom.btnMute.addEventListener('click', () => {
+  const muted = audio.toggleMuted();
+  dom.btnMute.innerHTML = muted ? '&#128263;' : '&#128266;';
+});
 dom.craftClose.addEventListener('click', () => closeCraft(game));
+
+function tapMove(dx, dy) {
+  if (game.state.mode !== 'overworld') return;
+  handleMove(game, dx, dy);
+  renderHud();
+}
+dom.dpadUp.addEventListener('click', () => tapMove(0, -1));
+dom.dpadDown.addEventListener('click', () => tapMove(0, 1));
+dom.dpadLeft.addEventListener('click', () => tapMove(-1, 0));
+dom.dpadRight.addEventListener('click', () => tapMove(1, 0));
 dom.codexClose.addEventListener('click', () => closeCodex(game));
 dom.dialogueNext.addEventListener('click', () => advanceDialogue(game));
 dom.victoryContinue.addEventListener('click', () => {
   game.state.mode = 'overworld';
   game.showPanel('overworld');
   renderOverworld(game);
+  audio.playOverworldMusic();
 });
 
 function boot() {

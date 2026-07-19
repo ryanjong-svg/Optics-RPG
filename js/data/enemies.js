@@ -60,7 +60,7 @@ export const ENEMIES = {
     zone: 'fiber', flavor: 'A pulse of guided light, born of a fiber-optic core-cladding boundary.'
   },
   attenuation_slug: {
-    id: 'attenuation_slug', name: 'Attenuation Slug', hp: 32, atk: 5, def: 4, xp: 18, mats: ['quartz'],
+    id: 'attenuation_slug', name: 'Attenuation Slug', hp: 36, atk: 7, def: 5, xp: 20, mats: ['quartz'],
     weakTo: ['laser_focus'], weakNote: 'a tight coherent beam resists losing energy to scattering far better than spread light.',
     resists: ['diffraction_wave'], resistNote: 'more spreading just feeds its favorite meal: attenuation.',
     zone: 'fiber', flavor: 'A slow drain on any beam that passes — every fiber loses some light to absorption and scattering.'

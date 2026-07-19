@@ -2,6 +2,7 @@ import { RECIPES, findRecipe } from '../data/equipment.js';
 import { MATERIALS } from '../data/materials.js';
 import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
+import * as audio from './audio.js';
 
 const CONCEPT_BY_SLOT_HINT = {
   lens: 'snell', mirror: 'reflection', prism: 'dispersion', filter: 'polarization'
@@ -75,6 +76,7 @@ export function craftItem(game, recipeId) {
   player.ownedGear[recipeId] = true;
   if (!player.equipped[recipe.slot]) player.equipped[recipe.slot] = recipeId;
   unlockCodex(game.state, CONCEPT_BY_SLOT_HINT[recipe.slot], null);
+  audio.playCraftSuccess();
   saveGame(game.state);
   renderCraft(game);
 }

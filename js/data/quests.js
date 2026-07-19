@@ -1,6 +1,7 @@
 // Lightweight side quests from the three professors. Deliberately simple —
 // no separate quest log UI; the NPC just tells you what's still needed each
-// time you talk to them, which doubles as the "log."
+// time you talk to them, which doubles as the "log." Each professor has
+// exactly one collect quest and one defeat quest, for a symmetric structure.
 export const QUESTS = {
   lumen_opal: {
     npc: 'prof_lumen',
@@ -11,6 +12,15 @@ export const QUESTS = {
     reminder: 'Professor Lumen: "Still no Opal from the Grating Gardens? Two pieces, whenever you find them."',
     complete: 'Professor Lumen turns the two Opals over in the light. "Beautiful ruling. Here — a Sapphire for your trouble, and my thanks."'
   },
+  lumen_mirror: {
+    npc: 'prof_lumen',
+    title: 'Confirm the Hall Is Quiet',
+    offer: 'Professor Lumen’s expression tightens. "Decades ago I surveyed the Hall of Mirrors myself and marked it \'gone wild.\' I\'d sleep better knowing its Wraith is finally dealt with. Bring me proof."',
+    objective: { type: 'defeat_guardian', map: 'mirrors' },
+    reward: { xp: 25, material: { id: 'aluminum', count: 2 } },
+    reminder: 'Professor Lumen: "The Infinite Reflection Wraith — still haunting the Hall, I take it?"',
+    complete: 'Professor Lumen exhales, something old finally settling. "Good. One less \'gone wild\' surface on my old survey maps. Take these — you\'ve earned them."'
+  },
   silvers_film: {
     npc: 'prof_mirrors',
     title: 'Hologram Archive Sample',
@@ -20,6 +30,15 @@ export const QUESTS = {
     reminder: 'Professor Silvers: "Two pieces of Silver Halide Film from the Archive — still waiting."',
     complete: 'Professor Silvers pockets the film carefully. "This confirms what I feared about that place — and I keep my promises. Here."'
   },
+  silvers_fiber: {
+    npc: 'prof_mirrors',
+    title: 'Tunnels I Used to Run',
+    offer: 'Professor Silvers goes quiet for a moment. "I ran signal through those Fiber Tunnels myself, once. Something\'s been draining the core dry for years — an Attenuation Slug, if the reports are right. Deal with it for me?"',
+    objective: { type: 'defeat_guardian', map: 'fiber' },
+    reward: { xp: 24, material: { id: 'polaroid', count: 2 } },
+    reminder: 'Professor Silvers: "That Attenuation Slug still draining my old tunnels?"',
+    complete: 'Professor Silvers exhales slowly. "Good. Some of what I built down there can finally rest. Thank you — here."'
+  },
   gapp_sentinel: {
     npc: 'prof_labs',
     title: 'Resolve the Sentinel',
@@ -28,6 +47,15 @@ export const QUESTS = {
     reward: { xp: 30, material: { id: 'silicon', count: 1 } },
     reminder: 'Professor Gapp: "That Aperture Sentinel still standing? Resolution takes precision, not brightness."',
     complete: 'Professor Gapp pumps a fist. "Knew you had the resolving power. Here\'s a little something from my own bench."'
+  },
+  gapp_prism: {
+    npc: 'prof_labs',
+    title: 'Glass From an Old Argument',
+    offer: 'Professor Gapp smirks. "Prism Peak\'s been arguing with itself about ray-versus-wave since before the Vanguard existed — and it\'s made excellent glass out of the argument. Bring me 2 Flint Glass from up there and I\'ll call it a fair trade."',
+    objective: { type: 'collect', material: 'flint_glass', count: 2 },
+    reward: { xp: 20, material: { id: 'crown_glass', count: 2 } },
+    reminder: 'Professor Gapp: "That flint glass from Prism Peak — still need 2 pieces."',
+    complete: 'Professor Gapp holds the glass up to the light. "Good stuff. Old argument, good glass. Thanks!"'
   }
 };
 
@@ -38,7 +66,23 @@ export function isObjectiveMet(state, quest) {
   return false;
 }
 
-export function findQuestForNpc(npcId) {
-  const entry = Object.entries(QUESTS).find(([, q]) => q.npc === npcId);
-  return entry ? { id: entry[0], quest: entry[1] } : null;
+export function findQuestsForNpc(npcId) {
+  return Object.entries(QUESTS)
+    .filter(([, q]) => q.npc === npcId)
+    .map(([id, quest]) => ({ id, quest }));
+}
+
+// Picks the single most relevant quest to surface on this conversation:
+// finish anything ready to turn in, then offer anything unstarted, then
+// remind about anything still active, otherwise there's nothing to say.
+export function pickQuestToPresent(state, npcId) {
+  const all = findQuestsForNpc(npcId);
+  if (!all.length) return null;
+  const completable = all.find(({ id, quest }) => state.flags.quests[id] === 'active' && isObjectiveMet(state, quest));
+  if (completable) return completable;
+  const offerable = all.find(({ id }) => !state.flags.quests[id]);
+  if (offerable) return offerable;
+  const active = all.find(({ id }) => state.flags.quests[id] === 'active');
+  if (active) return active;
+  return null;
 }
