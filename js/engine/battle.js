@@ -14,6 +14,18 @@ import { saveGame } from './save.js';
 import { applyConsumable } from './consumables.js';
 import * as audio from './audio.js';
 
+// A personal "Bestiary": once you've beaten an enemy type before, its known
+// weakness/resistance is surfaced up front on the next encounter, turning
+// "remember what worked last time" into an explicit part of the teaching.
+export function bestiaryHintText(enemy) {
+  const weak = (enemy.weakTo || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
+  const resist = (enemy.resists || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
+  const parts = [];
+  if (weak.length) parts.push(`Weak to: ${weak.join(', ')}.`);
+  if (resist.length) parts.push(`Resists: ${resist.join(', ')}.`);
+  return parts.length ? `📖 Bestiary: You've fought this before. ${parts.join(' ')}` : null;
+}
+
 function unlockAchievement(state, id, log) {
   if (state.flags.achievements[id]) return;
   state.flags.achievements[id] = true;
@@ -112,11 +124,16 @@ export function startBattle(game, enemyId, opts = {}) {
   }
   game.battle = {
     enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
-    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false, bossEnrageTriggered: false
+    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false, bossEnrageTriggered: false,
+    cooldowns: {}, enemyTelegraphed: false
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  if (game.state.flags.enemiesDefeated[enemyId]) {
+    const hint = bestiaryHintText(enemy);
+    if (hint) logMsg(game, hint);
+  }
   audio.stopZoneAmbience();
   audio.playBattleMusic();
   game.showPanel('battle');
@@ -195,14 +212,28 @@ function enemyTurn(game) {
   if (enemy.curHp <= 0) return { dmg: 0 };
 
   const gear = buildGear(player);
+
+  // Telegraphed heavy attack: guardians/the boss occasionally announce a
+  // bigger strike a full turn ahead, giving the player one round's warning
+  // to raise a defense ability before it lands.
+  if (!battle.enemyTelegraphed && isTelegraphEligible(battle) && Math.random() < 0.25) {
+    battle.enemyTelegraphed = true;
+    logMsg(game, `${enemy.name}'s form flares ominously — it's gathering strength for something bigger next turn!`);
+    return { dmg: 0 };
+  }
+
   const evasion = gear.lens && gear.lens.evasionBonus ? gear.lens.evasionBonus : 0;
   if (evasion && Math.random() < evasion) {
     logMsg(game, `${enemy.name}'s attack misses completely — your diverging lens scattered its aim.`);
     battle.playerBuff = null;
+    battle.enemyTelegraphed = false;
     return { dmg: 0 };
   }
 
+  const telegraphed = battle.enemyTelegraphed;
+  battle.enemyTelegraphed = false;
   let dmg = Math.max(1, enemy.atk + Math.floor(Math.random() * 5) - 2);
+  if (telegraphed) dmg = Math.round(dmg * 1.8);
   const defenseBonus = gear.mirror && gear.mirror.defenseBonus ? gear.mirror.defenseBonus : 0;
   if (defenseBonus) dmg = Math.max(1, dmg - defenseBonus);
   const buff = battle.playerBuff;
@@ -223,7 +254,9 @@ function enemyTurn(game) {
   }
   dmg = Math.max(0, dmg);
   player.hp = Math.max(0, player.hp - dmg);
-  logMsg(game, `${enemy.name} attacks for ${dmg} damage. ${note}`);
+  logMsg(game, telegraphed
+    ? `${enemy.name} unleashes the gathered strike for ${dmg} damage! ${note}`
+    : `${enemy.name} attacks for ${dmg} damage. ${note}`);
   battle.playerBuff = null;
   if (player.hp > 0 && player.hp / player.maxHp < 0.25 && claimHint(game.state, 'criticalHp')) {
     logMsg(game, '💡 Tip: Craft a Photon Salve at the Workbench to heal HP — usable anytime, even mid-battle.');
@@ -259,16 +292,37 @@ export function applyBossEnrage(enemy) {
   enemy.atk = Math.round(enemy.atk * 1.3);
 }
 
+// Cooldowns tick down once per completed round (win, loss, or a normal
+// exchange) regardless of which ability was used that round, so "cooldown: 2"
+// means "unusable for your next 2 turns" in the ordinary RPG sense.
+export function decrementCooldowns(battle) {
+  for (const id of Object.keys(battle.cooldowns)) {
+    if (battle.cooldowns[id] > 0) battle.cooldowns[id] -= 1;
+  }
+}
+
+// Only guardians and the boss telegraph a heavy attack — regular random
+// encounters stay simple.
+export function isTelegraphEligible(battle) {
+  return !!(battle.opts.guardianMap || battle.enemy.isBoss);
+}
+
 export function chooseAbility(game, abilityId) {
   const battle = game.battle;
   if (!battle || battle.over) return;
   const ability = findAbility(abilityId);
+  if ((battle.cooldowns[abilityId] || 0) > 0) {
+    logMsg(game, `${ability.name} is still recovering — ${battle.cooldowns[abilityId]} more turn(s).`);
+    renderBattle(game);
+    return;
+  }
   const gear = buildGear(game.state.player);
   const ctx = { player: game.state.player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
 
   const actionResult = applyPlayerAction(game, ability, ctx);
+  if (ability.cooldown) battle.cooldowns[abilityId] = ability.cooldown;
   if (ability.type === 'attack') {
     if (actionResult.landed) {
       if (actionResult.isCrit) audio.playCrit();
@@ -296,6 +350,7 @@ export function chooseAbility(game, abilityId) {
     pulseEffect(game.dom.battleEnemyCanvas, 'portrait-crit', 700);
   }
 
+  decrementCooldowns(battle);
   const enemyResult = enemyTurn(game);
   battle.damageTaken += enemyResult.dmg;
   showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
@@ -324,6 +379,7 @@ export function flee(game) {
     setTimeout(() => endBattle(game), 300);
   } else {
     logMsg(game, 'Couldn’t escape!');
+    decrementCooldowns(battle);
     const enemyResult = enemyTurn(game);
     battle.damageTaken += enemyResult.dmg;
     showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
@@ -353,6 +409,7 @@ export function useItemInBattle(game, itemId) {
   audio.playHeal();
   logMsg(game, `You use the ${item.name}, recovering ${healed} HP.`);
 
+  decrementCooldowns(battle);
   const enemyResult = enemyTurn(game);
   battle.damageTaken += enemyResult.dmg;
   showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
@@ -372,6 +429,7 @@ function resolveVictory(game) {
   const state = game.state;
   battle.over = true;
   logMsg(game, `${enemy.name} is defeated!`);
+  state.flags.enemiesDefeated[enemy.id] = true;
   audio.stopMusic();
   audio.playVictory();
   const xpAward = Math.round(enemy.xp * findDifficulty(state.settings.difficulty).xpMult);
@@ -464,9 +522,11 @@ export function renderBattle(game) {
   }
 
   ABILITIES.forEach(a => {
+    const cd = battle.cooldowns[a.id] || 0;
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
-    btn.innerHTML = `<strong>${a.name}</strong><span class="ability-desc">${a.desc}</span>`;
+    btn.innerHTML = `<strong>${a.name}${cd > 0 ? ` (${cd})` : ''}</strong><span class="ability-desc">${a.desc}</span>`;
+    btn.disabled = cd > 0;
     btn.onclick = () => chooseAbility(game, a.id);
     d.battleActions.appendChild(btn);
   });

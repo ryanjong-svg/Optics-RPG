@@ -59,6 +59,13 @@ test('startNewGamePlus: carries over level, gear, materials, and Codex/Chronicle
   assert.equal(state.codexUnlocked.reflection, true);
 });
 
+test('startNewGamePlus: does not reset the personal Bestiary (enemiesDefeated) — that knowledge carries over too', () => {
+  const state = newGameState();
+  state.flags.enemiesDefeated.mirror_golem = true;
+  startNewGamePlus(state);
+  assert.equal(state.flags.enemiesDefeated.mirror_golem, true);
+});
+
 test('applyNgPlusScaling: does nothing on cycle 0 (a fresh, non-NG+ game)', () => {
   const enemy = { hp: 40, curHp: 40, atk: 8, def: 5 };
   applyNgPlusScaling(enemy, 0);

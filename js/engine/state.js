@@ -28,7 +28,8 @@ export function newGameState() {
       secretsFound: {},
       achievements: {},
       ngPlusCycle: 0,
-      hintsShown: {}
+      hintsShown: {},
+      enemiesDefeated: {}
     },
     settings: {
       difficulty: 'normal',

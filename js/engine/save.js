@@ -15,6 +15,7 @@ export function migrateState(state) {
     if (!state.flags.achievements) state.flags.achievements = {};
     if (state.flags.ngPlusCycle === undefined) state.flags.ngPlusCycle = 0;
     if (!state.flags.hintsShown) state.flags.hintsShown = {};
+    if (!state.flags.enemiesDefeated) state.flags.enemiesDefeated = {};
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';
