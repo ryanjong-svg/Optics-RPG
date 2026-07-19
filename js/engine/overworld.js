@@ -8,6 +8,7 @@ import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
+import { unlockCodex } from './state.js';
 import * as audio from './audio.js';
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
@@ -33,7 +34,12 @@ export const ZONE_ENCOUNTERS = {
   fiber: ['signal_wisp', 'drift_echo'],
   grating: ['slit_wisp', 'grating_wraith'],
   hologram: ['standing_wave', 'fringe_phantom'],
-  lab: []
+  lab: [],
+  mirrors_deep: ['split_ray_wisp', 'twin_flicker'],
+  prism_deep: ['fire_moth', 'ember_shard'],
+  fiber_deep: ['mode_flicker', 'core_leech'],
+  grating_deep: ['lattice_wisp', 'forbidden_mote'],
+  hologram_deep: ['phase_echo', 'fringe_ghost']
 };
 
 // Each zone gets a distinct raised-block palette (top/left/right face shading)
@@ -45,7 +51,12 @@ export const ZONE_WALL_COLORS = {
   fiber: { top: '#3f7d7d', left: '#2f5c5c', right: '#234545' },
   grating: { top: '#8a7a3a', left: '#6b5c2a', right: '#4a3f1c' },
   hologram: { top: '#6b3a7a', left: '#4a2a5c', right: '#2f1a3f' },
-  lab: { top: '#3c4f7d', left: '#2a3a5c', right: '#1f2c45' }
+  lab: { top: '#3c4f7d', left: '#2a3a5c', right: '#1f2c45' },
+  mirrors_deep: { top: '#4a5580', left: '#333c5c', right: '#232a42' },
+  prism_deep: { top: '#8a3a2a', left: '#6b2a1e', right: '#4a1c14' },
+  fiber_deep: { top: '#2a6b6b', left: '#1e4a4a', right: '#143434' },
+  grating_deep: { top: '#5c4a8a', left: '#3f3266', right: '#2a2248' },
+  hologram_deep: { top: '#8a2a60', left: '#6b1e4a', right: '#4a1434' }
 };
 
 function tileAt(map, x, y) {
@@ -344,14 +355,34 @@ export function handleMove(game, dx, dy) {
     return;
   }
 
+  const secret = map.secret;
+  if (secret && secret.x === nx && secret.y === ny && !state.flags.secretsFound[map.id]) {
+    state.flags.secretsFound[map.id] = true;
+    state.player.materials[secret.material] = (state.player.materials[secret.material] || 0) + 1;
+    const mat = MATERIALS[secret.material];
+    audio.playQuestComplete();
+    showMessages(game, [`A hidden cache! ${secret.findText} (+1 ${mat.name})`]);
+    game.renderHud();
+    saveGame(state);
+    return;
+  }
+
   const exit = (map.exits || []).find(e => e.x === nx && e.y === ny);
   if (exit) {
     const target = MAPS[exit.to];
+    const firstVisit = !state.flags.visitedMaps[target.id];
     state.currentMap = target.id;
     state.pos = { ...target.spawn };
     state.flags.visitedMaps[target.id] = true;
+    audio.playZoneAmbience(target.zone);
+    if (firstVisit && target.codexConcept) {
+      unlockCodex(state, target.codexConcept, null);
+    }
     saveGame(state);
     renderOverworld(game);
+    if (firstVisit && target.arrival) {
+      showMessages(game, [target.arrival]);
+    }
     return;
   }
 

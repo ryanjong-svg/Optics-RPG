@@ -22,6 +22,17 @@ const VALID_SLOTS = new Set(['lens', 'mirror', 'prism', 'filter']);
 const ATTACK_ABILITY_IDS = new Set(ABILITIES.filter(a => a.type === 'attack').map(a => a.id));
 const PROFESSOR_IDS = new Set(['prof_lumen', 'prof_mirrors', 'prof_labs']);
 
+// Each depth zone is reached from, and returns to, exactly one parent zone —
+// not the village hub. This is the core structural claim of the "deeper
+// zones" expansion, so it gets its own explicit regression test.
+const DEPTH_ZONE_PARENTS = {
+  mirrors_deep: 'mirrors',
+  prism_deep: 'prism',
+  fiber_deep: 'fiber',
+  grating_deep: 'grating',
+  hologram_deep: 'hologram'
+};
+
 test('every recipe requires materials that exist', () => {
   for (const recipe of RECIPES) {
     for (const matId of recipe.materials) {
@@ -137,5 +148,29 @@ test('the boss phase sequence references real attack abilities', () => {
   assert.ok(boss, 'no boss enemy found');
   for (const abilityId of boss.phases) {
     assert.ok(ATTACK_ABILITY_IDS.has(abilityId), `boss phase references "${abilityId}", which is not a valid attack ability`);
+  }
+});
+
+test('every depth zone is reachable only from its designated parent zone, and returns only to it', () => {
+  for (const [childId, parentId] of Object.entries(DEPTH_ZONE_PARENTS)) {
+    const child = MAPS[childId];
+    const parent = MAPS[parentId];
+    assert.ok(child, `depth zone "${childId}" is missing from MAPS`);
+    assert.ok(parent, `parent zone "${parentId}" is missing from MAPS`);
+
+    const parentToChild = (parent.exits || []).filter(e => e.to === childId);
+    assert.equal(parentToChild.length, 1, `"${parentId}" should have exactly one exit into "${childId}"`);
+
+    const childExits = child.exits || [];
+    assert.equal(childExits.length, 1, `"${childId}" should have exactly one exit (back to its parent)`);
+    assert.equal(childExits[0].to, parentId, `"${childId}" should only exit back to "${parentId}"`);
+  }
+});
+
+test('every depth zone declares a codexConcept that matches a real Codex entry', () => {
+  for (const childId of Object.keys(DEPTH_ZONE_PARENTS)) {
+    const map = MAPS[childId];
+    assert.ok(map.codexConcept, `depth zone "${childId}" has no codexConcept`);
+    assert.ok(CODEX[map.codexConcept], `depth zone "${childId}" references unknown codex concept "${map.codexConcept}"`);
   }
 });

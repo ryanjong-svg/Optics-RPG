@@ -1,13 +1,22 @@
 import { ABILITIES, findAbility } from '../data/abilities.js';
 import { makeEnemyInstance } from '../data/enemies.js';
 import { MATERIALS } from '../data/materials.js';
+import { MAPS } from '../data/maps.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
 import { CHARACTER_SPRITES } from '../data/pixelArt.js';
+import { ACHIEVEMENTS } from '../data/achievements.js';
 import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex } from './state.js';
 import { saveGame } from './save.js';
 import * as audio from './audio.js';
+
+function unlockAchievement(state, id, log) {
+  if (state.flags.achievements[id]) return;
+  state.flags.achievements[id] = true;
+  const achievement = ACHIEVEMENTS[id];
+  if (achievement && log) log(`🏆 Achievement unlocked: ${achievement.title}`);
+}
 
 function grantXpWithSound(state, amount, log) {
   grantXp(state, amount, msg => {
@@ -73,10 +82,14 @@ export function startBattle(game, enemyId, opts = {}) {
     enemy.phaseIdx = 0;
     enemy.phaseTargetHp = Math.max(1, enemy.hp - Math.ceil((enemy.hp / enemy.phases.length) * (enemy.phaseIdx + 1)));
   }
-  game.battle = { enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false };
+  game.battle = {
+    enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
+    damageTaken: 0, abilitiesUsed: new Set()
+  };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  audio.stopZoneAmbience();
   audio.playBattleMusic();
   game.showPanel('battle');
   renderBattle(game);
@@ -94,6 +107,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
   let dmg = result.dmg != null ? result.dmg : (result.perHit ? result.perHit * (result.hits || 1) : 10);
   dmg = Math.max(1, Math.round(dmg + storedBonus));
   enemy.curHp = Math.max(0, enemy.curHp - dmg);
+  if (dmg >= enemy.hp) unlockAchievement(game.state, 'overqualified', m => logMsg(game, m));
   logMsg(game, `${ability.name} lands true! The Null Medium reels for ${dmg} damage. ${result.note || ''}`);
   enemy.phaseIdx += 1;
   if (enemy.curHp > 0 && enemy.phaseIdx < enemy.phases.length) {
@@ -137,6 +151,7 @@ function applyPlayerAction(game, ability, ctx) {
     }
     net = Math.max(0, net);
     battle.enemy.curHp = Math.max(0, battle.enemy.curHp - net);
+    if (net >= battle.enemy.hp) unlockAchievement(game.state, 'overqualified', m => logMsg(game, m));
     return { isCrit: !!result.isCrit, landed: true, dmg: net };
   }
 
@@ -192,6 +207,7 @@ export function chooseAbility(game, abilityId) {
   const gear = buildGear(game.state.player);
   const ctx = { player: game.state.player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
+  battle.abilitiesUsed.add(ability.id);
 
   const actionResult = applyPlayerAction(game, ability, ctx);
   if (ability.type === 'attack') {
@@ -209,6 +225,7 @@ export function chooseAbility(game, abilityId) {
   }
 
   const enemyResult = enemyTurn(game);
+  battle.damageTaken += enemyResult.dmg;
   showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
 
   if (game.state.player.hp <= 0) {
@@ -236,6 +253,7 @@ export function flee(game) {
   } else {
     logMsg(game, 'Couldn’t escape!');
     const enemyResult = enemyTurn(game);
+    battle.damageTaken += enemyResult.dmg;
     showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
     if (game.state.player.hp <= 0) {
       resolveDefeat(game);
@@ -260,6 +278,8 @@ function resolveVictory(game) {
   if (battle.opts.guardianMap) {
     state.flags.guardianDefeated[battle.opts.guardianMap] = true;
     logMsg(game, `The path deeper in feels different now...`);
+    if (battle.damageTaken === 0) unlockAchievement(state, 'unscathed', m => logMsg(game, m));
+    if (battle.abilitiesUsed.size === 1) unlockAchievement(state, 'one_trick', m => logMsg(game, m));
   }
   if (enemy.isBoss) {
     state.flags.bossDefeated = true;
@@ -291,6 +311,7 @@ export function endBattle(game) {
   game.renderOverworld();
   game.renderHud();
   audio.playOverworldMusic();
+  audio.playZoneAmbience(MAPS[state.currentMap].zone);
   saveGame(state);
 }
 

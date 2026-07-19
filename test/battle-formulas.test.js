@@ -43,6 +43,15 @@ test('dispersion_burst: hit count scales inversely with Abbe number, clamped to 
   assert.equal(veryHighAbbe.hits, 2); // round(280/999)=0, clamped to the min of 2
 });
 
+test('dispersion_burst: a Rutile Prism adds flat damage per hit on top of the base formula', () => {
+  const ability = findAbility('dispersion_burst');
+  const player = { focus: 0 };
+  const enemy = { weakTo: [], resists: [] };
+  const base = ability.effect({ player, gear: {}, log: noop, enemy });
+  const withRutile = ability.effect({ player, gear: { prism: { abbe: 55, dispersionBonus: 3 } }, log: noop, enemy });
+  assert.equal(withRutile.perHit, base.perHit + 3);
+});
+
 test('diffraction_wave: a Diffraction Grating adds to the base 0.5 defense-ignore fraction', () => {
   const ability = findAbility('diffraction_wave');
   const player = { focus: 0 };

@@ -20,6 +20,11 @@ export function isMuted() { return muted; }
 
 export function setMuted(value) {
   muted = value;
+  if (ambienceNodes) {
+    const c = getCtx();
+    ambienceNodes.master.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain, c.currentTime);
+    ambienceNodes.lfoGain.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain * 0.5, c.currentTime);
+  }
 }
 
 export function toggleMuted() {
@@ -107,4 +112,67 @@ export function stopMusic() {
   if (musicTimeoutId) clearTimeout(musicTimeoutId);
   musicTimeoutId = null;
   currentTrack = null;
+}
+
+// ---------- Per-zone ambience ----------
+// A quiet, continuous drone distinct per zone — layered under the overworld
+// melody, not a replacement for it. Two close oscillators create a slow
+// "beating" shimmer for the more otherworldly zones (mirrors/hologram).
+const ZONE_AMBIENCE = {
+  village: { freq: 220, freq2: null, lfoRate: 0.15, gain: 0.02 },
+  mirrors: { freq: 330, freq2: 332, lfoRate: 0.2, gain: 0.018 },
+  prism: { freq: 294, freq2: null, lfoRate: 0.35, gain: 0.02 },
+  fiber: { freq: 130, freq2: null, lfoRate: 0.1, gain: 0.025 },
+  grating: { freq: 246, freq2: null, lfoRate: 0.6, gain: 0.018 },
+  hologram: { freq: 260, freq2: 261.5, lfoRate: 0.18, gain: 0.018 },
+  lab: { freq: 82, freq2: null, lfoRate: 0.08, gain: 0.03 },
+  mirrors_deep: { freq: 330, freq2: 336, lfoRate: 0.25, gain: 0.02 },
+  prism_deep: { freq: 220, freq2: null, lfoRate: 0.5, gain: 0.024 },
+  fiber_deep: { freq: 110, freq2: null, lfoRate: 0.12, gain: 0.027 },
+  grating_deep: { freq: 246, freq2: null, lfoRate: 0.9, gain: 0.02 },
+  hologram_deep: { freq: 196, freq2: 197.5, lfoRate: 0.14, gain: 0.02 }
+};
+
+let ambienceNodes = null;
+let ambienceZone = null;
+
+export function playZoneAmbience(zone) {
+  const config = ZONE_AMBIENCE[zone];
+  if (!config || ambienceZone === zone) return;
+  stopZoneAmbience();
+  ambienceZone = zone;
+
+  const c = getCtx();
+  const startGain = muted ? 0 : config.gain;
+  const master = c.createGain();
+  master.gain.setValueAtTime(startGain, c.currentTime);
+  master.connect(c.destination);
+
+  const lfo = c.createOscillator();
+  const lfoGain = c.createGain();
+  lfo.frequency.value = config.lfoRate;
+  lfoGain.gain.value = muted ? 0 : config.gain * 0.5;
+  lfo.connect(lfoGain);
+  lfoGain.connect(master.gain);
+  lfo.start();
+
+  const oscillators = [lfo];
+  for (const freq of [config.freq, config.freq2]) {
+    if (!freq) continue;
+    const osc = c.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(master);
+    osc.start();
+    oscillators.push(osc);
+  }
+
+  ambienceNodes = { master, lfoGain, baseGain: config.gain, oscillators };
+}
+
+export function stopZoneAmbience() {
+  ambienceZone = null;
+  if (!ambienceNodes) return;
+  ambienceNodes.oscillators.forEach(osc => { try { osc.stop(); } catch { /* already stopped */ } });
+  ambienceNodes = null;
 }

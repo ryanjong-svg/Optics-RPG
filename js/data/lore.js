@@ -61,6 +61,31 @@ export const LORE = {
     title: 'On the Hologram Archive',
     unlock: { type: 'map', map: 'hologram' },
     body: `A splinter of the Silvered Circle set out to record light itself, rather than what light merely showed them, and built a vault to hold every fringe pattern the Reach cast. The recordings outlasted their recorders. Now the archive answers no one who asks whether what it shows them ever actually happened — only that it is willing, endlessly, to show it again.`
+  },
+  birefringent_depths: {
+    title: 'On the Birefringent Depths',
+    unlock: { type: 'map', map: 'mirrors_deep' },
+    body: `Beneath the Hall of Mirrors' endless single reflections, the Circle once mined a vein of crystal that refused to agree there was only one image to show. Every ray that entered came out twice, each half telling a slightly different story about where it had been. The miners who went deepest stopped being sure which of their own reflections to trust, and eventually stopped coming back up to ask.`
+  },
+  rutile_chasm: {
+    title: 'On the Rutile Chasm',
+    unlock: { type: 'map', map: 'prism_deep' },
+    body: `Prism Peak's original argument was only ever about how light splits. Something living in the chasm beneath it took that argument and set it on fire — a vein of crystal that refracts so hard and so unevenly that color stops looking like light and starts looking like heat. No scholar has explained why the burning never spreads, only that it never seems to need fuel.`
+  },
+  graded_core: {
+    title: 'On the Graded Core',
+    unlock: { type: 'map', map: 'fiber_deep' },
+    body: `Most of the Fiber Optic Tunnels were built once and left to decay. Not the Graded Core. Something down there has been quietly, continuously retuning the walls for longer than anyone alive can account for, smoothing every signal that passes back into a single clean pulse — as though the Reach still has one caretaker nobody has ever actually met.`
+  },
+  photonic_lattice: {
+    title: 'On the Photonic Lattice',
+    unlock: { type: 'map', map: 'grating_deep' },
+    body: `The scholar of the Grating Gardens ruled lines fine enough to resolve almost anything. Deeper down, something ruled a lattice fine enough to forbid almost everything — a structure that doesn't just bend light at sharp angles but refuses whole colors passage entirely, the way a locked door refuses a key that's only slightly the wrong shape.`
+  },
+  volume_vault: {
+    title: 'On the Volume Vault',
+    unlock: { type: 'map', map: 'hologram_deep' },
+    body: `The Hologram Archive records light on its surfaces. Beneath it, in the Volume Vault, an older and stranger crystal records light through its entire depth, and answers to a voltage that no living hand at the Archive remembers wiring in. Whatever it is still listening for, it has been listening for a very long time, and it has not yet decided that the answer isn't coming.`
   }
 };
 

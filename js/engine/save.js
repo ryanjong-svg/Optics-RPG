@@ -21,6 +21,8 @@ export function loadGame() {
       if (!state.flags.metNpc) state.flags.metNpc = {};
       if (!state.flags.quizAsked) state.flags.quizAsked = {};
       if (!state.flags.quests) state.flags.quests = {};
+      if (!state.flags.secretsFound) state.flags.secretsFound = {};
+      if (!state.flags.achievements) state.flags.achievements = {};
     }
     return state;
   } catch (e) {

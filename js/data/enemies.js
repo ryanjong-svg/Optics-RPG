@@ -115,6 +115,99 @@ export const ENEMIES = {
     resists: ['laser_focus', 'reflect_strike'], resistNote: 'a coherent beam and a clean reflection are exactly what a hologram is built from — both just feed the illusion.',
     zone: 'hologram', flavor: 'A hologram of an old guardian, reconstructed so faithfully from its recorded fringes that it no longer accepts it is a copy.'
   },
+  split_ray_wisp: {
+    id: 'split_ray_wisp', name: 'Split-Ray Wisp', hp: 28, atk: 6, def: 3, xp: 17, mats: ['calcite'],
+    weakTo: ['refraction_bend'], weakNote: 'a beam obeying Snell’s law splits clean along the crystal’s two indices instead of blurring further.',
+    resists: ['dispersion_burst'], resistNote: 'it’s already dividing one ray into two — further splitting barely registers.',
+    zone: 'mirrors_deep', flavor: 'A flicker that never travels as one ray — birefringence given a will of its own.'
+  },
+  twin_flicker: {
+    id: 'twin_flicker', name: 'Twin Flicker', hp: 32, atk: 7, def: 4, xp: 19, mats: ['calcite', 'silver'],
+    weakTo: ['diffraction_wave'], weakNote: 'a wave already spreading on its own doesn’t care which of the crystal’s two indices it meets.',
+    resists: ['reflect_strike'], resistNote: 'a flat reflection bounces off both twinned images identically, changing nothing.',
+    zone: 'mirrors_deep', flavor: 'Two afterimages of the same light, permanently out of step with each other.'
+  },
+  twinned_specter: {
+    id: 'twinned_specter', name: 'Twinned Specter', hp: 48, atk: 10, def: 7, xp: 34, mats: ['calcite', 'silver'],
+    weakTo: ['refraction_bend'], weakNote: 'a beam bent by Snell’s law separates cleanly along the crystal’s ordinary and extraordinary axes, unraveling the twin for good.',
+    resists: ['reflect_strike'], resistNote: 'reflecting doesn’t touch the crystal’s internal index split at all.',
+    zone: 'mirrors_deep', flavor: 'The Hall of Mirrors’ oldest secret finally given a shape: a guardian that is, quite literally, always two things at once.'
+  },
+  fire_moth: {
+    id: 'fire_moth', name: 'Fire Moth', hp: 30, atk: 7, def: 3, xp: 18, mats: ['rutile'],
+    weakTo: ['laser_focus'], weakNote: 'a single coherent color has no fire left to disperse.',
+    resists: ['refraction_bend'], resistNote: 'ordinary bending just adds more smear to a creature already made of it.',
+    zone: 'prism_deep', flavor: 'A cinder of pure chromatic fire, cut loose from a gemstone that refracts harder than diamond.'
+  },
+  ember_shard: {
+    id: 'ember_shard', name: 'Ember Shard', hp: 34, atk: 8, def: 4, xp: 20, mats: ['rutile', 'flint_glass'],
+    weakTo: ['dispersion_burst'], weakNote: 'oddly, splitting it further overloads a fire that was never meant to burn in this many colors at once.',
+    resists: ['reflect_strike'], resistNote: 'a plain reflection has no dispersion in it at all — nothing for the shard to catch fire from.',
+    zone: 'prism_deep', flavor: 'A splinter of rutile still burning with refracted light long after it broke free of the mountain.'
+  },
+  rutile_wyrm: {
+    id: 'rutile_wyrm', name: 'Rutile Wyrm', hp: 50, atk: 11, def: 8, xp: 36, mats: ['rutile', 'flint_glass'],
+    weakTo: ['laser_focus'], weakNote: 'one coherent color is the only light this creature can’t split into more fire to feed on.',
+    resists: ['dispersion_burst'], resistNote: 'it’s made of pure extreme dispersion already — more splitting just feeds it.',
+    zone: 'prism_deep', flavor: 'Coiled at the bottom of the chasm, wreathed in a refracted fire hotter and stranger than the mountain above it.'
+  },
+  mode_flicker: {
+    id: 'mode_flicker', name: 'Mode Flicker', hp: 28, atk: 6, def: 3, xp: 17, mats: ['ge_doped_silica'],
+    weakTo: ['refraction_bend'], weakNote: 'a graded-index profile is nothing but continuous refraction — a clean bend fits right through it.',
+    resists: ['diffraction_wave'], resistNote: 'spreading out is exactly what a graded core is built to prevent.',
+    zone: 'fiber_deep', flavor: 'A pulse that keeps almost losing its shape, then doesn’t — the graded core correcting it faster than it can blur.'
+  },
+  core_leech: {
+    id: 'core_leech', name: 'Core Leech', hp: 32, atk: 7, def: 4, xp: 19, mats: ['ge_doped_silica', 'quartz'],
+    weakTo: ['photoelectric_shock'], weakNote: 'a photon energetic enough to clear a real band gap punches straight through its graded shell.',
+    resists: ['laser_focus'], resistNote: 'a single coherent mode is exactly what a graded-index core is tuned to carry cleanly — it barely notices.',
+    zone: 'fiber_deep', flavor: 'Something that has learned to live inside a fiber core, feeding on whatever light loses its way there.'
+  },
+  dispersion_choke: {
+    id: 'dispersion_choke', name: 'Dispersion Choke', hp: 52, atk: 11, def: 8, xp: 36, mats: ['ge_doped_silica', 'quartz'],
+    weakTo: ['laser_focus'], weakNote: 'single-mode coherent light is immune to the modal dispersion this guardian depends on.',
+    resists: ['diffraction_wave'], resistNote: 'a graded index profile is precisely engineered to resist any further spreading.',
+    zone: 'fiber_deep', flavor: 'The Tunnels’ deepest choke point, where every multimode signal that ever wandered too wide still waits to arrive.'
+  },
+  lattice_wisp: {
+    id: 'lattice_wisp', name: 'Lattice Wisp', hp: 30, atk: 7, def: 4, xp: 18, mats: ['photonic_crystal'],
+    bandgapEV: 1.4,
+    weakTo: ['photoelectric_shock'], weakNote: 'like an electronic band gap, only photon energies outside its photonic band gap get through at all.',
+    resists: ['diffraction_wave'], resistNote: 'it’s built from a periodic lattice already tuned to diffract at this exact spacing — more of the same barely registers.',
+    zone: 'grating_deep', flavor: 'A flicker of light trapped in a lattice fine enough to forbid it a way through at all.'
+  },
+  forbidden_mote: {
+    id: 'forbidden_mote', name: 'Forbidden Mote', hp: 34, atk: 8, def: 5, xp: 21, mats: ['photonic_crystal', 'opal'],
+    bandgapEV: 1.4,
+    weakTo: ['photoelectric_shock'], weakNote: 'only energy that clears its forbidden band actually reaches it.',
+    resists: ['dispersion_burst'], resistNote: 'splitting light into more colors just gives it more wavelengths already inside its own forbidden band.',
+    zone: 'grating_deep', flavor: 'A mote of light that exists only in the narrow band the lattice around it refuses to forbid.'
+  },
+  lattice_warden: {
+    id: 'lattice_warden', name: 'Lattice Warden', hp: 54, atk: 12, def: 9, xp: 38, mats: ['photonic_crystal', 'opal'],
+    bandgapEV: 1.4,
+    weakTo: ['photoelectric_shock'], weakNote: 'exactly like a semiconductor band gap, only a photon energetic enough clears its photonic one.',
+    resists: ['diffraction_wave', 'dispersion_burst'], resistNote: 'diffracting or splitting the beam further just adds more wavelengths already forbidden by its own lattice.',
+    zone: 'grating_deep', flavor: 'The engineered heart of the Grating Gardens’ deepest lattice, forbidding almost everything except the one energy that was always going to end it.'
+  },
+  phase_echo: {
+    id: 'phase_echo', name: 'Phase Echo', hp: 30, atk: 7, def: 4, xp: 18, mats: ['lithium_niobate'],
+    weakTo: ['refraction_bend'], weakNote: 'an electro-optic crystal bends light by voltage-induced index change — a direct refraction attack overloads that exact mechanism.',
+    resists: ['reflect_strike'], resistNote: 'a plain reflection never touches the crystal’s internal field at all.',
+    zone: 'hologram_deep', flavor: 'A recording that keeps almost resolving into an image, held together by a field with nowhere left to discharge.'
+  },
+  fringe_ghost: {
+    id: 'fringe_ghost', name: 'Fringe Ghost', hp: 34, atk: 8, def: 4, xp: 20, mats: ['lithium_niobate', 'silver_halide'],
+    weakTo: ['dispersion_burst'], weakNote: 'splitting its recorded light into separate colors breaks the single reference wavelength it needs to reconstruct.',
+    resists: ['laser_focus'], resistNote: 'a single coherent beam is exactly the reference wave a hologram is built to answer — it just reinforces the recording.',
+    zone: 'hologram_deep', flavor: 'The ghost of an interference pattern recorded so many times over it no longer remembers which exposure it actually is.'
+  },
+  volume_warden: {
+    id: 'volume_warden', name: 'Volume Warden', hp: 52, atk: 11, def: 8, xp: 37, mats: ['lithium_niobate', 'silver_halide'],
+    weakTo: ['refraction_bend'], weakNote: 'a direct index-changing bend overloads the same electro-optic effect the warden runs on.',
+    resists: ['laser_focus', 'reflect_strike'], resistNote: 'a coherent beam and a clean reflection are exactly the two things a volume hologram is built to answer with — both just feed it.',
+    zone: 'hologram_deep', flavor: 'A guardian recorded so deep in the vault’s crystal that it doesn’t just show a memory of a defender anymore — the electro-optic field holding it up simply refuses to switch off.'
+  },
   null_medium: {
     id: 'null_medium', name: 'The Null Medium', hp: 70, atk: 11, def: 5, xp: 80, mats: [],
     isBoss: true,

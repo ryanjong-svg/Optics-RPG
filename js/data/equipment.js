@@ -113,6 +113,46 @@ export const RECIPES = [
       return { hologramBonus: 0.15 };
     },
     fact: 'A hologram records the interference pattern between a reference beam and light reflected off an object, then reconstructs it later.'
+  },
+  {
+    id: 'calcite_polarizer', name: 'Calcite Polarizer', slot: 'filter', glyph: '\u{2744}\u{FE0F}',
+    materials: ['calcite'], count: 2,
+    build() {
+      return { glareReduction: 0.8 };
+    },
+    fact: 'A calcite Nicol prism splits light into two polarized rays and discards one — a far more complete polarizer than a simple polaroid film.'
+  },
+  {
+    id: 'rutile_prism', name: 'Rutile Prism', slot: 'prism', glyph: '\u{1F525}',
+    materials: ['rutile'], count: 2,
+    build() {
+      return { abbe: MATERIALS.rutile.abbe, dispersionBonus: 3 };
+    },
+    fact: 'Rutile’s refractive index near 2.6 and Abbe number near 10 give it more "fire" than diamond — this prism splits light harder than any lesser glass.'
+  },
+  {
+    id: 'graded_index_core', name: 'Graded-Index Fiber Core', slot: 'filter', glyph: '\u{1F4E1}',
+    materials: ['ge_doped_silica'], count: 2,
+    build() {
+      return { tirBonus: 0.6 };
+    },
+    fact: 'A germanium-doped, graded-index core keeps light trapped by total internal reflection even more reliably than a simple step-index fiber.'
+  },
+  {
+    id: 'photonic_lattice_grating', name: 'Photonic Crystal Grating', slot: 'prism', glyph: '\u{1F52C}',
+    materials: ['photonic_crystal'], count: 2,
+    build() {
+      return { abbe: MATERIALS.photonic_crystal.abbe, diffractionBonus: 0.35 };
+    },
+    fact: 'An engineered photonic crystal diffracts with far sharper, more deliberate precision than any natural grating.'
+  },
+  {
+    id: 'electro_optic_modulator', name: 'Electro-Optic Modulator', slot: 'filter', glyph: '\u{26A1}',
+    materials: ['lithium_niobate'], count: 2,
+    build() {
+      return { hologramBonus: 0.35 };
+    },
+    fact: 'Lithium niobate’s electro-optic effect lets a voltage bend light on demand — real fiber-optic modulators and the sharpest volume holograms both depend on this crystal.'
   }
 ];
 

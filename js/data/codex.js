@@ -52,6 +52,26 @@ export const CODEX = {
   fiber_optics: {
     title: 'Optical Fiber',
     body: `A fiber has a higher-index core surrounded by a lower-index cladding. Light launched inside the core beyond the critical angle undergoes continuous total internal reflection, guiding it for enormous distances. Real fibers still lose a little light each kilometer to absorption and scattering — that loss is called attenuation.`
+  },
+  birefringence: {
+    title: 'Birefringence & Double Refraction',
+    body: `Some crystals, like calcite, don't have a single refractive index — they have two, one for each polarization of light. A ray entering one splits into an "ordinary" ray and an "extraordinary" ray that bend by different amounts, producing a visibly doubled image through a clear crystal. Viking sagas describe navigating by a "sunstone" that may have exploited exactly this to locate the sun through overcast sky.`
+  },
+  refractive_index_extremes: {
+    title: "High-Index Materials & Optical \"Fire\"",
+    body: `A gem's sparkle, or "fire," comes from combining a high refractive index with a low Abbe number: light entering slows and bends sharply (high n), then splits hard into color on the way out (low Abbe). Synthetic rutile pushes both to extremes — n near 2.6 and an Abbe number near 10 — giving it more fire than diamond, even though it's softer and cloudier.`
+  },
+  graded_index: {
+    title: 'Graded-Index Fiber & Modal Dispersion',
+    body: `A simple "step-index" fiber has one sharp index boundary between core and cladding; different light paths (modes) travel slightly different lengths and arrive smeared out in time — modal dispersion. A graded-index fiber instead varies its refractive index smoothly across the core, continuously bending faster paths back inward so every mode arrives at nearly the same time. Doping the core with germanium is one real way to engineer that gradient.`
+  },
+  photonic_bandgap: {
+    title: 'Photonic Crystals & Photonic Band Gaps',
+    body: `Just as a periodic crystal lattice of atoms creates an electronic band gap that forbids certain electron energies, a periodic nanostructure of a transparent material creates a photonic band gap that forbids certain wavelengths of light from propagating through it at all — not absorbing them, but simply refusing them passage. Opal's natural silica-sphere lattice hints at this; engineered photonic crystals push it much further, on purpose.`
+  },
+  electro_optic: {
+    title: 'The Electro-Optic Effect & Volume Holograms',
+    body: `In certain crystals, like lithium niobate, an applied electric voltage directly changes the refractive index — the electro-optic effect. That lets engineers bend, switch, or modulate light at extreme speed with no moving parts, which is exactly what drives real fiber-optic communication modulators. The same crystals also make superb volume holograms, recording interference patterns through their whole thickness rather than just on a surface.`
   }
 };
 

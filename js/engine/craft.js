@@ -43,6 +43,9 @@ function describeStats(stats) {
   if (stats.hologramBonus) {
     lines.push(`+${Math.round(stats.hologramBonus * 100)}% Interference Cancel full-negate chance`);
   }
+  if (stats.dispersionBonus) {
+    lines.push(`+${stats.dispersionBonus} flat damage per hit on Dispersion Burst`);
+  }
   if (stats.abbe !== undefined) {
     const hits = Math.max(2, Math.min(7, Math.round(280 / stats.abbe)));
     lines.push(stats.correctsChroma

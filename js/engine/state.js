@@ -23,7 +23,9 @@ export function newGameState() {
       visitedMaps: { village: true },
       metNpc: {},
       quizAsked: {},
-      quests: {}
+      quests: {},
+      secretsFound: {},
+      achievements: {}
     },
     codexUnlocked: {}
   };

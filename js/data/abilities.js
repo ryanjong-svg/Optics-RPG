@@ -39,7 +39,8 @@ export const ABILITIES = [
     effect(ctx) {
       const abbe = ctx.gear.prism ? ctx.gear.prism.abbe : 55;
       const hits = Math.max(2, Math.min(7, Math.round(280 / abbe)));
-      let per = Math.round(this.basePower + ctx.player.focus * 0.15);
+      const dispersionBonus = ctx.gear.prism && ctx.gear.prism.dispersionBonus ? ctx.gear.prism.dispersionBonus : 0;
+      let per = Math.round(this.basePower + ctx.player.focus * 0.15 + dispersionBonus);
       per = applyMatchup(ctx, this.id, per);
       return { hits, perHit: per, note: `Abbe number ${abbe} splits the beam into ${hits} colors.` };
     }

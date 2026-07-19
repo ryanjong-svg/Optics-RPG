@@ -61,6 +61,31 @@ export const MATERIALS = {
     id: 'silver_halide', name: 'Silver Halide Film', glyph: '\u{1F4F7}', n: 2.0, abbe: 0, hardness: 2,
     transparency: 0.2, density: 6.47,
     fact: 'Photographic and holographic emulsions use silver halide crystals to physically record interference fringe patterns.'
+  },
+  calcite: {
+    id: 'calcite', name: 'Calcite Crystal', glyph: '\u{2744}\u{FE0F}', n: 1.658, abbe: 40, hardness: 3,
+    transparency: 0.85, density: 2.71,
+    fact: 'Calcite splits a single ray into two — ordinary (n=1.658) and extraordinary (n=1.486) — a birefringence so strong that Viking sailors may have used "sunstones" of it to find the sun through cloud.'
+  },
+  rutile: {
+    id: 'rutile', name: 'Rutile', glyph: '\u{1F525}', n: 2.61, abbe: 10, hardness: 6,
+    transparency: 0.7, density: 4.25,
+    fact: 'Synthetic rutile has a refractive index near 2.6 and an Abbe number around 10 — even more fire and dispersion than diamond, though softer and cloudier.'
+  },
+  ge_doped_silica: {
+    id: 'ge_doped_silica', name: 'Germanium-Doped Silica', glyph: '\u{1F4E1}', n: 1.47, abbe: 67, hardness: 6,
+    transparency: 0.97, density: 2.2,
+    fact: 'Doping a fiber core with germanium dioxide raises its index just enough above the cladding to guide light, while keeping dispersion low enough for real long-haul signals.'
+  },
+  photonic_crystal: {
+    id: 'photonic_crystal', name: 'Photonic Crystal', glyph: '\u{1F52C}', n: 2.0, abbe: 15, hardness: 6,
+    transparency: 0.5, density: 3.0,
+    fact: 'A photonic crystal’s periodic nanostructure creates a photonic band gap — much like a semiconductor’s electronic one, it can forbid certain wavelengths from propagating through it at all.'
+  },
+  lithium_niobate: {
+    id: 'lithium_niobate', name: 'Lithium Niobate', glyph: '\u{26A1}', n: 2.2, abbe: 30, hardness: 5,
+    transparency: 0.85, density: 4.65,
+    fact: 'Lithium niobate’s electro-optic effect lets an applied voltage change its refractive index on demand — the crystal at the heart of most real fiber-optic modulators and many volume holograms.'
   }
 };
 

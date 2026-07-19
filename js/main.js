@@ -8,6 +8,7 @@ import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
+import { MAPS } from './data/maps.js';
 import * as audio from './engine/audio.js';
 
 function q(id) { return document.getElementById(id); }
@@ -66,6 +67,7 @@ const dom = {
   completionPanel: q('completion-panel'),
   completionOverall: q('completion-overall'),
   completionList: q('completion-list'),
+  completionAchievements: q('completion-achievements'),
   completionClose: q('completion-close'),
 
   mapPanel: q('map-panel'),
@@ -119,7 +121,10 @@ game.renderHud = renderHud;
 
 function unlockAndStartMusic() {
   audio.unlockAudio();
-  if (game.state.mode === 'overworld') audio.playOverworldMusic();
+  if (game.state.mode === 'overworld') {
+    audio.playOverworldMusic();
+    audio.playZoneAmbience(MAPS[game.state.currentMap].zone);
+  }
 }
 document.addEventListener('keydown', unlockAndStartMusic, { once: true });
 document.addEventListener('pointerdown', unlockAndStartMusic, { once: true });
@@ -170,6 +175,7 @@ dom.victoryContinue.addEventListener('click', () => {
   game.showPanel('overworld');
   renderOverworld(game);
   audio.playOverworldMusic();
+  audio.playZoneAmbience(MAPS[game.state.currentMap].zone);
 });
 
 function boot() {

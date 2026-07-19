@@ -185,7 +185,32 @@ export const PALETTES = {
   gem_polaroid: { K: OUTLINE, A: '#5c4a8a', D: '#c9b8ff' },
   gem_sapphire: { K: OUTLINE, A: '#2e5fd6', D: '#bcd4ff' },
   gem_opal: { K: OUTLINE, A: '#cdeee0', D: '#ff9ff3' },
-  gem_silver_halide: { K: OUTLINE, A: '#8a8a94', D: '#e8d8c0' }
+  gem_silver_halide: { K: OUTLINE, A: '#8a8a94', D: '#e8d8c0' },
+  gem_calcite: { K: OUTLINE, A: '#bfe3ff', D: '#ffffff' },
+  gem_rutile: { K: OUTLINE, A: '#ff6a3a', D: '#ffd9a0' },
+  gem_ge_doped_silica: { K: OUTLINE, A: '#7fe0c8', D: '#eafff8' },
+  gem_photonic_crystal: { K: OUTLINE, A: '#b088e0', D: '#e8d9ff' },
+  gem_lithium_niobate: { K: OUTLINE, A: '#d94aa0', D: '#ffd9ef' },
+
+  split_ray_wisp: { K: OUTLINE, A: '#bfe3ff', E: '#0a2a3a' },
+  twin_flicker: { K: OUTLINE, A: '#8fc7e0', C: '#e8f7ff', E: '#0a2a3a' },
+  twinned_specter: { K: OUTLINE, A: '#4a7d94', E: '#eaf7ff' },
+
+  fire_moth: { K: OUTLINE, A: '#ff8a4a', C: '#ffd166', E: '#3a0a0a' },
+  ember_shard: { K: '#3a0a0a', A: '#ff5a2a', E: '#ffd166' },
+  rutile_wyrm: { K: OUTLINE, A: '#c23a1a', B: '#7a1f0a', D: '#ffb066' },
+
+  mode_flicker: { K: OUTLINE, A: '#7fe0c8', E: '#0a2a24' },
+  core_leech: { K: OUTLINE, A: '#4aa88a', E: '#c0392b' },
+  dispersion_choke: { K: OUTLINE, A: '#2f8f74', B: '#1c5c48', D: '#c8fff0' },
+
+  lattice_wisp: { K: OUTLINE, A: '#b088e0', E: '#1a0a2e' },
+  forbidden_mote: { K: OUTLINE, A: '#9a6ad0', C: '#e0c8ff', E: '#1a0a2e' },
+  lattice_warden: { K: OUTLINE, A: '#6a3fae', B: '#3f1f6e', D: '#e8d9ff' },
+
+  phase_echo: { K: OUTLINE, A: '#d94aa0', E: '#2a0a1e' },
+  fringe_ghost: { K: '#2a0a1e', A: '#b23a80', E: '#ffd9ef' },
+  volume_warden: { K: OUTLINE, A: '#8a2a60', B: '#5c1a40', D: '#ffb0dd' }
 };
 
 // enemyId/npcId -> { shape, palette }
@@ -214,7 +239,27 @@ export const CHARACTER_SPRITES = {
   fringe_phantom: { shape: 'wraith', palette: 'fringe_phantom' },
   archive_wraith: { shape: 'wraith', palette: 'archive_wraith' },
   attenuation_slug: { shape: 'slug', palette: 'attenuation_slug' },
-  null_medium: { shape: 'voidling', palette: 'null_medium' }
+  null_medium: { shape: 'voidling', palette: 'null_medium' },
+
+  split_ray_wisp: { shape: 'ghost', palette: 'split_ray_wisp' },
+  twin_flicker: { shape: 'imp', palette: 'twin_flicker' },
+  twinned_specter: { shape: 'wraith', palette: 'twinned_specter' },
+
+  fire_moth: { shape: 'imp', palette: 'fire_moth' },
+  ember_shard: { shape: 'wraith', palette: 'ember_shard' },
+  rutile_wyrm: { shape: 'golem', palette: 'rutile_wyrm' },
+
+  mode_flicker: { shape: 'ghost', palette: 'mode_flicker' },
+  core_leech: { shape: 'slug', palette: 'core_leech' },
+  dispersion_choke: { shape: 'golem', palette: 'dispersion_choke' },
+
+  lattice_wisp: { shape: 'ghost', palette: 'lattice_wisp' },
+  forbidden_mote: { shape: 'imp', palette: 'forbidden_mote' },
+  lattice_warden: { shape: 'golem', palette: 'lattice_warden' },
+
+  phase_echo: { shape: 'ghost', palette: 'phase_echo' },
+  fringe_ghost: { shape: 'wraith', palette: 'fringe_ghost' },
+  volume_warden: { shape: 'golem', palette: 'volume_warden' }
 };
 
 export function itemSprite(materialId) {

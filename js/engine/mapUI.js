@@ -2,10 +2,13 @@ import { MAPS } from '../data/maps.js';
 
 // Mirrors the real village exit layout: grating/mirrors/prism sit at the
 // north exits, fiber/hologram/lab at the south exits, village in the middle.
+// Each depth zone sits directly beside its parent, one ring further out.
 const LAYOUT = [
   ['mirrors', 'grating', 'prism'],
+  ['mirrors_deep', 'grating_deep', 'prism_deep'],
   [null, 'village', null],
-  ['fiber', 'hologram', 'lab']
+  ['fiber', 'hologram', 'lab'],
+  ['fiber_deep', 'hologram_deep', null]
 ];
 
 export function openMap(game) {
