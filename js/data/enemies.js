@@ -18,14 +18,14 @@ export const ENEMIES = {
   },
   mirror_golem: {
     id: 'mirror_golem', name: 'Mirror Golem', hp: 40, atk: 8, def: 6, xp: 20, mats: ['silver', 'aluminum'],
-    weakTo: ['polarize_filter', 'diffraction_wave'],
-    weakNote: 'glare from its polished shell is fully polarized at Brewster’s angle, and waves diffract right around its flat face.',
+    weakTo: ['diffraction_wave'],
+    weakNote: 'waves diffract cleanly around its flat, polished face.',
     resists: ['reflect_strike'], resistNote: 'a mirror strike reflects straight back off its polished shell.',
     zone: 'mirrors', flavor: 'A hulking construct of silvered glass panels, endlessly bouncing light between its plates.'
   },
   reflection_wraith: {
     id: 'reflection_wraith', name: 'Infinite Reflection Wraith', hp: 34, atk: 7, def: 3, xp: 22, mats: ['silver'],
-    weakTo: ['absorb_reemit'], weakNote: 'absorbing swallows every ghost-image the wraith throws back at once.',
+    weakTo: ['refraction_bend'], weakNote: 'a beam that refracts through its surface escapes the endless reflection loop instead of feeding it.',
     resists: ['dispersion_burst'], resistNote: 'splitting light into more copies just feeds a creature made of copies.',
     zone: 'mirrors', flavor: 'Two facing mirrors gone wrong — an endless hallway of its own reflection given form.'
   },

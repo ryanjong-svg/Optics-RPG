@@ -190,12 +190,55 @@ canvas#overworld-canvas {
 
 /* ---------- Battle ---------- */
 .battle-row { display: flex; justify-content: space-around; margin-bottom: 10px; }
-.combatant { text-align: center; }
+.combatant { text-align: center; position: relative; }
 .portrait-canvas {
   background: #0a0e14;
   border: 1px solid var(--cyan-dim);
   box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
   margin-bottom: 4px;
+}
+
+/* Hit feedback on battle portraits */
+.portrait-hit { animation: portrait-shake 0.35s ease; }
+.portrait-crit { animation: portrait-shake-big 0.4s ease; box-shadow: 0 0 18px 4px rgba(255,204,51,0.8) !important; }
+.portrait-miss { animation: portrait-fade 0.35s ease; }
+@keyframes portrait-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+@keyframes portrait-shake-big {
+  0%, 100% { transform: translateX(0) scale(1); }
+  15% { transform: translateX(-9px) scale(1.03); }
+  35% { transform: translateX(8px) scale(1.03); }
+  55% { transform: translateX(-6px) scale(1.02); }
+  75% { transform: translateX(5px) scale(1.01); }
+}
+@keyframes portrait-fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.dmg-popup {
+  position: absolute;
+  top: 10px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1em;
+  color: var(--red);
+  text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 0 2px #000;
+  pointer-events: none;
+  animation: dmg-popup-float 0.9s ease-out forwards;
+  z-index: 5;
+}
+.dmg-popup-crit { color: var(--hazard); font-size: 1.4em; }
+.dmg-popup-miss { color: var(--text-dim); font-size: 0.9em; }
+@keyframes dmg-popup-float {
+  0% { transform: translate(-50%, 0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(-50%, -34px); opacity: 0; }
 }
 #battle-log {
   background: #0a0e14; color: var(--text-light);

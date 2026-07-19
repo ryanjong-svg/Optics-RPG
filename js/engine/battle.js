@@ -18,6 +18,35 @@ function grantXpWithSound(state, amount, log) {
 
 const PORTRAIT_PX = 5;
 
+// Re-triggerable CSS animation: strip the class, force a reflow, re-add it,
+// then clean up — so back-to-back hits each get their own shake/flash.
+function pulseEffect(el, className, duration = 400) {
+  if (!el) return;
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+  setTimeout(() => el.classList.remove(className), duration);
+}
+
+function spawnDamagePopup(canvasEl, text, variant) {
+  if (!canvasEl || !canvasEl.parentElement) return;
+  const popup = document.createElement('div');
+  popup.className = 'dmg-popup' + (variant ? ` dmg-popup-${variant}` : '');
+  popup.textContent = text;
+  canvasEl.parentElement.appendChild(popup);
+  setTimeout(() => popup.remove(), 900);
+}
+
+function showHitFx(game, canvasEl, dmg, isCrit) {
+  if (dmg > 0) {
+    pulseEffect(canvasEl, isCrit ? 'portrait-crit' : 'portrait-hit');
+    spawnDamagePopup(canvasEl, `-${dmg}`, isCrit ? 'crit' : 'normal');
+  } else {
+    pulseEffect(canvasEl, 'portrait-miss');
+    spawnDamagePopup(canvasEl, 'MISS', 'miss');
+  }
+}
+
 function logMsg(game, msg) {
   const log = game.battle.log;
   log.push(msg);
@@ -60,7 +89,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
   const result = ability.effect(ctx);
   if (ability.id !== neededId) {
     logMsg(game, `${ability.name} passes right through The Null Medium — it hasn't taken on that property yet.`);
-    return { isCrit: false, landed: false };
+    return { isCrit: false, landed: false, dmg: 0 };
   }
   let dmg = result.dmg != null ? result.dmg : (result.perHit ? result.perHit * (result.hits || 1) : 10);
   dmg = Math.max(1, Math.round(dmg + storedBonus));
@@ -71,7 +100,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
     const nextName = findAbility(enemy.phases[enemy.phaseIdx]).name;
     logMsg(game, `It shudders and takes on a new property — try ${nextName} next.`);
   }
-  return { isCrit: !!result.isCrit, landed: true };
+  return { isCrit: !!result.isCrit, landed: true, dmg };
 }
 
 function applyPlayerAction(game, ability, ctx) {
@@ -106,27 +135,28 @@ function applyPlayerAction(game, ability, ctx) {
       if (!(ability.noDamageFloor && result.dmg === 0)) net = Math.max(net, raw > 0 || storedBonus > 0 ? 1 : 0);
       logMsg(game, `${ability.name}: dealt ${Math.max(0, net)} damage. ${result.note || ''}`);
     }
-    battle.enemy.curHp = Math.max(0, battle.enemy.curHp - Math.max(0, net));
-    return { isCrit: !!result.isCrit, landed: true };
+    net = Math.max(0, net);
+    battle.enemy.curHp = Math.max(0, battle.enemy.curHp - net);
+    return { isCrit: !!result.isCrit, landed: true, dmg: net };
   }
 
   battle.playerBuff = result;
   logMsg(game, `${ability.name}: ${result.note || 'You brace for the next attack.'}`);
-  return { isCrit: false, landed: false };
+  return { isCrit: false, landed: false, dmg: 0 };
 }
 
 function enemyTurn(game) {
   const battle = game.battle;
   const enemy = battle.enemy;
   const player = game.state.player;
-  if (enemy.curHp <= 0) return;
+  if (enemy.curHp <= 0) return { dmg: 0 };
 
   const gear = buildGear(player);
   const evasion = gear.lens && gear.lens.evasionBonus ? gear.lens.evasionBonus : 0;
   if (evasion && Math.random() < evasion) {
     logMsg(game, `${enemy.name}'s attack misses completely — your diverging lens scattered its aim.`);
     battle.playerBuff = null;
-    return;
+    return { dmg: 0 };
   }
 
   let dmg = Math.max(1, enemy.atk + Math.floor(Math.random() * 5) - 2);
@@ -152,6 +182,7 @@ function enemyTurn(game) {
   player.hp = Math.max(0, player.hp - dmg);
   logMsg(game, `${enemy.name} attacks for ${dmg} damage. ${note}`);
   battle.playerBuff = null;
+  return { dmg };
 }
 
 export function chooseAbility(game, abilityId) {
@@ -163,9 +194,12 @@ export function chooseAbility(game, abilityId) {
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
 
   const actionResult = applyPlayerAction(game, ability, ctx);
-  if (actionResult.landed) {
-    if (actionResult.isCrit) audio.playCrit();
-    else audio.playHit();
+  if (ability.type === 'attack') {
+    if (actionResult.landed) {
+      if (actionResult.isCrit) audio.playCrit();
+      else audio.playHit();
+    }
+    showHitFx(game, game.dom.battleEnemyCanvas, actionResult.dmg, actionResult.isCrit);
   }
 
   if (battle.enemy.curHp <= 0) {
@@ -174,7 +208,8 @@ export function chooseAbility(game, abilityId) {
     return;
   }
 
-  enemyTurn(game);
+  const enemyResult = enemyTurn(game);
+  showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
 
   if (game.state.player.hp <= 0) {
     resolveDefeat(game);
@@ -200,7 +235,8 @@ export function flee(game) {
     setTimeout(() => endBattle(game), 300);
   } else {
     logMsg(game, 'Couldn’t escape!');
-    enemyTurn(game);
+    const enemyResult = enemyTurn(game);
+    showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
     if (game.state.player.hp <= 0) {
       resolveDefeat(game);
     }

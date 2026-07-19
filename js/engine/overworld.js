@@ -26,7 +26,7 @@ function toScreen(x, y) {
   };
 }
 
-const ZONE_ENCOUNTERS = {
+export const ZONE_ENCOUNTERS = {
   village: ['wisp', 'puddle_imp', 'glint_moth'],
   mirrors: ['mirror_golem', 'fractured_pane'],
   prism: ['prism_sprite', 'spectral_moth'],
@@ -38,7 +38,7 @@ const ZONE_ENCOUNTERS = {
 
 // Each zone gets a distinct raised-block palette (top/left/right face shading)
 // so a glance at the walls alone tells you which area you're in.
-const ZONE_WALL_COLORS = {
+export const ZONE_WALL_COLORS = {
   village: { top: '#6b4530', left: '#4a2f22', right: '#34201a' },
   mirrors: { top: '#7c8790', left: '#5c6570', right: '#3f4750' },
   prism: { top: '#7a5296', left: '#5a3a6e', right: '#432a54' },
