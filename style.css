@@ -139,6 +139,7 @@ canvas#overworld-canvas {
 }
 .bar-fill.hp { background-color: var(--red); box-shadow: 0 0 6px rgba(255,92,92,0.5); }
 .bar-fill.xp { background-color: var(--cyan); box-shadow: 0 0 6px rgba(79,216,255,0.5); }
+.bar-fill.charge { background-color: var(--orange); box-shadow: 0 0 6px rgba(255,204,51,0.5); }
 .bar-fill.hp.critical { animation: hp-critical-pulse 0.8s ease-in-out infinite; }
 @keyframes hp-critical-pulse {
   0%, 100% { box-shadow: 0 0 6px rgba(255,92,92,0.5); filter: brightness(1); }
@@ -164,6 +165,10 @@ canvas#overworld-canvas {
 .action-btn.ghost { background: transparent; border-color: var(--cyan-dim); color: var(--cyan); }
 .action-btn.ability-btn { display: flex; flex-direction: column; gap: 6px; }
 .ability-desc { font-family: 'Share Tech Mono', monospace; font-size: 1.05em; color: var(--text-dim); }
+.charge-tag { font-size: 0.8em; color: var(--orange); }
+#battle-pack-mates { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.pack-mate { font-size: 0.9em; color: var(--text-light); background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); padding: 4px 8px; }
+.pack-mate-dead { color: var(--text-dim); text-decoration: line-through; opacity: 0.6; }
 .action-btn.flee-btn { grid-column: 1 / -1; text-align: center; background: #3a1414; border-color: var(--red); color: var(--red); }
 
 /* ---------- Panels ---------- */

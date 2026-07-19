@@ -92,6 +92,37 @@ export function equipItem(game, slot, recipeId) {
   renderCraft(game);
 }
 
+// Loadouts are just a saved snapshot of `equipped` - no new gear is created,
+// so switching builds mid-adventure doesn't need a trip through every dropdown.
+// Pure state mutations (no dom/save side effects) so they stay unit-testable;
+// saveLoadout()/loadLoadout() below are the UI-wired versions callers use.
+export function applySaveLoadout(state, slot) {
+  state.player.loadouts[slot] = { ...state.player.equipped };
+}
+
+export function applyLoadLoadout(state, slot) {
+  const player = state.player;
+  const loadout = player.loadouts[slot];
+  if (!loadout) return false;
+  ['lens', 'mirror', 'prism', 'filter'].forEach(s => {
+    const recipeId = loadout[s];
+    player.equipped[s] = (recipeId && player.ownedGear[recipeId]) ? recipeId : null;
+  });
+  return true;
+}
+
+export function saveLoadout(game, slot) {
+  applySaveLoadout(game.state, slot);
+  saveGame(game.state);
+  renderCraft(game);
+}
+
+export function loadLoadout(game, slot) {
+  if (!applyLoadLoadout(game.state, slot)) return;
+  saveGame(game.state);
+  renderCraft(game);
+}
+
 function craftConsumableAndRender(game, itemId) {
   craftConsumable(game, itemId);
   renderCraft(game);
@@ -111,6 +142,37 @@ export function renderCraft(game) {
     const count = player.materials[m.id] || 0;
     return `<div class="mat-chip" title="${m.fact}"><span>${m.glyph}</span> ${m.name} <b>${count}</b></div>`;
   }).join('');
+
+  if (d.craftLoadouts) {
+    d.craftLoadouts.innerHTML = '';
+    [1, 2].forEach(slot => {
+      const loadout = player.loadouts[slot];
+      const summary = loadout
+        ? ['lens', 'mirror', 'prism', 'filter'].map(s => loadout[s] ? findRecipe(loadout[s]).name : '(none)').join(' • ')
+        : 'Empty — nothing saved yet.';
+      const row = document.createElement('div');
+      row.className = 'recipe-row';
+      row.innerHTML = `
+        <div class="recipe-head"><strong>Loadout ${slot}</strong></div>
+        <div class="recipe-req">${summary}</div>
+      `;
+      const btnRow = document.createElement('div');
+      btnRow.className = 'recipe-btn-row';
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'action-btn';
+      saveBtn.textContent = 'Save Current';
+      saveBtn.onclick = () => saveLoadout(game, slot);
+      const loadBtn = document.createElement('button');
+      loadBtn.className = 'action-btn';
+      loadBtn.textContent = 'Load';
+      loadBtn.disabled = !loadout;
+      loadBtn.onclick = () => loadLoadout(game, slot);
+      btnRow.appendChild(saveBtn);
+      btnRow.appendChild(loadBtn);
+      row.appendChild(btnRow);
+      d.craftLoadouts.appendChild(row);
+    });
+  }
 
   d.craftConsumables.innerHTML = '';
   CONSUMABLES.forEach(item => {

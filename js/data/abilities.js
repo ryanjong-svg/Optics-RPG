@@ -3,7 +3,7 @@
 export const ABILITIES = [
   {
     id: 'reflect_strike', name: 'Reflect Strike', concept: 'reflection', slot: 'mirror',
-    type: 'attack', basePower: 10,
+    type: 'attack', basePower: 10, chargeCost: 1,
     desc: 'Bounce focused light off your mirror coating straight at the foe.',
     effect(ctx) {
       const R = ctx.gear.mirror ? ctx.gear.mirror.reflectivity : 0.2;
@@ -14,7 +14,7 @@ export const ABILITIES = [
   },
   {
     id: 'refraction_bend', name: 'Refraction Bend', concept: 'snell', slot: 'lens',
-    type: 'attack', basePower: 9,
+    type: 'attack', basePower: 9, chargeCost: 1,
     desc: 'Snell’s Law bends your beam around the enemy’s guard.',
     effect(ctx) {
       const n = ctx.gear.lens ? ctx.gear.lens.focusPower : 4;
@@ -34,7 +34,7 @@ export const ABILITIES = [
   },
   {
     id: 'dispersion_burst', name: 'Dispersion Burst', concept: 'dispersion', slot: 'prism',
-    type: 'attack', basePower: 4, cooldown: 1,
+    type: 'attack', basePower: 4, cooldown: 1, chargeCost: 2,
     desc: 'Split white light into a rainbow of smaller hits — more hits with lower-Abbe glass.',
     effect(ctx) {
       const abbe = ctx.gear.prism ? ctx.gear.prism.abbe : 55;
@@ -56,7 +56,7 @@ export const ABILITIES = [
   },
   {
     id: 'diffraction_wave', name: 'Diffraction Wave', concept: 'diffraction', slot: 'prism',
-    type: 'attack', basePower: 7,
+    type: 'attack', basePower: 7, chargeCost: 1,
     desc: 'Bend the beam around obstacles — ignores half the enemy’s guard.',
     effect(ctx) {
       let dmg = Math.round(this.basePower + ctx.player.focus * 0.3);
@@ -70,7 +70,7 @@ export const ABILITIES = [
   },
   {
     id: 'laser_focus', name: 'Laser Focus', concept: 'coherence', slot: 'lens',
-    type: 'attack', basePower: 12, cooldown: 2,
+    type: 'attack', basePower: 12, cooldown: 2, chargeCost: 2,
     desc: 'A coherent, single-color beam — high critical-hit chance.',
     effect(ctx) {
       const critBonus = ctx.gear.lens ? (ctx.gear.lens.critBonus || 0) : 0;
@@ -95,7 +95,7 @@ export const ABILITIES = [
   },
   {
     id: 'photoelectric_shock', name: 'Photoelectric Shock', concept: 'photoelectric', slot: 'filter',
-    type: 'attack', basePower: 14, cooldown: 2,
+    type: 'attack', basePower: 14, cooldown: 2, chargeCost: 2,
     desc: 'Only works if photon energy clears the target’s band gap — but hits hard when it does.',
     effect(ctx) {
       const photonEV = 1.0 + ctx.player.focus * 0.05 + (ctx.gear.filter && ctx.gear.filter.bandgapPierce ? 0.8 : 0);

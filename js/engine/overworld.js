@@ -42,6 +42,12 @@ export const ZONE_ENCOUNTERS = {
   hologram_deep: ['phase_echo', 'fringe_ghost']
 };
 
+// The 5 depth zones occasionally throw 2 regular enemies at once instead of
+// 1 — "later zones" get real multi-enemy tactical texture (every attack
+// ability cleaves to all living targets in a pack) without touching the
+// original 7 outer zones' pacing at all.
+const PACK_ELIGIBLE_ZONES = new Set(['mirrors_deep', 'prism_deep', 'fiber_deep', 'grating_deep', 'hologram_deep']);
+
 // Each zone gets a distinct raised-block palette (top/left/right face shading)
 // so a glance at the walls alone tells you which area you're in.
 export const ZONE_WALL_COLORS = {
@@ -263,6 +269,14 @@ export function renderOverworld(game) {
     });
   }
 
+  if (map.wanderer) {
+    const sprite = CHARACTER_SPRITES[map.wanderer.enemyId];
+    putEntity(map.wanderer.x, map.wanderer.y, (sx, sy) => {
+      const topY = drawIsoSprite(ctx2d, sprite.shape, sprite.palette, sx, sy);
+      labelQueue.push(() => drawLabel(ctx2d, `${ENEMIES[map.wanderer.enemyId].name}`, sx, topY, '#8bd9ff'));
+    });
+  }
+
   if (map.boss && !state.flags.bossDefeated) {
     const sprite = CHARACTER_SPRITES[map.boss.enemyId];
     const locked = map.boss.requiresGuardian && !state.flags.guardianDefeated[map.id];
@@ -329,6 +343,11 @@ export function handleMove(game, dx, dy) {
     return;
   }
 
+  if (map.wanderer && map.wanderer.x === nx && map.wanderer.y === ny) {
+    startBattle(game, map.wanderer.enemyId, { scaleToLevel: state.player.level, surpriseBonus: true });
+    return;
+  }
+
   if (map.boss && map.boss.x === nx && map.boss.y === ny && !state.flags.bossDefeated) {
     if (map.boss.requiresGuardian && !state.flags.guardianDefeated[map.id]) {
       showMessages(game, [BOSS_LOCKED_MESSAGE]);
@@ -390,7 +409,11 @@ export function handleMove(game, dx, dy) {
     const pool = ZONE_ENCOUNTERS[map.zone] || [];
     if (pool.length && Math.random() < 0.16) {
       const enemyId = pool[Math.floor(Math.random() * pool.length)];
-      startBattle(game, enemyId, { scaleToLevel: state.player.level });
+      const opts = { scaleToLevel: state.player.level };
+      if (PACK_ELIGIBLE_ZONES.has(map.zone) && Math.random() < 0.3) {
+        opts.packIds = [pool[Math.floor(Math.random() * pool.length)]];
+      }
+      startBattle(game, enemyId, opts);
       return;
     }
   }

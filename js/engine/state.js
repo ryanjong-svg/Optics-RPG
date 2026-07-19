@@ -11,10 +11,12 @@ export function newGameState() {
       name: 'Apprentice',
       level: 1, xp: 0, xpToNext: 20,
       maxHp: 40, hp: 40, focus: 6,
+      maxCharge: 3, charge: 3,
       materials,
       ownedGear: {},
       equipped: { lens: null, mirror: null, prism: null, filter: null },
-      consumables: {}
+      consumables: {},
+      loadouts: { 1: null, 2: null }
     },
     flags: {
       seenIntro: false,
@@ -48,9 +50,11 @@ export function grantXp(state, amount, log) {
     p.level += 1;
     p.maxHp += 8;
     p.focus += 2;
+    p.maxCharge += 1;
     p.hp = p.maxHp;
+    p.charge = p.maxCharge;
     p.xpToNext = Math.round(p.xpToNext * 1.4);
-    log(`Level up! You are now level ${p.level}. Max HP and Focus increased, HP restored.`);
+    log(`Level up! You are now level ${p.level}. Max HP, Focus, and Charge increased, HP and Charge restored.`);
   }
 }
 

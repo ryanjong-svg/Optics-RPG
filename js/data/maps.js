@@ -175,6 +175,7 @@ export const MAPS = {
       { x: 2, y: 9, material: 'silver' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'twinned_specter' },
+    wanderer: { x: 2, y: 5, enemyId: 'split_ray_wisp' },
     secret: { x: 8, y: 3, material: 'lithium_niobate', findText: 'A shard of crystal that hums faintly when struck, as if it still remembers a voltage from somewhere deeper still.' }
   },
   prism_deep: {
@@ -189,6 +190,7 @@ export const MAPS = {
       { x: 2, y: 9, material: 'flint_glass' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'rutile_wyrm' },
+    wanderer: { x: 2, y: 5, enemyId: 'fire_moth' },
     secret: { x: 8, y: 3, material: 'calcite', findText: 'A crystal that shows everything behind it twice, slightly apart. Nothing in this chasm should refract that cleanly.' }
   },
   fiber_deep: {
@@ -203,6 +205,7 @@ export const MAPS = {
       { x: 2, y: 9, material: 'quartz' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'dispersion_choke' },
+    wanderer: { x: 2, y: 5, enemyId: 'mode_flicker' },
     secret: { x: 8, y: 3, material: 'rutile', findText: 'A cinder of fire-bright crystal, still faintly warm. Nothing down here should burn like the Chasm does.' }
   },
   grating_deep: {
@@ -217,6 +220,7 @@ export const MAPS = {
       { x: 2, y: 9, material: 'opal' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'lattice_warden' },
+    wanderer: { x: 2, y: 5, enemyId: 'lattice_wisp' },
     secret: { x: 8, y: 3, material: 'ge_doped_silica', findText: 'A sliver of fiber core, doped and graded with a precision this lattice shouldn’t have any use for.' }
   },
   hologram_deep: {
@@ -231,6 +235,7 @@ export const MAPS = {
       { x: 2, y: 9, material: 'silver_halide' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'volume_warden' },
+    wanderer: { x: 2, y: 5, enemyId: 'phase_echo' },
     secret: { x: 8, y: 3, material: 'photonic_crystal', findText: 'A shard of engineered lattice, forbidding light in a way nothing in this vault was built to do.' }
   }
 };

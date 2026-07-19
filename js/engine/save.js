@@ -6,6 +6,11 @@ const KEY = 'optics-rpg-save-v1';
 // touching localStorage, which isn't available under the Node test runner.
 export function migrateState(state) {
   if (state.player && !state.player.consumables) state.player.consumables = {};
+  if (state.player && state.player.maxCharge === undefined) {
+    state.player.maxCharge = 3;
+    state.player.charge = 3;
+  }
+  if (state.player && !state.player.loadouts) state.player.loadouts = { 1: null, 2: null };
   if (state.flags) {
     if (!state.flags.visitedMaps) state.flags.visitedMaps = { [state.currentMap]: true };
     if (!state.flags.metNpc) state.flags.metNpc = {};

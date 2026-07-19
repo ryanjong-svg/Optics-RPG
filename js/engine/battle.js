@@ -122,14 +122,25 @@ export function startBattle(game, enemyId, opts = {}) {
     enemy.phaseIdx = 0;
     enemy.phaseTargetHp = Math.max(1, enemy.hp - Math.ceil((enemy.hp / enemy.phases.length) * (enemy.phaseIdx + 1)));
   }
+  const packMates = (opts.packIds || []).map(id => {
+    const mate = makeEnemyInstance(id);
+    applyDifficultyScaling(mate, game.state.settings.difficulty);
+    applyNgPlusScaling(mate, game.state.flags.ngPlusCycle);
+    if (opts.scaleToLevel) scaleEnemyToLevel(mate, opts.scaleToLevel);
+    return mate;
+  });
+
   game.battle = {
-    enemy, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
+    enemy, packMates, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
     damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false, bossEnrageTriggered: false,
-    cooldowns: {}, enemyTelegraphed: false
+    cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  if (packMates.length) {
+    logMsg(game, `${packMates.map(m => m.name).join(' and ')} join${packMates.length === 1 ? 's' : ''} the fight!`);
+  }
   if (game.state.flags.enemiesDefeated[enemyId]) {
     const hint = bestiaryHintText(enemy);
     if (hint) logMsg(game, hint);
@@ -162,6 +173,13 @@ function applyBossAction(game, ability, ctx, storedBonus) {
   return { isCrit: !!result.isCrit, landed: true, dmg };
 }
 
+// True exactly once per battle, the first time an attack ability is used
+// after a surprise (wanderer) encounter — consumed by whichever code path
+// checks it, single-target or pack.
+export function shouldApplySurprise(battle, ability) {
+  return !!(battle.surpriseAvailable && ability.type === 'attack');
+}
+
 function applyPlayerAction(game, ability, ctx) {
   const battle = game.battle;
   let storedBonus = 0;
@@ -171,8 +189,19 @@ function applyPlayerAction(game, ability, ctx) {
     logMsg(game, `Releasing ${storedBonus} stored (Stokes-shifted) energy from last turn.`);
   }
 
+  const surprised = shouldApplySurprise(battle, ability);
+  if (surprised) {
+    battle.surpriseAvailable = false;
+    logMsg(game, 'Surprise attack! The unprepared foe takes extra damage.');
+  }
+  const surpriseMult = surprised ? 1.3 : 1;
+
   if (battle.enemy.isBoss && ability.type === 'attack') {
     return applyBossAction(game, ability, ctx, storedBonus);
+  }
+
+  if (ability.type === 'attack' && battle.packMates.length > 0) {
+    return applyPlayerActionPack(game, ability, ctx, storedBonus, surpriseMult);
   }
 
   const result = ability.effect(ctx);
@@ -195,6 +224,7 @@ function applyPlayerAction(game, ability, ctx) {
       logMsg(game, `${ability.name}: dealt ${Math.max(0, net)} damage. ${result.note || ''}`);
     }
     net = Math.max(0, net);
+    net = Math.round(net * surpriseMult);
     battle.enemy.curHp = Math.max(0, battle.enemy.curHp - net);
     if (net >= battle.enemy.hp) unlockAchievement(game.state, 'overqualified', m => logMsg(game, m));
     return { isCrit: !!result.isCrit, landed: true, dmg: net };
@@ -203,6 +233,41 @@ function applyPlayerAction(game, ability, ctx) {
   battle.playerBuff = result;
   logMsg(game, `${ability.name}: ${result.note || 'You brace for the next attack.'}`);
   return { isCrit: false, landed: false, dmg: 0 };
+}
+
+// Attack abilities cleave to every living target when fighting a pack —
+// no per-enemy targeting UI needed, and every ability becomes a real AoE
+// tool in exactly the fights where that matters.
+function applyPlayerActionPack(game, ability, ctx, storedBonus, surpriseMult) {
+  const battle = game.battle;
+  const targets = [battle.enemy, ...battle.packMates].filter(t => t.curHp > 0);
+  let totalDealt = 0;
+  let firstNote = '';
+  let anyCrit = false;
+  targets.forEach((target, i) => {
+    const targetCtx = { ...ctx, enemy: target, log: i === 0 ? ctx.log : () => {} };
+    const result = ability.effect(targetCtx);
+    let net;
+    if (result.hits) {
+      let total = 0;
+      for (let h = 0; h < result.hits; h++) total += Math.max(1, Math.round(result.perHit - target.def * 0.5));
+      net = total + (i === 0 ? storedBonus : 0);
+    } else {
+      const ignoreFrac = result.ignoreDefFrac || 0;
+      const defApplied = target.def * (1 - ignoreFrac);
+      const raw = result.dmg || 0;
+      net = Math.round(raw - defApplied) + (i === 0 ? storedBonus : 0);
+      if (!(ability.noDamageFloor && result.dmg === 0)) net = Math.max(net, raw > 0 ? 1 : 0);
+    }
+    net = Math.max(0, net);
+    net = Math.round(net * surpriseMult);
+    target.curHp = Math.max(0, target.curHp - net);
+    totalDealt += net;
+    if (i === 0) { firstNote = result.note || ''; anyCrit = !!result.isCrit; }
+    if (net >= target.hp) unlockAchievement(game.state, 'overqualified', m => logMsg(game, m));
+  });
+  logMsg(game, `${ability.name} sweeps the group for ${totalDealt} total damage. ${firstNote}`);
+  return { isCrit: anyCrit, landed: totalDealt > 0, dmg: totalDealt };
 }
 
 function enemyTurn(game) {
@@ -264,6 +329,61 @@ function enemyTurn(game) {
   return { dmg };
 }
 
+// Every living pack member attacks once each round — packs are always
+// ordinary (non-guardian, non-boss) encounters, so this is deliberately
+// simpler than enemyTurn() (no telegraph mechanic) and left fully separate
+// from it rather than merged, so the single-enemy path stays untouched.
+function packEnemiesTurn(game) {
+  const battle = game.battle;
+  const player = game.state.player;
+  const targets = [battle.enemy, ...battle.packMates].filter(e => e.curHp > 0);
+  const gear = buildGear(player);
+  const evasion = gear.lens && gear.lens.evasionBonus ? gear.lens.evasionBonus : 0;
+  const defenseBonus = gear.mirror && gear.mirror.defenseBonus ? gear.mirror.defenseBonus : 0;
+  const buff = battle.playerBuff;
+  let totalDmg = 0;
+  targets.forEach(enemy => {
+    if (evasion && Math.random() < evasion) {
+      logMsg(game, `${enemy.name}'s attack misses completely — your diverging lens scattered its aim.`);
+      return;
+    }
+    let dmg = Math.max(1, enemy.atk + Math.floor(Math.random() * 5) - 2);
+    if (defenseBonus) dmg = Math.max(1, dmg - defenseBonus);
+    let note = '';
+    if (buff) {
+      if (buff.fullNegateChance && Math.random() < buff.fullNegateChance) {
+        dmg = 0; note = 'Destructive interference cancels the attack completely!';
+      } else if (buff.block && Math.random() < buff.block) {
+        dmg = Math.round(dmg * 0.15); note = 'Mostly blocked!';
+      } else if (buff.glareShield) {
+        dmg = Math.round(dmg * (1 - buff.glareShield)); note = 'The polarizing filter cuts much of the glare.';
+      } else if (buff.absorbShield) {
+        const absorbed = Math.round(dmg * buff.absorbShield);
+        dmg = Math.max(0, dmg - absorbed);
+        battle.storedEnergy = (battle.storedEnergy || 0) + Math.round(absorbed * 0.6);
+        note = `Absorbed ${absorbed} damage, storing some for your next turn.`;
+      }
+    }
+    dmg = Math.max(0, dmg);
+    player.hp = Math.max(0, player.hp - dmg);
+    totalDmg += dmg;
+    logMsg(game, `${enemy.name} attacks for ${dmg} damage. ${note}`);
+  });
+  battle.playerBuff = null;
+  if (player.hp > 0 && player.hp / player.maxHp < 0.25 && claimHint(game.state, 'criticalHp')) {
+    logMsg(game, '💡 Tip: Craft a Photon Salve at the Workbench to heal HP — usable anytime, even mid-battle.');
+  }
+  return { dmg: totalDmg };
+}
+
+function resolveEnemyTurn(game) {
+  return game.battle.packMates.length > 0 ? packEnemiesTurn(game) : enemyTurn(game);
+}
+
+export function allEnemiesDefeated(battle) {
+  return battle.enemy.curHp <= 0 && battle.packMates.every(m => m.curHp <= 0);
+}
+
 // A guardian that drops to half HP or below shudders and hits harder for the
 // rest of the fight — one-time, guardian-only (the boss already has its own
 // ability-phase mechanic and doesn't need a second one layered on top).
@@ -307,6 +427,12 @@ export function isTelegraphEligible(battle) {
   return !!(battle.opts.guardianMap || battle.enemy.isBoss);
 }
 
+// Charge regenerates by 1 every completed round (same points as
+// decrementCooldowns), capped at the player's current max.
+export function regenCharge(player) {
+  if (player.charge < player.maxCharge) player.charge += 1;
+}
+
 export function chooseAbility(game, abilityId) {
   const battle = game.battle;
   if (!battle || battle.over) return;
@@ -316,13 +442,21 @@ export function chooseAbility(game, abilityId) {
     renderBattle(game);
     return;
   }
-  const gear = buildGear(game.state.player);
-  const ctx = { player: game.state.player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
+  const player = game.state.player;
+  const chargeCost = ability.chargeCost || 0;
+  if (chargeCost > player.charge) {
+    logMsg(game, `Not enough Charge for ${ability.name} — need ${chargeCost}, have ${player.charge}.`);
+    renderBattle(game);
+    return;
+  }
+  const gear = buildGear(player);
+  const ctx = { player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
 
   const actionResult = applyPlayerAction(game, ability, ctx);
   if (ability.cooldown) battle.cooldowns[abilityId] = ability.cooldown;
+  if (chargeCost) player.charge -= chargeCost;
   if (ability.type === 'attack') {
     if (actionResult.landed) {
       if (actionResult.isCrit) audio.playCrit();
@@ -331,7 +465,7 @@ export function chooseAbility(game, abilityId) {
     showHitFx(game, game.dom.battleEnemyCanvas, actionResult.dmg, actionResult.isCrit);
   }
 
-  if (battle.enemy.curHp <= 0) {
+  if (allEnemiesDefeated(battle)) {
     resolveVictory(game);
     renderBattle(game);
     return;
@@ -351,7 +485,8 @@ export function chooseAbility(game, abilityId) {
   }
 
   decrementCooldowns(battle);
-  const enemyResult = enemyTurn(game);
+  regenCharge(player);
+  const enemyResult = resolveEnemyTurn(game);
   battle.damageTaken += enemyResult.dmg;
   showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
 
@@ -380,7 +515,8 @@ export function flee(game) {
   } else {
     logMsg(game, 'Couldn’t escape!');
     decrementCooldowns(battle);
-    const enemyResult = enemyTurn(game);
+    regenCharge(game.state.player);
+    const enemyResult = resolveEnemyTurn(game);
     battle.damageTaken += enemyResult.dmg;
     showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
     if (game.state.player.hp <= 0) {
@@ -410,7 +546,8 @@ export function useItemInBattle(game, itemId) {
   logMsg(game, `You use the ${item.name}, recovering ${healed} HP.`);
 
   decrementCooldowns(battle);
-  const enemyResult = enemyTurn(game);
+  regenCharge(game.state.player);
+  const enemyResult = resolveEnemyTurn(game);
   battle.damageTaken += enemyResult.dmg;
   showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
 
@@ -427,16 +564,20 @@ function resolveVictory(game) {
   const battle = game.battle;
   const enemy = battle.enemy;
   const state = game.state;
+  const allDefeated = [enemy, ...battle.packMates];
   battle.over = true;
-  logMsg(game, `${enemy.name} is defeated!`);
-  state.flags.enemiesDefeated[enemy.id] = true;
+  logMsg(game, battle.packMates.length ? 'The pack is defeated!' : `${enemy.name} is defeated!`);
+  allDefeated.forEach(e => { state.flags.enemiesDefeated[e.id] = true; });
   audio.stopMusic();
   audio.playVictory();
-  const xpAward = Math.round(enemy.xp * findDifficulty(state.settings.difficulty).xpMult);
+  const totalXp = allDefeated.reduce((sum, e) => sum + e.xp, 0);
+  const xpAward = Math.round(totalXp * findDifficulty(state.settings.difficulty).xpMult);
   grantXpWithSound(state, xpAward, m => logMsg(game, m));
-  (enemy.mats || []).forEach(matId => {
-    state.player.materials[matId] = (state.player.materials[matId] || 0) + 1;
-    logMsg(game, `Gained 1 ${MATERIALS[matId].name}.`);
+  allDefeated.forEach(e => {
+    (e.mats || []).forEach(matId => {
+      state.player.materials[matId] = (state.player.materials[matId] || 0) + 1;
+      logMsg(game, `Gained 1 ${MATERIALS[matId].name}.`);
+    });
   });
   if (battle.opts.guardianMap) {
     state.flags.guardianDefeated[battle.opts.guardianMap] = true;
@@ -508,6 +649,17 @@ export function renderBattle(game) {
   d.battlePlayerLevel.textContent = `Lv.${player.level}`;
   d.battlePlayerHpBar.classList.toggle('critical', player.hp / player.maxHp < 0.25);
 
+  if (d.battleChargeBar) {
+    d.battleChargeBar.style.width = Math.max(0, Math.round((player.charge / player.maxCharge) * 100)) + '%';
+    d.battleChargeText.textContent = `${player.charge} / ${player.maxCharge}`;
+  }
+
+  if (d.battlePackMates) {
+    d.battlePackMates.innerHTML = battle.packMates.map(m => `
+      <div class="pack-mate${m.curHp <= 0 ? ' pack-mate-dead' : ''}">${m.name}: ${Math.max(0, m.curHp)} / ${m.hp} HP</div>
+    `).join('');
+  }
+
   d.battleLog.innerHTML = battle.log.map(l => `<div>${l}</div>`).join('');
   d.battleLog.scrollTop = d.battleLog.scrollHeight;
 
@@ -523,10 +675,13 @@ export function renderBattle(game) {
 
   ABILITIES.forEach(a => {
     const cd = battle.cooldowns[a.id] || 0;
+    const cost = a.chargeCost || 0;
+    const shortOnCharge = cost > player.charge;
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
-    btn.innerHTML = `<strong>${a.name}${cd > 0 ? ` (${cd})` : ''}</strong><span class="ability-desc">${a.desc}</span>`;
-    btn.disabled = cd > 0;
+    const costTag = cost ? ` <span class="charge-tag">${cost}⚡</span>` : '';
+    btn.innerHTML = `<strong>${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}</strong><span class="ability-desc">${a.desc}</span>`;
+    btn.disabled = cd > 0 || shortOnCharge;
     btn.onclick = () => chooseAbility(game, a.id);
     d.battleActions.appendChild(btn);
   });
