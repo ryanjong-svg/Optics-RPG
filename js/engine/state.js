@@ -22,7 +22,8 @@ export function newGameState() {
       takenItems: {},
       visitedMaps: { village: true },
       metNpc: {},
-      quizAsked: {}
+      quizAsked: {},
+      quests: {}
     },
     codexUnlocked: {}
   };

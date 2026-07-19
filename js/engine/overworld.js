@@ -5,7 +5,7 @@ import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
-import { showMessages, startQuiz } from './dialogueUI.js';
+import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 
@@ -30,6 +30,8 @@ const ZONE_ENCOUNTERS = {
   mirrors: ['mirror_golem', 'fractured_pane'],
   prism: ['prism_sprite', 'spectral_moth'],
   fiber: ['signal_wisp', 'drift_echo'],
+  grating: ['slit_wisp', 'grating_wraith'],
+  hologram: ['standing_wave', 'fringe_phantom'],
   lab: []
 };
 
@@ -40,6 +42,8 @@ const ZONE_WALL_COLORS = {
   mirrors: { top: '#7c8790', left: '#5c6570', right: '#3f4750' },
   prism: { top: '#7a5296', left: '#5a3a6e', right: '#432a54' },
   fiber: { top: '#3f7d7d', left: '#2f5c5c', right: '#234545' },
+  grating: { top: '#8a7a3a', left: '#6b5c2a', right: '#4a3f1c' },
+  hologram: { top: '#6b3a7a', left: '#4a2a5c', right: '#2f1a3f' },
   lab: { top: '#3c4f7d', left: '#2a3a5c', right: '#1f2c45' }
 };
 
@@ -301,7 +305,7 @@ export function handleMove(game, dx, dy) {
   const ny = state.pos.y + dy;
 
   const npc = npcAt(map, nx, ny);
-  if (npc) { startQuiz(game, npc.id); return; }
+  if (npc) { startNpcInteraction(game, npc.id); return; }
 
   if (map.workbench && map.workbench.x === nx && map.workbench.y === ny) {
     openCraft(game);

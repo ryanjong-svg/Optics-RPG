@@ -20,6 +20,7 @@ export function loadGame() {
       if (!state.flags.visitedMaps) state.flags.visitedMaps = { [state.currentMap]: true };
       if (!state.flags.metNpc) state.flags.metNpc = {};
       if (!state.flags.quizAsked) state.flags.quizAsked = {};
+      if (!state.flags.quests) state.flags.quests = {};
     }
     return state;
   } catch (e) {

@@ -54,13 +54,17 @@ export const ABILITIES = [
     desc: 'Block glare-based attacks at Brewster’s angle.'
   },
   {
-    id: 'diffraction_wave', name: 'Diffraction Wave', concept: 'diffraction', slot: null,
+    id: 'diffraction_wave', name: 'Diffraction Wave', concept: 'diffraction', slot: 'prism',
     type: 'attack', basePower: 7,
     desc: 'Bend the beam around obstacles — ignores half the enemy’s guard.',
     effect(ctx) {
       let dmg = Math.round(this.basePower + ctx.player.focus * 0.3);
       dmg = applyMatchup(ctx, this.id, dmg);
-      return { dmg, ignoreDefFrac: 0.5, note: 'Waves spread around the edges of any obstacle.' };
+      const bonus = ctx.gear.prism && ctx.gear.prism.diffractionBonus ? ctx.gear.prism.diffractionBonus : 0;
+      return {
+        dmg, ignoreDefFrac: 0.5 + bonus,
+        note: bonus ? `A ruled grating sharpens the bend — ignores even more of the guard.` : 'Waves spread around the edges of any obstacle.'
+      };
     }
   },
   {
@@ -77,11 +81,15 @@ export const ABILITIES = [
     }
   },
   {
-    id: 'interference_cancel', name: 'Interference Cancel', concept: 'interference', slot: null,
+    id: 'interference_cancel', name: 'Interference Cancel', concept: 'interference', slot: 'filter',
     type: 'defense', basePower: 0,
     desc: 'Time an out-of-phase wave to destructively cancel the next attack.',
     effect(ctx) {
-      return { block: 0.55, fullNegateChance: 0.25, note: 'Trough meets crest — the wave cancels itself out.' };
+      const bonus = ctx.gear.filter && ctx.gear.filter.hologramBonus ? ctx.gear.filter.hologramBonus : 0;
+      return {
+        block: 0.55, fullNegateChance: 0.25 + bonus,
+        note: bonus ? 'A recorded reference pattern predicts the incoming wave — near-perfect cancellation.' : 'Trough meets crest — the wave cancels itself out.'
+      };
     }
   },
   {

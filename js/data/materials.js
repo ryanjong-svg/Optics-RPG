@@ -51,6 +51,16 @@ export const MATERIALS = {
     id: 'sapphire', name: 'Sapphire', glyph: '\u{1F535}', n: 1.76, abbe: 72, hardness: 9,
     transparency: 0.85, density: 3.98,
     fact: 'Sapphire is nearly as hard as diamond, so it’s used for scratch-proof watch faces and camera lens covers.'
+  },
+  opal: {
+    id: 'opal', name: 'Opal', glyph: '\u{1F5FF}', n: 1.45, abbe: 50, hardness: 6,
+    transparency: 0.6, density: 2.1,
+    fact: 'Opal’s "play of color" comes from a periodic lattice of silica nanospheres acting as a natural diffraction grating.'
+  },
+  silver_halide: {
+    id: 'silver_halide', name: 'Silver Halide Film', glyph: '\u{1F4F7}', n: 2.0, abbe: 0, hardness: 2,
+    transparency: 0.2, density: 6.47,
+    fact: 'Photographic and holographic emulsions use silver halide crystals to physically record interference fringe patterns.'
   }
 };
 

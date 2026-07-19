@@ -51,7 +51,9 @@ export const MAPS = {
       { x: 3, y: 2, to: 'mirrors', label: 'Hall of Mirrors' },
       { x: 12, y: 2, to: 'prism', label: 'Prism Peak' },
       { x: 3, y: 8, to: 'fiber', label: 'Fiber Optic Tunnels' },
-      { x: 12, y: 8, to: 'lab', label: 'Semiconductor Labs' }
+      { x: 12, y: 8, to: 'lab', label: 'Semiconductor Labs' },
+      { x: 8, y: 2, to: 'grating', label: 'The Grating Gardens' },
+      { x: 8, y: 8, to: 'hologram', label: 'The Hologram Archive' }
     ]
   },
   mirrors: {
@@ -87,6 +89,28 @@ export const MAPS = {
       { x: 2, y: 9, material: 'water' }
     ],
     guardian: { x: 13, y: 9, enemyId: 'attenuation_slug' }
+  },
+  grating: {
+    id: 'grating', name: 'The Grating Gardens', zone: 'grating',
+    rows: borderedGrassBlock(),
+    spawn: { x: 2, y: 1 },
+    exits: [{ x: 2, y: 1, to: 'village', label: 'Lumen Village' }],
+    items: [
+      { x: 13, y: 1, material: 'opal' },
+      { x: 2, y: 9, material: 'quartz' }
+    ],
+    guardian: { x: 13, y: 9, enemyId: 'aperture_sentinel' }
+  },
+  hologram: {
+    id: 'hologram', name: 'The Hologram Archive', zone: 'hologram',
+    rows: borderedGrassBlock(),
+    spawn: { x: 2, y: 1 },
+    exits: [{ x: 2, y: 1, to: 'village', label: 'Lumen Village' }],
+    items: [
+      { x: 13, y: 1, material: 'silver_halide' },
+      { x: 2, y: 9, material: 'silver' }
+    ],
+    guardian: { x: 13, y: 9, enemyId: 'archive_wraith' }
   },
   lab: {
     id: 'lab', name: 'Semiconductor Labs', zone: 'lab',

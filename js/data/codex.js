@@ -23,7 +23,7 @@ export const CODEX = {
   },
   diffraction: {
     title: 'Diffraction',
-    body: `Waves bend around obstacles and spread out after passing through small openings — a direct consequence of light's wave nature. It's why a shadow's edge is never perfectly sharp, and why very small camera apertures actually blur images ("diffraction-limited" optics).`
+    body: `Waves bend around obstacles and spread out after passing through small openings — a direct consequence of light's wave nature. A periodic grating diffracts light at sharp angles given by d·sinθ = mλ (opal owes its shifting colors to exactly this, from a natural lattice of silica spheres). Diffraction also sets a hard floor on resolution — the Rayleigh criterion says no optical system, however well made, can distinguish two points closer together than roughly 1.22λ/D. That's why a shadow's edge is never perfectly sharp, and why very small camera apertures actually blur images ("diffraction-limited" optics).`
   },
   coherence: {
     title: 'Coherence & Lasers',
@@ -31,7 +31,7 @@ export const CODEX = {
   },
   interference: {
     title: 'Interference',
-    body: `When two light waves overlap in phase (crest meets crest) they add up — constructive interference. Out of phase (crest meets trough) they cancel — destructive interference. This is the principle behind anti-reflective coatings, holograms, and noise-cancelling optics research.`
+    body: `When two light waves overlap in phase (crest meets crest) they add up — constructive interference. Out of phase (crest meets trough) they cancel — destructive interference. Holography takes this further: a hologram physically records the interference pattern between a reference beam and light reflected off an object (often in silver halide film), then reconstructs the full 3D wavefront when lit again the same way. The same principle underlies anti-reflective coatings and noise-cancelling optics research.`
   },
   photoelectric: {
     title: 'The Photoelectric Effect & Band Gaps',

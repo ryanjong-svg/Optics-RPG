@@ -71,6 +71,30 @@ export const ENEMIES = {
     resists: ['dispersion_burst'], resistNote: 'it’s already a guided, single-color pulse — splitting it into more colors doesn’t confuse it.',
     zone: 'fiber', flavor: 'A message that never arrived, still bouncing down a corridor toward a receiver that stopped listening lifetimes ago.'
   },
+  slit_wisp: {
+    id: 'slit_wisp', name: 'Slit Wisp', hp: 28, atk: 6, def: 2, xp: 15, mats: ['opal'],
+    weakTo: ['diffraction_wave'], weakNote: 'a wave bends cleanly around its double-slit pattern and catches both paths of light at once.',
+    resists: ['reflect_strike'], resistNote: 'it can’t decide whether it’s one bright thing or two — a flat reflection has nothing solid to bounce off.',
+    zone: 'grating', flavor: 'A flicker born where two paths of the same light insisted on interfering with each other.'
+  },
+  grating_wraith: {
+    id: 'grating_wraith', name: 'Grating Wraith', hp: 36, atk: 8, def: 4, xp: 20, mats: ['opal', 'quartz'],
+    weakTo: ['laser_focus'], weakNote: 'a single coherent color isn’t split into confusing orders the way white light is.',
+    resists: ['dispersion_burst'], resistNote: 'it’s already a ruled, periodic spectrum — more splitting just adds to its own pattern.',
+    zone: 'grating', flavor: 'A shard of a shattered diffraction grating, still carrying its ruled lines like old scars.'
+  },
+  standing_wave: {
+    id: 'standing_wave', name: 'Standing Wave', hp: 26, atk: 6, def: 2, xp: 14, mats: ['silver_halide'],
+    weakTo: ['reflect_strike'], weakNote: 'a standing wave is literally built from a wave reflecting into itself — one more clean reflection collapses its nodes.',
+    resists: ['laser_focus'], resistNote: 'a steady coherent beam just reinforces the pattern instead of disrupting it.',
+    zone: 'hologram', flavor: 'A pattern of nodes and antinodes that never travels, only pulses in place.'
+  },
+  fringe_phantom: {
+    id: 'fringe_phantom', name: 'Fringe Phantom', hp: 34, atk: 8, def: 3, xp: 19, mats: ['silver_halide', 'quartz'],
+    weakTo: ['dispersion_burst'], weakNote: 'it holds together only as a single pure wavelength — splitting it into colors unravels its coherence.',
+    resists: ['reflect_strike'], resistNote: 'reflecting the wave just adds another wave for it to interfere with, feeding it.',
+    zone: 'hologram', flavor: 'A creature stitched from interference fringes, coherent only so long as its color stays pure.'
+  },
   photon_sentinel: {
     id: 'photon_sentinel', name: 'Photon Sentinel', hp: 46, atk: 10, def: 8, xp: 30, mats: ['silicon'],
     bandgapEV: 1.1,
@@ -78,6 +102,18 @@ export const ENEMIES = {
     resists: ['reflect_strike', 'refraction_bend', 'dispersion_burst', 'diffraction_wave', 'laser_focus'],
     resistNote: 'below the band gap, no matter how the light arrives, it just passes through or reflects off harmlessly.',
     zone: 'lab', flavor: 'A crystalline sentry standing guard over the Semiconductor Labs, immune to light it cannot absorb.'
+  },
+  aperture_sentinel: {
+    id: 'aperture_sentinel', name: 'Aperture Sentinel', hp: 42, atk: 9, def: 6, xp: 26, mats: ['opal'],
+    weakTo: ['laser_focus'], weakNote: 'only a coherent, tightly resolved beam is precise enough to be told apart from the space beside it — the Rayleigh criterion made literal.',
+    resists: ['diffraction_wave', 'dispersion_burst'], resistNote: 'spreading light out — by diffraction or dispersion — only blurs it further past resolving.',
+    zone: 'grating', flavor: 'A patient, faceted watcher that blurs anything struck without precision back into an indistinct smear.'
+  },
+  archive_wraith: {
+    id: 'archive_wraith', name: 'Archive Wraith', hp: 44, atk: 10, def: 6, xp: 28, mats: ['silver_halide', 'silver'],
+    weakTo: ['refraction_bend'], weakNote: 'bending the reconstructing beam breaks the exact angle match a hologram needs to replay correctly.',
+    resists: ['laser_focus', 'reflect_strike'], resistNote: 'a coherent beam and a clean reflection are exactly what a hologram is built from — both just feed the illusion.',
+    zone: 'hologram', flavor: 'A hologram of an old guardian, reconstructed so faithfully from its recorded fringes that it no longer accepts it is a copy.'
   },
   null_medium: {
     id: 'null_medium', name: 'The Null Medium', hp: 70, atk: 11, def: 5, xp: 80, mats: [],

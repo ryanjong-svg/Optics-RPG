@@ -51,6 +51,16 @@ export const LORE = {
     title: 'On the Null Medium',
     unlock: { type: 'map', map: 'lab' },
     body: `Every wakened thing in this world is a fragment of the first Ray that chose a fate at a boundary. One fragment refused every fate offered. It has no reflectivity, no index, no gap of its own — and reaches into travelers to borrow ours, one insult at a time, before discarding each in turn. Scholars of every rival order agree on exactly one thing: until it is resolved, the Bending itself is not finished, and neither, perhaps, is the world.`
+  },
+  grating_gardens: {
+    title: 'On the Grating Gardens',
+    unlock: { type: 'map', map: 'grating' },
+    body: `A scholar once ruled lines into glass fine enough, she believed, to resolve any two things in the world from one another. She was correct about the lines. She was wrong about the world. What remains of her garden no longer distinguishes visitors by name, deed, or intention — only by whether it can tell them apart from the space beside them at all.`
+  },
+  hologram_archive: {
+    title: 'On the Hologram Archive',
+    unlock: { type: 'map', map: 'hologram' },
+    body: `A splinter of the Silvered Circle set out to record light itself, rather than what light merely showed them, and built a vault to hold every fringe pattern the Reach cast. The recordings outlasted their recorders. Now the archive answers no one who asks whether what it shows them ever actually happened — only that it is willing, endlessly, to show it again.`
   }
 };
 

@@ -95,6 +95,24 @@ export const RECIPES = [
       return { reflectivity: 0.3, defenseBonus: 8 };
     },
     fact: 'Sapphire (Mohs 9) barely scratches — used as a tough, clear shield in real optical instruments.'
+  },
+  {
+    id: 'diffraction_grating', name: 'Diffraction Grating', slot: 'prism', glyph: '\u{1F5FF}',
+    materials: ['opal'], count: 2,
+    build() {
+      // Neutral Abbe so equipping this doesn't quietly gut Dispersion Burst —
+      // this item's real bonus is a sharper Diffraction Wave.
+      return { abbe: MATERIALS.opal.abbe, diffractionBonus: 0.15 };
+    },
+    fact: 'd·sinθ = mλ — a periodic grating (like the silica lattice inside an opal) diffracts light at sharp, predictable angles.'
+  },
+  {
+    id: 'holographic_plate', name: 'Holographic Plate', slot: 'filter', glyph: '\u{1F4F7}',
+    materials: ['silver_halide', 'quartz'], count: 2,
+    build() {
+      return { hologramBonus: 0.15 };
+    },
+    fact: 'A hologram records the interference pattern between a reference beam and light reflected off an object, then reconstructs it later.'
   }
 ];
 

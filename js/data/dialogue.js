@@ -17,7 +17,9 @@ export const GUARDIAN_INTRO = {
   reflection_wraith: 'An endless hallway of reflections coalesces into a shrieking wraith!',
   chroma_beast: 'Blurred rainbow fringes converge into a lumbering beast!',
   attenuation_slug: 'A slow, light-draining slug blocks the tunnel ahead!',
-  photon_sentinel: 'A crystalline sentinel powers on, humming at exactly 1.1 eV.'
+  photon_sentinel: 'A crystalline sentinel powers on, humming at exactly 1.1 eV.',
+  aperture_sentinel: 'Two points of light drift toward each other in the dark — and the Sentinel decides, once and for all, whether you can still tell them apart.',
+  archive_wraith: 'A shape steps out of the recorded light, sure of its own footsteps, certain it was never anything but real.'
 };
 
 export const BOSS_INTRO =

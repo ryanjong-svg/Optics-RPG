@@ -1,5 +1,6 @@
 import { QUIZZES } from '../data/quizzes.js';
 import { NPC_INTRO } from '../data/dialogue.js';
+import { findQuestForNpc, isObjectiveMet } from '../data/quests.js';
 import { grantXp } from './state.js';
 import { saveGame } from './save.js';
 
@@ -27,6 +28,56 @@ function pickQuizQuestion(game, npcId, questions) {
   const idx = available[Math.floor(Math.random() * available.length)];
   asked.push(idx);
   return questions[idx];
+}
+
+// Layers a professor's side quest (offer / reminder / turn-in) on top of the
+// normal quiz interaction, without touching the quiz logic itself. Every NPC
+// bump routes through here now instead of calling startQuiz directly.
+export function startNpcInteraction(game, npcId) {
+  const state = game.state;
+  const found = findQuestForNpc(npcId);
+  if (!found) { startQuiz(game, npcId); return; }
+
+  const { id: questId, quest } = found;
+  const status = state.flags.quests[questId];
+
+  if (!status) {
+    showMessages(game, [quest.offer], () => {
+      state.flags.quests[questId] = 'active';
+      saveGame(state);
+      startQuiz(game, npcId);
+    });
+    return;
+  }
+
+  if (status === 'active') {
+    if (isObjectiveMet(state, quest)) {
+      showMessages(game, [quest.complete], () => {
+        completeQuest(game, questId, quest);
+        startQuiz(game, npcId);
+      });
+      return;
+    }
+    showMessages(game, [quest.reminder], () => startQuiz(game, npcId));
+    return;
+  }
+
+  startQuiz(game, npcId);
+}
+
+function completeQuest(game, questId, quest) {
+  const state = game.state;
+  state.flags.quests[questId] = 'completed';
+  if (quest.objective.type === 'collect') {
+    state.player.materials[quest.objective.material] -= quest.objective.count;
+  }
+  if (quest.reward.material) {
+    const { id, count } = quest.reward.material;
+    state.player.materials[id] = (state.player.materials[id] || 0) + count;
+  }
+  if (quest.reward.xp) grantXp(state, quest.reward.xp, () => {});
+  game.renderHud();
+  saveGame(state);
 }
 
 export function startQuiz(game, npcId) {
