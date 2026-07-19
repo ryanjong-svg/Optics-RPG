@@ -118,6 +118,11 @@ export function startBattle(game, enemyId, opts = {}) {
   applyDifficultyScaling(enemy, game.state.settings.difficulty);
   applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
   if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
+  // Snapshot atk right after run-level scaling (NG+/difficulty) but before any
+  // in-fight escalation (phase2/enrage) — telegraphed hits scale off this
+  // baseline instead of an already-escalated atk, so the two mechanics don't
+  // compound into an unfair one-shot when both happen to be active at once.
+  enemy.baseAtk = enemy.atk;
   if (enemy.isBoss) {
     enemy.phaseIdx = 0;
     enemy.phaseTargetHp = Math.max(1, enemy.hp - Math.ceil((enemy.hp / enemy.phases.length) * (enemy.phaseIdx + 1)));
@@ -140,6 +145,12 @@ export function startBattle(game, enemyId, opts = {}) {
   if (enemy.flavor) logMsg(game, enemy.flavor);
   if (packMates.length) {
     logMsg(game, `${packMates.map(m => m.name).join(' and ')} join${packMates.length === 1 ? 's' : ''} the fight!`);
+    if (claimHint(game.state, 'firstPack')) {
+      logMsg(game, '💡 Tip: Facing multiple enemies — every attack ability hits all of them at once.');
+    }
+  }
+  if (opts.surpriseBonus && claimHint(game.state, 'firstWanderer')) {
+    logMsg(game, '💡 Tip: Approaching a visible enemy grants a surprise attack bonus on your first hit.');
   }
   if (game.state.flags.enemiesDefeated[enemyId]) {
     const hint = bestiaryHintText(enemy);
@@ -297,7 +308,7 @@ function enemyTurn(game) {
 
   const telegraphed = battle.enemyTelegraphed;
   battle.enemyTelegraphed = false;
-  let dmg = Math.max(1, enemy.atk + Math.floor(Math.random() * 5) - 2);
+  let dmg = Math.max(1, telegraphDamageBase(enemy, telegraphed) + Math.floor(Math.random() * 5) - 2);
   if (telegraphed) dmg = Math.round(dmg * 1.8);
   const defenseBonus = gear.mirror && gear.mirror.defenseBonus ? gear.mirror.defenseBonus : 0;
   if (defenseBonus) dmg = Math.max(1, dmg - defenseBonus);
@@ -427,6 +438,14 @@ export function isTelegraphEligible(battle) {
   return !!(battle.opts.guardianMap || battle.enemy.isBoss);
 }
 
+// A telegraphed hit scales off the enemy's atk as it stood right after
+// run-level scaling (NG+/difficulty), not its current (possibly
+// phase2/enrage-boosted) atk — so a telegraph landing after the enemy has
+// already escalated doesn't multiply on top of that escalation too.
+export function telegraphDamageBase(enemy, telegraphed) {
+  return telegraphed && enemy.baseAtk != null ? enemy.baseAtk : enemy.atk;
+}
+
 // Charge regenerates by 1 every completed round (same points as
 // decrementCooldowns), capped at the player's current max.
 export function regenCharge(player) {
@@ -439,6 +458,9 @@ export function chooseAbility(game, abilityId) {
   const ability = findAbility(abilityId);
   if ((battle.cooldowns[abilityId] || 0) > 0) {
     logMsg(game, `${ability.name} is still recovering — ${battle.cooldowns[abilityId]} more turn(s).`);
+    if (claimHint(game.state, 'abilityCooldown')) {
+      logMsg(game, '💡 Tip: Abilities on cooldown recover automatically after a couple of turns — try a different one meanwhile.');
+    }
     renderBattle(game);
     return;
   }
@@ -446,6 +468,9 @@ export function chooseAbility(game, abilityId) {
   const chargeCost = ability.chargeCost || 0;
   if (chargeCost > player.charge) {
     logMsg(game, `Not enough Charge for ${ability.name} — need ${chargeCost}, have ${player.charge}.`);
+    if (claimHint(game.state, 'chargeEmpty')) {
+      logMsg(game, '💡 Tip: Charge regenerates slowly during battle, or fully restores anytime at the Workbench via Meditate.');
+    }
     renderBattle(game);
     return;
   }

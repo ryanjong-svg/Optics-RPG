@@ -117,6 +117,22 @@ export function saveLoadout(game, slot) {
   renderCraft(game);
 }
 
+// Charge only otherwise recovers by 1 per completed battle round, and
+// persists between fights like HP does - Meditate is the one place (only
+// here, only at the Workbench) to fully top it off between adventures.
+export function applyMeditate(player) {
+  if (player.charge >= player.maxCharge) return false;
+  player.charge = player.maxCharge;
+  return true;
+}
+
+export function meditate(game) {
+  if (!applyMeditate(game.state.player)) return;
+  audio.playHeal();
+  saveGame(game.state);
+  renderCraft(game);
+}
+
 export function loadLoadout(game, slot) {
   if (!applyLoadLoadout(game.state, slot)) return;
   saveGame(game.state);
@@ -137,6 +153,17 @@ function useConsumableAndRender(game, itemId) {
 export function renderCraft(game) {
   const player = game.state.player;
   const d = game.dom;
+
+  if (d.craftMeditate) {
+    const full = player.charge >= player.maxCharge;
+    d.craftMeditate.innerHTML = `<div class="recipe-row"><div class="recipe-req">Charge: ${player.charge} / ${player.maxCharge}</div></div>`;
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = full ? 'Charge Full' : 'Meditate';
+    btn.disabled = full;
+    btn.onclick = () => meditate(game);
+    d.craftMeditate.querySelector('.recipe-row').appendChild(btn);
+  }
 
   d.craftMaterials.innerHTML = Object.values(MATERIALS).map(m => {
     const count = player.materials[m.id] || 0;

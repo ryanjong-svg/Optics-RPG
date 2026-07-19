@@ -58,6 +58,7 @@ const dom = {
   craftMaterials: q('craft-materials'),
   craftEquipped: q('craft-equipped'),
   craftLoadouts: q('craft-loadouts'),
+  craftMeditate: q('craft-meditate'),
   craftConsumables: q('craft-consumables'),
   craftRecipes: q('craft-recipes'),
   craftClose: q('craft-close'),
