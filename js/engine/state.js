@@ -13,7 +13,8 @@ export function newGameState() {
       maxHp: 40, hp: 40, focus: 6,
       materials,
       ownedGear: {},
-      equipped: { lens: null, mirror: null, prism: null, filter: null }
+      equipped: { lens: null, mirror: null, prism: null, filter: null },
+      consumables: {}
     },
     flags: {
       seenIntro: false,

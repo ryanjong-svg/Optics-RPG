@@ -16,6 +16,7 @@ export function loadGame() {
     if (!raw) return null;
     const state = JSON.parse(raw);
     // Backfill fields added after this save was written, so older saves don't crash.
+    if (state.player && !state.player.consumables) state.player.consumables = {};
     if (state.flags) {
       if (!state.flags.visitedMaps) state.flags.visitedMaps = { [state.currentMap]: true };
       if (!state.flags.metNpc) state.flags.metNpc = {};

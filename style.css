@@ -283,6 +283,8 @@ canvas#overworld-canvas {
 .recipe-effects { margin: 4px 0; padding-left: 18px; font-size: 0.95em; color: var(--green); }
 .recipe-effects li { margin-bottom: 2px; }
 .recipe-fact { font-size: 0.92em; color: var(--text-dim); margin: 4px 0 8px; }
+.recipe-btn-row { display: flex; gap: 8px; }
+.recipe-btn-row .action-btn { flex: 1; }
 
 .codex-progress { color: var(--orange); margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 0.7em; }
 .codex-list { display: flex; flex-direction: column; gap: 10px; }

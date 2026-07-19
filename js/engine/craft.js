@@ -1,7 +1,9 @@
 import { RECIPES, findRecipe } from '../data/equipment.js';
 import { MATERIALS } from '../data/materials.js';
+import { CONSUMABLES } from '../data/consumables.js';
 import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
+import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from './consumables.js';
 import * as audio from './audio.js';
 
 const CONCEPT_BY_SLOT_HINT = {
@@ -90,6 +92,17 @@ export function equipItem(game, slot, recipeId) {
   renderCraft(game);
 }
 
+function craftConsumableAndRender(game, itemId) {
+  craftConsumable(game, itemId);
+  renderCraft(game);
+}
+
+function useConsumableAndRender(game, itemId) {
+  useConsumableOutOfBattle(game, itemId);
+  game.renderHud();
+  renderCraft(game);
+}
+
 export function renderCraft(game) {
   const player = game.state.player;
   const d = game.dom;
@@ -98,6 +111,38 @@ export function renderCraft(game) {
     const count = player.materials[m.id] || 0;
     return `<div class="mat-chip" title="${m.fact}"><span>${m.glyph}</span> ${m.name} <b>${count}</b></div>`;
   }).join('');
+
+  d.craftConsumables.innerHTML = '';
+  CONSUMABLES.forEach(item => {
+    const owned = player.consumables[item.id] || 0;
+    const affordable = canCraftConsumable(player, item);
+    const reqText = item.materials.map(mId => `${MATERIALS[mId].name} x${item.count}`).join(', ');
+    const row = document.createElement('div');
+    row.className = 'recipe-row';
+    row.innerHTML = `
+      <div class="recipe-head"><span>${item.glyph}</span> <strong>${item.name}</strong> <span class="slot-tag">x${owned}</span></div>
+      <div class="recipe-req">Needs: ${reqText}</div>
+      <ul class="recipe-effects"><li>Restores ${item.heal} HP</li></ul>
+      <div class="recipe-fact">${item.fact}</div>
+    `;
+    const btnRow = document.createElement('div');
+    btnRow.className = 'recipe-btn-row';
+    const craftBtn = document.createElement('button');
+    craftBtn.className = 'action-btn';
+    craftBtn.textContent = affordable ? 'Craft' : 'Need materials';
+    craftBtn.disabled = !affordable;
+    craftBtn.onclick = () => craftConsumableAndRender(game, item.id);
+    const useBtn = document.createElement('button');
+    useBtn.className = 'action-btn';
+    const full = player.hp >= player.maxHp;
+    useBtn.textContent = full ? 'Full HP' : 'Use';
+    useBtn.disabled = owned <= 0 || full;
+    useBtn.onclick = () => useConsumableAndRender(game, item.id);
+    btnRow.appendChild(craftBtn);
+    btnRow.appendChild(useBtn);
+    row.appendChild(btnRow);
+    d.craftConsumables.appendChild(row);
+  });
 
   d.craftRecipes.innerHTML = '';
   RECIPES.forEach(recipe => {

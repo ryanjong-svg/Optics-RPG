@@ -17,6 +17,7 @@ import { LORE } from '../js/data/lore.js';
 import { CODEX } from '../js/data/codex.js';
 import { CHARACTER_SPRITES, PALETTES, SHAPES, itemSprite } from '../js/data/pixelArt.js';
 import { ZONE_ENCOUNTERS, ZONE_WALL_COLORS } from '../js/engine/overworld.js';
+import { CONSUMABLES } from '../js/data/consumables.js';
 
 const VALID_SLOTS = new Set(['lens', 'mirror', 'prism', 'filter']);
 const ATTACK_ABILITY_IDS = new Set(ABILITIES.filter(a => a.type === 'attack').map(a => a.id));
@@ -39,6 +40,14 @@ test('every recipe requires materials that exist', () => {
       assert.ok(MATERIALS[matId], `${recipe.id} requires unknown material "${matId}"`);
     }
     assert.ok(VALID_SLOTS.has(recipe.slot), `${recipe.id} has invalid slot "${recipe.slot}"`);
+  }
+});
+
+test('every consumable requires materials that exist', () => {
+  for (const item of CONSUMABLES) {
+    for (const matId of item.materials) {
+      assert.ok(MATERIALS[matId], `${item.id} requires unknown material "${matId}"`);
+    }
   }
 });
 

@@ -72,6 +72,10 @@ export const CODEX = {
   electro_optic: {
     title: 'The Electro-Optic Effect & Volume Holograms',
     body: `In certain crystals, like lithium niobate, an applied electric voltage directly changes the refractive index — the electro-optic effect. That lets engineers bend, switch, or modulate light at extreme speed with no moving parts, which is exactly what drives real fiber-optic communication modulators. The same crystals also make superb volume holograms, recording interference patterns through their whole thickness rather than just on a surface.`
+  },
+  photobiomodulation: {
+    title: 'Photobiomodulation & the Therapeutic Window',
+    body: `Blood and water absorb most visible and infrared light strongly — except for a narrow "therapeutic window" around 650-1350nm, where both absorb comparatively little and light can penetrate several centimeters into tissue. Low-power red or near-infrared light in that window can be absorbed by mitochondrial cytochrome c oxidase, mildly stimulating cellular energy production and repair — the real mechanism behind "cold laser therapy," used clinically for wound healing and pain relief.`
   }
 };
 

@@ -52,6 +52,7 @@ const dom = {
   craftPanel: q('craft-panel'),
   craftMaterials: q('craft-materials'),
   craftEquipped: q('craft-equipped'),
+  craftConsumables: q('craft-consumables'),
   craftRecipes: q('craft-recipes'),
   craftClose: q('craft-close'),
 

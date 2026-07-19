@@ -5,10 +5,12 @@ import { MAPS } from '../data/maps.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
 import { CHARACTER_SPRITES } from '../data/pixelArt.js';
 import { ACHIEVEMENTS } from '../data/achievements.js';
+import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { drawSprite } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex } from './state.js';
 import { saveGame } from './save.js';
+import { applyConsumable } from './consumables.js';
 import * as audio from './audio.js';
 
 function unlockAchievement(state, id, log) {
@@ -262,6 +264,38 @@ export function flee(game) {
   }
 }
 
+// Using an item still costs your turn — the enemy gets to act right after —
+// except when it would do nothing (already at full HP), which is free so
+// players can't be punished for misclicking.
+export function useItemInBattle(game, itemId) {
+  const battle = game.battle;
+  if (!battle || battle.over) return;
+  const item = findConsumable(itemId);
+  if (!item || (game.state.player.consumables[itemId] || 0) <= 0) return;
+
+  if (game.state.player.hp >= game.state.player.maxHp) {
+    logMsg(game, `You're already at full health — no need for the ${item.name}.`);
+    renderBattle(game);
+    return;
+  }
+
+  const healed = applyConsumable(game.state, itemId);
+  audio.playHeal();
+  logMsg(game, `You use the ${item.name}, recovering ${healed} HP.`);
+
+  const enemyResult = enemyTurn(game);
+  battle.damageTaken += enemyResult.dmg;
+  showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
+
+  if (game.state.player.hp <= 0) {
+    resolveDefeat(game);
+    renderBattle(game);
+    return;
+  }
+
+  renderBattle(game);
+}
+
 function resolveVictory(game) {
   const battle = game.battle;
   const enemy = battle.enemy;
@@ -360,6 +394,16 @@ export function renderBattle(game) {
     btn.className = 'action-btn ability-btn';
     btn.innerHTML = `<strong>${a.name}</strong><span class="ability-desc">${a.desc}</span>`;
     btn.onclick = () => chooseAbility(game, a.id);
+    d.battleActions.appendChild(btn);
+  });
+
+  CONSUMABLES.forEach(item => {
+    const owned = player.consumables[item.id] || 0;
+    if (owned <= 0) return;
+    const btn = document.createElement('button');
+    btn.className = 'action-btn ability-btn';
+    btn.innerHTML = `<strong>Use ${item.name} (x${owned})</strong><span class="ability-desc">Restores ${item.heal} HP.</span>`;
+    btn.onclick = () => useItemInBattle(game, item.id);
     d.battleActions.appendChild(btn);
   });
 

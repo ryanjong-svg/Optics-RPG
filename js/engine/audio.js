@@ -74,6 +74,7 @@ export function playCraftSuccess() { playSequence([[784, 0.07], [988, 0.07], [11
 export function playQuestComplete() { playSequence([[659, 0.09], [880, 0.09], [1047, 0.09], [1319, 0.2]], { type: 'triangle', gain: 0.15 }); }
 export function playCorrect() { playSequence([[659, 0.07], [988, 0.14]], { type: 'triangle', gain: 0.13 }); }
 export function playIncorrect() { playSequence([[220, 0.12], [175, 0.18]], { type: 'sawtooth', gain: 0.11 }); }
+export function playHeal() { playSequence([[440, 0.09], [554, 0.09], [659, 0.09], [880, 0.22]], { type: 'sine', gain: 0.13 }); }
 
 // ---------- Looping background music ----------
 const OVERWORLD_MELODY = [
