@@ -109,7 +109,18 @@ function enemyTurn(game) {
   const enemy = battle.enemy;
   const player = game.state.player;
   if (enemy.curHp <= 0) return;
+
+  const gear = buildGear(player);
+  const evasion = gear.lens && gear.lens.evasionBonus ? gear.lens.evasionBonus : 0;
+  if (evasion && Math.random() < evasion) {
+    logMsg(game, `${enemy.name}'s attack misses completely — your diverging lens scattered its aim.`);
+    battle.playerBuff = null;
+    return;
+  }
+
   let dmg = Math.max(1, enemy.atk + Math.floor(Math.random() * 5) - 2);
+  const defenseBonus = gear.mirror && gear.mirror.defenseBonus ? gear.mirror.defenseBonus : 0;
+  if (defenseBonus) dmg = Math.max(1, dmg - defenseBonus);
   const buff = battle.playerBuff;
   let note = '';
   if (buff) {

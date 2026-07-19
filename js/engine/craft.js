@@ -7,6 +7,50 @@ const CONCEPT_BY_SLOT_HINT = {
   lens: 'snell', mirror: 'reflection', prism: 'dispersion', filter: 'polarization'
 };
 
+// Turns a recipe's built stats into plain-English, real-number gameplay
+// effects — the physics `fact` text explains *why*, this explains *what it
+// actually does for your stats*.
+function describeStats(stats) {
+  const lines = [];
+  if (stats.focusPower !== undefined) {
+    lines.push(`Focus Power ${stats.focusPower} — adds ${Math.round(stats.focusPower * 0.6)} flat damage to Refraction Bend`);
+  }
+  if (stats.critBonus) {
+    lines.push(`+${Math.round(stats.critBonus * 100)}% crit chance on Laser Focus`);
+  }
+  if (stats.evasionBonus) {
+    lines.push(`+${Math.round(stats.evasionBonus * 100)}% chance to dodge an enemy attack entirely`);
+  }
+  if (stats.reflectivity !== undefined) {
+    lines.push(`${Math.round(stats.reflectivity * 100)}% reflectivity — boosts Reflect Strike damage`);
+  }
+  if (stats.defenseBonus) {
+    lines.push(`-${stats.defenseBonus} flat damage from every enemy attack`);
+  }
+  if (stats.glareReduction) {
+    lines.push(`-${Math.round(stats.glareReduction * 100)}% damage from glare attacks (Polarize Filter)`);
+  }
+  if (stats.tirBonus) {
+    lines.push(`+${Math.round(stats.tirBonus * 100)}% TIR Shield block chance`);
+  }
+  if (stats.bandgapPierce) {
+    lines.push(`Photoelectric Shock always clears the band gap`);
+  }
+  if (stats.diffractionBonus) {
+    lines.push(`+${Math.round(stats.diffractionBonus * 100)}% Diffraction Wave defense-ignore`);
+  }
+  if (stats.hologramBonus) {
+    lines.push(`+${Math.round(stats.hologramBonus * 100)}% Interference Cancel full-negate chance`);
+  }
+  if (stats.abbe !== undefined) {
+    const hits = Math.max(2, Math.min(7, Math.round(280 / stats.abbe)));
+    lines.push(stats.correctsChroma
+      ? `Corrects chromatic smear; Dispersion Burst splits into ${hits} hits`
+      : `Dispersion Burst splits into ${hits} hits (Abbe ${stats.abbe})`);
+  }
+  return lines;
+}
+
 export function openCraft(game) {
   game.state.mode = 'craft';
   game.showPanel('craft');
@@ -55,11 +99,13 @@ export function renderCraft(game) {
     const owned = !!player.ownedGear[recipe.id];
     const affordable = canAfford(player, recipe);
     const reqText = recipe.materials.map(mId => `${MATERIALS[mId].name} x${recipe.count}`).join(', ');
+    const effectLines = describeStats(recipe.build());
     const row = document.createElement('div');
     row.className = 'recipe-row';
     row.innerHTML = `
       <div class="recipe-head"><span>${recipe.glyph}</span> <strong>${recipe.name}</strong> <span class="slot-tag">${recipe.slot}</span></div>
       <div class="recipe-req">Needs: ${reqText}</div>
+      <ul class="recipe-effects">${effectLines.map(l => `<li>${l}</li>`).join('')}</ul>
       <div class="recipe-fact">${recipe.fact}</div>
     `;
     const btn = document.createElement('button');
@@ -95,6 +141,15 @@ export function renderCraft(game) {
     select.onchange = () => equipItem(game, slot, select.value);
     wrap.innerHTML = `<label>${slot.toUpperCase()}</label>`;
     wrap.appendChild(select);
+
+    const equippedRecipe = owned.find(r => r.id === player.equipped[slot]);
+    const effectEl = document.createElement('div');
+    effectEl.className = 'equip-effect';
+    effectEl.textContent = equippedRecipe
+      ? describeStats(equippedRecipe.build()).join(' • ')
+      : 'No bonus equipped';
+    wrap.appendChild(effectEl);
+
     d.craftEquipped.appendChild(wrap);
   });
 }
