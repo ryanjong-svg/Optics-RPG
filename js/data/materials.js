@@ -91,6 +91,11 @@ export const MATERIALS = {
     id: 'avalanche_silicon', name: 'Avalanche Silicon', glyph: '\u{1F4A5}', n: 3.6, abbe: 0, hardness: 7,
     transparency: 0.03, bandgapEV: 1.6, density: 2.4,
     fact: 'Under a strong enough reverse-bias field, one photo-generated carrier gains enough kinetic energy to knock loose another on impact — each new carrier repeats the process, multiplying a single absorbed photon into a cascade.'
+  },
+  geiger_mode_silicon: {
+    id: 'geiger_mode_silicon', name: 'Geiger-Mode Silicon', glyph: '\u{2604}\u{FE0F}', n: 3.7, abbe: 0, hardness: 7,
+    transparency: 0.02, bandgapEV: 1.9, density: 2.45,
+    fact: 'Biased well past its breakdown voltage, an avalanche photodiode in Geiger mode doesn’t just multiply a photon’s carriers — it fires a full, self-sustaining discharge from a single absorbed photon, then needs a moment to quench before it can fire again.'
   }
 };
 

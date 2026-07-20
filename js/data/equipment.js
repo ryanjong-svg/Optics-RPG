@@ -161,6 +161,14 @@ export const RECIPES = [
       return { bandgapPierce: true, bandgapEV: MATERIALS.avalanche_silicon.bandgapEV, bandgapPierceEV: 1.5 };
     },
     fact: 'Impact ionization multiplies a single absorbed photon into a cascade of carriers — real avalanche photodiodes use exactly this gain mechanism for single-photon-level sensitivity.'
+  },
+  {
+    id: 'spad', name: 'Single-Photon Avalanche Diode', slot: 'filter', glyph: '\u{2604}\u{FE0F}',
+    materials: ['geiger_mode_silicon'], count: 2, upgradesFrom: 'avalanche_photodetector',
+    build() {
+      return { bandgapPierce: true, bandgapEV: MATERIALS.geiger_mode_silicon.bandgapEV, bandgapPierceEV: 2.4 };
+    },
+    fact: 'Run in Geiger mode, a SPAD turns a single absorbed photon into a full digital pulse — the most sensitive practical photon detector, and the natural end of this line of gear.'
   }
 ];
 

@@ -87,6 +87,11 @@ export const ACHIEVEMENTS = {
     desc: 'Try both specializations.',
     check: state => !!(state.flags.specializationsTried &&
       state.flags.specializationsTried.photon_focus && state.flags.specializationsTried.wave_mechanics)
+  },
+  fifth_property: {
+    title: 'The Fifth Property',
+    desc: 'Defeat the Null Medium\'s bonus coherence phase, on New Game+ cycle 2 or later.',
+    check: state => !!(state.flags.achievements && state.flags.achievements.fifth_property)
   }
 };
 

@@ -17,6 +17,7 @@ import { showToast } from './toastUI.js';
 import { SPECIALIZATIONS } from '../data/specializations.js';
 import { openSnellPuzzle } from './snellPuzzleUI.js';
 import { openDiffractionPuzzle } from './diffractionPuzzleUI.js';
+import { openBrewsterPuzzle } from './brewsterPuzzleUI.js';
 import * as audio from './audio.js';
 
 // A personal "Bestiary": once you've beaten an enemy type before, its known
@@ -46,6 +47,15 @@ function grantXpWithSound(state, amount, log) {
 }
 
 const PORTRAIT_PX = 5;
+
+// NG+ cycle 2+ exclusive: the boss borrows one more property (coherence) for
+// a bonus fifth phase, on top of its usual four. Exported as its own pure
+// function so the cycle-gating logic is unit-testable without a full battle.
+const NG_PLUS_BONUS_PHASE_CYCLE = 2;
+const NG_PLUS_BONUS_PHASE_ABILITY = 'laser_focus';
+export function ngPlusBonusPhaseAbility(cycle) {
+  return (cycle || 0) >= NG_PLUS_BONUS_PHASE_CYCLE ? NG_PLUS_BONUS_PHASE_ABILITY : null;
+}
 
 // Re-triggerable CSS animation: strip the class, force a reflow, re-add it,
 // then clean up — so back-to-back hits each get their own shake/flash.
@@ -129,6 +139,13 @@ export function startBattle(game, enemyId, opts = {}) {
   // compound into an unfair one-shot when both happen to be active at once.
   enemy.baseAtk = enemy.atk;
   if (enemy.isBoss) {
+    // enemy.phases is still the shared ENEMIES data array reference at this
+    // point, so this clones rather than mutates it in place.
+    const bonusAbility = ngPlusBonusPhaseAbility(game.state.flags.ngPlusCycle);
+    if (bonusAbility && !enemy.phases.includes(bonusAbility)) {
+      enemy.phases = [...enemy.phases, bonusAbility];
+      enemy.ngPlusBonusPhase = true;
+    }
     enemy.phaseIdx = 0;
     enemy.phaseTargetHp = Math.max(1, enemy.hp - Math.ceil((enemy.hp / enemy.phases.length) * (enemy.phaseIdx + 1)));
   }
@@ -148,6 +165,9 @@ export function startBattle(game, enemyId, opts = {}) {
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  if (enemy.ngPlusBonusPhase) {
+    logMsg(game, 'Something is different this cycle — The Null Medium has learned to borrow one more property: coherence itself.');
+  }
   if (packMates.length) {
     logMsg(game, `${packMates.map(m => m.name).join(' and ')} join${packMates.length === 1 ? 's' : ''} the fight!`);
     if (claimHint(game.state, 'firstPack')) {
@@ -220,7 +240,9 @@ function applyPlayerAction(game, ability, ctx) {
     return applyPlayerActionPack(game, ability, ctx, storedBonus, surpriseMult);
   }
 
-  const result = ability.type === 'attack' ? applyOffensiveModifiers(game, ability, ability.effect(ctx)) : ability.effect(ctx);
+  const result = ability.type === 'attack'
+    ? applyOffensiveModifiers(game, ability, ability.effect(ctx))
+    : applyDefensiveModifiers(game, ability, ability.effect(ctx));
 
   if (ability.type === 'attack') {
     let net;
@@ -513,6 +535,17 @@ function applyOffensiveModifiers(game, ability, result) {
   return result;
 }
 
+// The defense-side counterpart to applyOffensiveModifiers — only the puzzle
+// bonus mult applies here (specialization/adaptive-resist are damage-dealing
+// concepts, not defensive ones), scaling glareShield instead of dmg.
+function applyDefensiveModifiers(game, ability, result) {
+  const battle = game.battle;
+  const mult = battle.puzzleBonusMult || 1;
+  if (mult === 1) return result;
+  if (result.glareShield != null) result.glareShield = Math.min(0.95, result.glareShield * mult);
+  return result;
+}
+
 export function chooseAbility(game, abilityId) {
   const battle = game.battle;
   if (!battle || battle.over) return;
@@ -621,6 +654,20 @@ function resolveDiffractionPuzzleShot(game, hit, angleDeg) {
   delete battle.puzzleBonusMult;
 }
 
+// Polarize Filter's button opens the Brewster's-angle puzzle — a defense
+// ability, so unlike the two attack puzzles above the bonus mult scales
+// glareShield (see applyDefensiveModifiers) instead of dmg.
+function resolveBrewsterPuzzleShot(game, hit, angleDeg) {
+  const battle = game.battle;
+  if (!battle || battle.over) return;
+  battle.puzzleBonusMult = hit ? 1.6 : 1;
+  logMsg(game, hit
+    ? `The reflection at ${angleDeg}° comes back fully polarized — the filter blocks it almost entirely!`
+    : `${angleDeg}° isn't Brewster's angle — some glare still gets through. Normal block.`);
+  chooseAbility(game, 'polarize_filter');
+  delete battle.puzzleBonusMult;
+}
+
 export function flee(game) {
   const battle = game.battle;
   if (!battle || battle.over) return;
@@ -720,6 +767,7 @@ function resolveVictory(game) {
   if (enemy.isBoss) {
     state.flags.bossDefeated = true;
     state.mode = 'victory';
+    if (enemy.ngPlusBonusPhase) unlockAchievement(state, 'fifth_property', m => logMsg(game, m));
   }
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
@@ -816,11 +864,13 @@ export function renderBattle(game) {
   // Abilities that open an aiming puzzle instead of resolving instantly.
   const PUZZLE_ABILITIES = {
     refraction_bend: (g, cb) => openSnellPuzzle(g, cb),
-    diffraction_wave: (g, cb) => openDiffractionPuzzle(g, cb)
+    diffraction_wave: (g, cb) => openDiffractionPuzzle(g, cb),
+    polarize_filter: (g, cb) => openBrewsterPuzzle(g, cb)
   };
   const PUZZLE_RESOLVERS = {
     refraction_bend: resolveSnellPuzzleShot,
-    diffraction_wave: resolveDiffractionPuzzleShot
+    diffraction_wave: resolveDiffractionPuzzleShot,
+    polarize_filter: resolveBrewsterPuzzleShot
   };
 
   ABILITIES.forEach(a => {
@@ -846,7 +896,7 @@ export function renderBattle(game) {
     btn.onclick = PUZZLE_ABILITIES[a.id]
       ? () => {
           if (claimHint(game.state, 'aimingPuzzle')) {
-            logMsg(game, '💡 Tip: This ability opens an aiming puzzle — landing the target zone deals bonus damage, but missing still lands a normal hit.');
+            logMsg(game, '💡 Tip: This ability opens an aiming puzzle — landing the target zone boosts its effect, but missing still gives the normal result.');
           }
           PUZZLE_ABILITIES[a.id](game, (hit, value) => PUZZLE_RESOLVERS[a.id](game, hit, value));
         }

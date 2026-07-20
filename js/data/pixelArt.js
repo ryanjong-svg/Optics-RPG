@@ -233,6 +233,7 @@ export const PALETTES = {
   gem_photonic_crystal: { K: OUTLINE, A: '#b088e0', D: '#e8d9ff' },
   gem_lithium_niobate: { K: OUTLINE, A: '#d94aa0', D: '#ffd9ef' },
   gem_avalanche_silicon: { K: OUTLINE, A: '#ffcc33', D: '#ffffff' },
+  gem_geiger_mode_silicon: { K: OUTLINE, A: '#ff3333', D: '#ffffff' },
 
   split_ray_wisp: { K: OUTLINE, A: '#bfe3ff', E: '#0a2a3a' },
   twin_flicker: { K: OUTLINE, A: '#8fc7e0', C: '#e8f7ff', E: '#0a2a3a' },

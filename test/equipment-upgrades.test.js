@@ -106,3 +106,28 @@ test('applyCraftRecipe: if the Silicon Photodetector was equipped, the Avalanche
   applyCraftRecipe(state.player, findRecipe('avalanche_photodetector'));
   assert.equal(state.player.equipped.filter, 'avalanche_photodetector');
 });
+
+test('canCraftRecipe: the second-tier SPAD is refused without the Avalanche Photodetector, even with enough materials', () => {
+  const state = withMaterials(newGameState(), { geiger_mode_silicon: 2 });
+  assert.equal(canCraftRecipe(state.player, findRecipe('spad')), false);
+});
+
+test('applyCraftRecipe: combining the SPAD consumes the Avalanche Photodetector (not the first-tier Photodetector) and grants the upgrade', () => {
+  const state = withMaterials(newGameState(), { geiger_mode_silicon: 2 });
+  state.player.ownedGear.photodetector = true;
+  state.player.ownedGear.avalanche_photodetector = true;
+  const ok = applyCraftRecipe(state.player, findRecipe('spad'));
+  assert.equal(ok, true);
+  assert.equal(state.player.ownedGear.avalanche_photodetector, false, 'the immediate predecessor should be consumed');
+  assert.equal(state.player.ownedGear.photodetector, true, 'the first-tier item two steps back should be untouched');
+  assert.equal(state.player.ownedGear.spad, true);
+  assert.equal(state.player.materials.geiger_mode_silicon, 0);
+});
+
+test('applyCraftRecipe: if the Avalanche Photodetector was equipped, the SPAD takes its place', () => {
+  const state = withMaterials(newGameState(), { geiger_mode_silicon: 2 });
+  state.player.ownedGear.avalanche_photodetector = true;
+  state.player.equipped.filter = 'avalanche_photodetector';
+  applyCraftRecipe(state.player, findRecipe('spad'));
+  assert.equal(state.player.equipped.filter, 'spad');
+});

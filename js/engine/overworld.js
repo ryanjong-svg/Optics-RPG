@@ -2,7 +2,7 @@ import { MAPS, mapWidth, mapHeight } from '../data/maps.js';
 import { MATERIALS } from '../data/materials.js';
 import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
-import { drawSprite, spriteSize, drawGroundShadow, idleBob } from './pixelSprites.js';
+import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
@@ -322,6 +322,8 @@ export function renderOverworld(game) {
   }
 
   labelQueue.forEach(fn => fn());
+
+  drawZoneAmbience(ctx2d, canvas.width, canvas.height, map.zone);
 
   game.dom.mapLabel.textContent = map.name;
   renderExitsHint(game, map);

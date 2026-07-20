@@ -136,6 +136,39 @@ export function drawZoneBackdrop(ctx, w, h, zone) {
   ctx.restore();
 }
 
+// Ambient overworld atmosphere — a handful of slow-drifting, zone-tinted
+// motes drawn over the whole board, using the same accent color (or the
+// rainbow spectrum, for the two themes with no single accent) as that zone's
+// battle backdrop, so the two visual layers read as one consistent identity.
+// Positions are deterministic per-particle (stable base spot) plus a
+// Date.now()-driven drift/pulse, cheap enough to redraw every animation
+// frame the way idleBob() already does for sprites.
+const AMBIENCE_PARTICLE_COUNT = 10;
+
+export function drawZoneAmbience(ctx, w, h, zone) {
+  const theme = BACKDROP_THEMES[zone] || BACKDROP_THEMES.village;
+  if (theme.pattern === 'none') return;
+  const t = Date.now() / 1000;
+  ctx.save();
+  for (let i = 0; i < AMBIENCE_PARTICLE_COUNT; i++) {
+    const seed = i * 91.7;
+    const baseX = (Math.sin(seed) * 0.5 + 0.5) * w;
+    const baseY = (Math.sin(seed * 1.7 + 3) * 0.5 + 0.5) * h;
+    const driftX = Math.sin(t * 0.3 + seed) * 14;
+    const driftY = Math.cos(t * 0.22 + seed * 1.3) * 10;
+    const x = (baseX + driftX + w) % w;
+    const y = (baseY + driftY + h) % h;
+    const pulse = (Math.sin(t * 0.8 + seed) + 1) / 2; // 0..1
+    const color = theme.accent || SPECTRUM_COLORS[i % SPECTRUM_COLORS.length];
+    ctx.globalAlpha = 0.12 + pulse * 0.18;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.2 + pulse * 1.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 export function spriteSize(shapeKey, px) {
   const rows = SHAPES[shapeKey];
   return { w: rows[0].length * 2 * px, h: rows.length * px };

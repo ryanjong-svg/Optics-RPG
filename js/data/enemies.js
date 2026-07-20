@@ -217,7 +217,7 @@ export const ENEMIES = {
     zone: 'lab_deep', flavor: 'A flicker of current that was never triggered by light at all — pure thermal noise, leaking through the junction in the dark.'
   },
   gain_specter: {
-    id: 'gain_specter', name: 'Gain Specter', hp: 34, atk: 8, def: 5, xp: 21, mats: ['avalanche_silicon', 'silicon'],
+    id: 'gain_specter', name: 'Gain Specter', hp: 34, atk: 8, def: 5, xp: 21, mats: ['avalanche_silicon', 'silicon', 'geiger_mode_silicon'],
     bandgapEV: 1.6,
     weakTo: ['photoelectric_shock'], weakNote: 'one photon clearing its 1.6 eV gap is all the trigger a reverse-biased junction needs to cascade.',
     resists: ['reflect_strike'], resistNote: 'a reflection carries no absorption event — nothing for the avalanche to start from.',

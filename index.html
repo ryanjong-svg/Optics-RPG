@@ -123,6 +123,18 @@
     <button id="diffraction-fire" class="action-btn primary puzzle-fire">Fire</button>
   </div>
 
+  <div id="brewster-puzzle-panel" class="panel bracketed hidden puzzle-overlay">
+    <div class="panel-header"><h2>Find the Polarizing Angle</h2><button id="brewster-cancel" class="action-btn ghost">Cancel</button></div>
+    <p class="ngplus-hint" style="margin-top:0;">Brewster's angle: tan&theta;&#8299; = n. Set the incident angle so the reflected glare comes back fully polarized, for a stronger block this turn.</p>
+    <canvas id="brewster-canvas" width="260" height="180"></canvas>
+    <p id="brewster-readout" class="ngplus-hint"></p>
+    <div class="volume-row">
+      <label for="brewster-angle">Incident angle: <span id="brewster-angle-value">55&deg;</span></label>
+    </div>
+    <input id="brewster-angle" type="range" min="40" max="80" step="1" value="55">
+    <button id="brewster-fire" class="action-btn primary puzzle-fire">Fire</button>
+  </div>
+
   <div id="codex-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Codex of Light</h2><button id="codex-close" class="action-btn ghost">Close</button></div>
     <div id="codex-progress" class="codex-progress"></div>

@@ -13,6 +13,7 @@ import { openQuestLog, closeQuestLog, hasReadyQuest } from './engine/questLogUI.
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { renderSnellPuzzle, fireSnellPuzzle, closeSnellPuzzle } from './engine/snellPuzzleUI.js';
 import { renderDiffractionPuzzle, fireDiffractionPuzzle, closeDiffractionPuzzle } from './engine/diffractionPuzzleUI.js';
+import { renderBrewsterPuzzle, fireBrewsterPuzzle, closeBrewsterPuzzle } from './engine/brewsterPuzzleUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
 import * as audio from './engine/audio.js';
@@ -83,6 +84,14 @@ const dom = {
   diffractionReadout: q('diffraction-readout'),
   diffractionFire: q('diffraction-fire'),
   diffractionCancel: q('diffraction-cancel'),
+
+  brewsterPuzzlePanel: q('brewster-puzzle-panel'),
+  brewsterCanvas: q('brewster-canvas'),
+  brewsterAngle: q('brewster-angle'),
+  brewsterAngleValue: q('brewster-angle-value'),
+  brewsterReadout: q('brewster-readout'),
+  brewsterFire: q('brewster-fire'),
+  brewsterCancel: q('brewster-cancel'),
 
   craftRecipes: q('craft-recipes'),
   craftClose: q('craft-close'),
@@ -229,6 +238,11 @@ document.addEventListener('keydown', (e) => {
       closeDiffractionPuzzle(game);
       return;
     }
+    if (!dom.brewsterPuzzlePanel.classList.contains('hidden')) {
+      e.preventDefault();
+      closeBrewsterPuzzle(game);
+      return;
+    }
   }
   const keyMap = {
     ArrowUp: [0, -1], KeyW: [0, -1],
@@ -310,6 +324,10 @@ dom.snellCancel.addEventListener('click', () => closeSnellPuzzle(game));
 dom.diffractionAngle.addEventListener('input', () => renderDiffractionPuzzle(game));
 dom.diffractionFire.addEventListener('click', () => fireDiffractionPuzzle(game));
 dom.diffractionCancel.addEventListener('click', () => closeDiffractionPuzzle(game));
+
+dom.brewsterAngle.addEventListener('input', () => renderBrewsterPuzzle(game));
+dom.brewsterFire.addEventListener('click', () => fireBrewsterPuzzle(game));
+dom.brewsterCancel.addEventListener('click', () => closeBrewsterPuzzle(game));
 
 function showSaveMsg(text) {
   dom.saveTransferMsg.textContent = text;
