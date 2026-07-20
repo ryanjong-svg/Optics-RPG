@@ -35,7 +35,7 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.secretsFound, {});
   assert.deepEqual(migrated.flags.achievements, {});
   assert.equal(migrated.flags.ngPlusCycle, 0);
-  assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false });
+  assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1 });
 });
 
 test('migrateState: leaves already-present fields untouched', () => {
@@ -57,4 +57,13 @@ test('migrateState: backfills a partially-present settings object (e.g. an older
   const migrated = migrateState(state);
   assert.equal(migrated.settings.difficulty, 'normal');
   assert.equal(migrated.settings.muted, false);
+});
+
+test('migrateState: backfills musicVolume/sfxVolume to full (1) for a save from before they existed', () => {
+  const state = newGameState();
+  delete state.settings.musicVolume;
+  delete state.settings.sfxVolume;
+  const migrated = migrateState(state);
+  assert.equal(migrated.settings.musicVolume, 1);
+  assert.equal(migrated.settings.sfxVolume, 1);
 });

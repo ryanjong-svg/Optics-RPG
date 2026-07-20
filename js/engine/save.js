@@ -18,6 +18,7 @@ export function migrateState(state) {
     if (!state.flags.quests) state.flags.quests = {};
     if (!state.flags.secretsFound) state.flags.secretsFound = {};
     if (!state.flags.achievements) state.flags.achievements = {};
+    if (!state.flags.achievementsSeen) state.flags.achievementsSeen = {};
     if (state.flags.ngPlusCycle === undefined) state.flags.ngPlusCycle = 0;
     if (!state.flags.hintsShown) state.flags.hintsShown = {};
     if (!state.flags.enemiesDefeated) state.flags.enemiesDefeated = {};
@@ -25,6 +26,8 @@ export function migrateState(state) {
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';
   if (state.settings.muted === undefined) state.settings.muted = false;
+  if (state.settings.musicVolume === undefined) state.settings.musicVolume = 1;
+  if (state.settings.sfxVolume === undefined) state.settings.sfxVolume = 1;
   return state;
 }
 

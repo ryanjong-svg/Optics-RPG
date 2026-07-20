@@ -9,7 +9,17 @@ import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 import { unlockCodex } from './state.js';
+import { checkNewAchievements } from '../data/achievements.js';
 import * as audio from './audio.js';
+
+// Overworld actions (pickups, secrets, zone arrivals) have no per-turn log
+// stream like battle does, so this appends any newly-crossed milestone
+// achievement onto whichever message queue is already about to be shown,
+// instead of leaving it to surface only later in the Field Log.
+function withAchievementLines(state, lines) {
+  const newlyUnlocked = checkNewAchievements(state);
+  return [...lines, ...newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`)];
+}
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
 
@@ -368,7 +378,7 @@ export function handleMove(game, dx, dy) {
     state.player.materials[item.material] = (state.player.materials[item.material] || 0) + 1;
     const mat = MATERIALS[item.material];
     audio.playPickup();
-    showMessages(game, [`Picked up ${mat.name}! ${mat.fact}`]);
+    showMessages(game, withAchievementLines(state, [`Picked up ${mat.name}! ${mat.fact}`]));
     game.renderHud();
     saveGame(state);
     return;
@@ -380,7 +390,7 @@ export function handleMove(game, dx, dy) {
     state.player.materials[secret.material] = (state.player.materials[secret.material] || 0) + 1;
     const mat = MATERIALS[secret.material];
     audio.playQuestComplete();
-    showMessages(game, [`A hidden cache! ${secret.findText} (+1 ${mat.name})`]);
+    showMessages(game, withAchievementLines(state, [`A hidden cache! ${secret.findText} (+1 ${mat.name})`]));
     game.renderHud();
     saveGame(state);
     return;
@@ -400,7 +410,12 @@ export function handleMove(game, dx, dy) {
     saveGame(state);
     renderOverworld(game);
     if (firstVisit && target.arrival) {
-      showMessages(game, [target.arrival]);
+      showMessages(game, withAchievementLines(state, [target.arrival]));
+    } else {
+      const newlyUnlocked = checkNewAchievements(state);
+      if (newlyUnlocked.length) {
+        showMessages(game, newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`));
+      }
     }
     return;
   }

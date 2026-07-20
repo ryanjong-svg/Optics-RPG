@@ -82,3 +82,21 @@ export const ACHIEVEMENTS = {
 export function unlockedAchievements(state) {
   return Object.entries(ACHIEVEMENTS).filter(([, a]) => a.check(state));
 }
+
+// Milestone achievements are computed live from state, so nothing marks the
+// moment they first become true. This diffs the currently-unlocked set
+// against state.flags.achievementsSeen and returns only the newly-crossed
+// ones (marking them seen), so callers can announce them the moment they
+// happen instead of leaving players to notice by opening the Field Log.
+export function checkNewAchievements(state) {
+  if (!state.flags.achievementsSeen) state.flags.achievementsSeen = {};
+  const seen = state.flags.achievementsSeen;
+  const newly = [];
+  for (const [id, a] of unlockedAchievements(state)) {
+    if (!seen[id]) {
+      seen[id] = true;
+      newly.push(a);
+    }
+  }
+  return newly;
+}

@@ -29,13 +29,16 @@ export function newGameState() {
       quests: {},
       secretsFound: {},
       achievements: {},
+      achievementsSeen: {},
       ngPlusCycle: 0,
       hintsShown: {},
       enemiesDefeated: {}
     },
     settings: {
       difficulty: 'normal',
-      muted: false
+      muted: false,
+      musicVolume: 1,
+      sfxVolume: 1
     },
     codexUnlocked: {}
   };
@@ -89,6 +92,7 @@ export function startNewGamePlus(state) {
   state.flags.quizAsked = {};
   state.flags.quests = {};
   state.flags.achievements = {};
+  state.flags.achievementsSeen = {};
   state.currentMap = 'village';
   state.pos = { x: 7, y: 8 };
   state.mode = 'overworld';

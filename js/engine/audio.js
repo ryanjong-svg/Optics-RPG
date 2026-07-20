@@ -5,6 +5,10 @@ let ctx = null;
 let muted = false;
 let musicTimeoutId = null;
 let currentTrack = null;
+// Independent of the single "mute everything" toggle above: two 0-1 volume
+// levels so a player can, say, keep zone ambience but silence battle stingers.
+let musicVolume = 1;
+let sfxVolume = 1;
 
 function getCtx() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -18,13 +22,17 @@ export function unlockAudio() {
 
 export function isMuted() { return muted; }
 
+function applyAmbienceGain() {
+  if (!ambienceNodes) return;
+  const c = getCtx();
+  const gain = muted ? 0 : ambienceNodes.baseGain * musicVolume;
+  ambienceNodes.master.gain.setValueAtTime(gain, c.currentTime);
+  ambienceNodes.lfoGain.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain * 0.5 * musicVolume, c.currentTime);
+}
+
 export function setMuted(value) {
   muted = value;
-  if (ambienceNodes) {
-    const c = getCtx();
-    ambienceNodes.master.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain, c.currentTime);
-    ambienceNodes.lfoGain.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain * 0.5, c.currentTime);
-  }
+  applyAmbienceGain();
 }
 
 export function toggleMuted() {
@@ -32,15 +40,27 @@ export function toggleMuted() {
   return muted;
 }
 
-function tone(freq, startTime, duration, { type = 'square', gain = 0.15, attack = 0.005, release = 0.05 } = {}) {
-  if (muted || !freq) return;
+export function getMusicVolume() { return musicVolume; }
+export function setMusicVolume(v) {
+  musicVolume = Math.max(0, Math.min(1, v));
+  applyAmbienceGain();
+}
+
+export function getSfxVolume() { return sfxVolume; }
+export function setSfxVolume(v) {
+  sfxVolume = Math.max(0, Math.min(1, v));
+}
+
+function tone(freq, startTime, duration, { type = 'square', gain = 0.15, attack = 0.005, release = 0.05, channel = 'sfx' } = {}) {
+  const vol = channel === 'music' ? musicVolume : sfxVolume;
+  if (muted || !freq || vol <= 0) return;
   const c = getCtx();
   const osc = c.createOscillator();
   const g = c.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, startTime);
   g.gain.setValueAtTime(0, startTime);
-  g.gain.linearRampToValueAtTime(gain, startTime + attack);
+  g.gain.linearRampToValueAtTime(gain * vol, startTime + attack);
   g.gain.linearRampToValueAtTime(0.0001, startTime + duration + release);
   osc.connect(g);
   g.connect(c.destination);
@@ -48,11 +68,11 @@ function tone(freq, startTime, duration, { type = 'square', gain = 0.15, attack 
   osc.stop(startTime + duration + release + 0.02);
 }
 
-function playSequence(notes, { type = 'square', gain = 0.15 } = {}) {
+function playSequence(notes, { type = 'square', gain = 0.15, channel = 'sfx' } = {}) {
   const c = getCtx();
   let t = c.currentTime + 0.01;
   notes.forEach(([freq, dur]) => {
-    tone(freq, t, dur, { type, gain });
+    tone(freq, t, dur, { type, gain, channel });
     t += dur;
   });
 }
@@ -92,7 +112,7 @@ function scheduleMusicLoop(melody, type, gain) {
   const c = getCtx();
   let t = c.currentTime + 0.05;
   melody.forEach(([freq, dur]) => {
-    tone(freq, t, dur * 0.9, { type, gain });
+    tone(freq, t, dur * 0.9, { type, gain, channel: 'music' });
     t += dur;
   });
   const totalDurMs = melody.reduce((s, [, d]) => s + d, 0) * 1000;
@@ -144,7 +164,7 @@ export function playZoneAmbience(zone) {
   ambienceZone = zone;
 
   const c = getCtx();
-  const startGain = muted ? 0 : config.gain;
+  const startGain = muted ? 0 : config.gain * musicVolume;
   const master = c.createGain();
   master.gain.setValueAtTime(startGain, c.currentTime);
   master.connect(c.destination);
@@ -152,7 +172,7 @@ export function playZoneAmbience(zone) {
   const lfo = c.createOscillator();
   const lfoGain = c.createGain();
   lfo.frequency.value = config.lfoRate;
-  lfoGain.gain.value = muted ? 0 : config.gain * 0.5;
+  lfoGain.gain.value = muted ? 0 : config.gain * 0.5 * musicVolume;
   lfo.connect(lfoGain);
   lfoGain.connect(master.gain);
   lfo.start();

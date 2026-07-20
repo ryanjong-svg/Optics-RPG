@@ -3,6 +3,7 @@ import { NPC_INTRO } from '../data/dialogue.js';
 import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
 import { grantXp, claimHint } from './state.js';
 import { saveGame } from './save.js';
+import { checkNewAchievements } from '../data/achievements.js';
 import * as audio from './audio.js';
 
 function grantXpWithSound(state, amount, log) {
@@ -65,8 +66,12 @@ export function startNpcInteraction(game, npcId) {
   if (status === 'active') {
     if (isObjectiveMet(state, quest)) {
       showMessages(game, [quest.complete], () => {
-        completeQuest(game, questId, quest);
-        startQuiz(game, npcId);
+        const newlyUnlocked = completeQuest(game, questId, quest);
+        if (newlyUnlocked.length) {
+          showMessages(game, newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`), () => startQuiz(game, npcId));
+        } else {
+          startQuiz(game, npcId);
+        }
       });
       return;
     }
@@ -90,7 +95,9 @@ function completeQuest(game, questId, quest) {
   if (quest.reward.xp) grantXpWithSound(state, quest.reward.xp, () => {});
   audio.playQuestComplete();
   game.renderHud();
+  const newlyUnlocked = checkNewAchievements(state);
   saveGame(state);
+  return newlyUnlocked;
 }
 
 export function startQuiz(game, npcId) {

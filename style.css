@@ -318,6 +318,9 @@ canvas#overworld-canvas {
   padding: 6px 8px; font-family: 'Share Tech Mono', monospace; font-size: 1em; margin-bottom: 8px;
 }
 #settings-panel .action-btn { width: 100%; margin-bottom: 8px; }
+.volume-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.volume-row label { font-size: 0.85em; color: var(--text-dim); flex: 0 0 auto; }
+.volume-row input[type="range"] { flex: 1; accent-color: var(--cyan-dim); }
 
 /* ---------- Tactical Map ---------- */
 .map-grid {
@@ -332,6 +335,7 @@ canvas#overworld-canvas {
 }
 .map-node-name { font-family: 'Orbitron', sans-serif; font-size: 0.68em; color: var(--cyan); }
 .map-node-status { font-size: 0.85em; color: var(--text-dim); }
+.map-node-wanderer { font-size: 0.72em; color: var(--text-dim); opacity: 0.85; }
 .map-node-current { border-color: var(--hazard); box-shadow: 0 0 10px rgba(255,204,51,0.4); }
 .map-node-current .map-node-name { color: var(--hazard); }
 .map-node-unvisited { opacity: 0.55; }

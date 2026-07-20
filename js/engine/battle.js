@@ -4,7 +4,8 @@ import { MATERIALS } from '../data/materials.js';
 import { MAPS } from '../data/maps.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
 import { CHARACTER_SPRITES } from '../data/pixelArt.js';
-import { ACHIEVEMENTS } from '../data/achievements.js';
+import { ACHIEVEMENTS, checkNewAchievements } from '../data/achievements.js';
+import { CODEX } from '../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
 import { drawSprite } from './pixelSprites.js';
@@ -25,6 +26,10 @@ export function bestiaryHintText(enemy) {
 function unlockAchievement(state, id, log) {
   if (state.flags.achievements[id]) return;
   state.flags.achievements[id] = true;
+  // Also marks it seen, since it's already announced right here — otherwise
+  // the generic checkNewAchievements() pass below would announce it again.
+  if (!state.flags.achievementsSeen) state.flags.achievementsSeen = {};
+  state.flags.achievementsSeen[id] = true;
   const achievement = ACHIEVEMENTS[id];
   if (achievement && log) log(`🏆 Achievement unlocked: ${achievement.title}`);
 }
@@ -620,6 +625,7 @@ function resolveVictory(game) {
     state.flags.bossDefeated = true;
     state.mode = 'victory';
   }
+  checkNewAchievements(state).forEach(a => logMsg(game, `🏆 Achievement unlocked: ${a.title} — ${a.desc}`));
   saveGame(state);
 }
 
@@ -709,6 +715,13 @@ export function renderBattle(game) {
     btn.className = 'action-btn ability-btn';
     const costTag = cost ? ` <span class="charge-tag">${cost}⚡</span>` : '';
     btn.innerHTML = `<strong>${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}</strong><span class="ability-desc">${a.desc}</span>`;
+    // The button already shows a one-line gameplay blurb; the full Codex
+    // explanation (once unlocked) goes in the title attribute so the deeper
+    // "why" is a hover away without leaving battle for the Codex panel.
+    const codexEntry = CODEX[a.concept];
+    if (codexEntry && game.state.codexUnlocked[a.concept]) {
+      btn.title = `${codexEntry.title}\n\n${codexEntry.body}`;
+    }
     btn.disabled = cd > 0 || shortOnCharge;
     btn.onclick = () => chooseAbility(game, a.id);
     d.battleActions.appendChild(btn);
@@ -720,6 +733,7 @@ export function renderBattle(game) {
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
     btn.innerHTML = `<strong>Use ${item.name} (x${owned})</strong><span class="ability-desc">Restores ${item.heal} HP.</span>`;
+    if (item.fact) btn.title = item.fact;
     btn.onclick = () => useItemInBattle(game, item.id);
     d.battleActions.appendChild(btn);
   });

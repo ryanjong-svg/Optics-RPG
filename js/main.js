@@ -107,6 +107,8 @@ const dom = {
   settingsDifficulty: q('settings-difficulty'),
   settingsDifficultyDesc: q('settings-difficulty-desc'),
   settingsMuteToggle: q('settings-mute-toggle'),
+  settingsMusicVolume: q('settings-music-volume'),
+  settingsSfxVolume: q('settings-sfx-volume'),
   settingsResetSave: q('settings-reset-save'),
 
   helpPanel: q('help-panel'),
@@ -224,6 +226,18 @@ function setMuted(muted) {
 }
 dom.btnMute.addEventListener('click', () => setMuted(!audio.isMuted()));
 dom.settingsMuteToggle.addEventListener('click', () => setMuted(!audio.isMuted()));
+dom.settingsMusicVolume.addEventListener('input', () => {
+  const v = Number(dom.settingsMusicVolume.value) / 100;
+  audio.setMusicVolume(v);
+  game.state.settings.musicVolume = v;
+  saveGame(game.state);
+});
+dom.settingsSfxVolume.addEventListener('input', () => {
+  const v = Number(dom.settingsSfxVolume.value) / 100;
+  audio.setSfxVolume(v);
+  game.state.settings.sfxVolume = v;
+  saveGame(game.state);
+});
 
 dom.craftClose.addEventListener('click', () => closeCraft(game));
 
@@ -330,6 +344,10 @@ function boot() {
   renderHud();
   audio.setMuted(game.state.settings.muted);
   syncMuteUI(game.state.settings.muted);
+  audio.setMusicVolume(game.state.settings.musicVolume);
+  audio.setSfxVolume(game.state.settings.sfxVolume);
+  dom.settingsMusicVolume.value = Math.round(game.state.settings.musicVolume * 100);
+  dom.settingsSfxVolume.value = Math.round(game.state.settings.sfxVolume * 100);
   if (!game.state.flags.seenIntro) {
     game.state.flags.seenIntro = true;
     showMessages(game, INTRO_LINES, () => {

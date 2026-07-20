@@ -30,6 +30,15 @@ function nodeStatus(state, id, map) {
   return { visited, text: 'Explored' };
 }
 
+// Wanderers are visible, permanent overworld enemies (one per depth zone) —
+// a separate line from the guardian/boss status above, shown only once the
+// zone itself has been visited so it doesn't spoil an unexplored zone.
+function wandererStatus(state, map) {
+  if (!map.wanderer) return null;
+  const defeated = !!state.flags.enemiesDefeated[map.wanderer.enemyId];
+  return defeated ? '👁 Wanderer Defeated' : '👁 Wanderer Nearby';
+}
+
 export function renderMap(game) {
   const state = game.state;
   const cells = LAYOUT.flat().map(id => {
@@ -37,6 +46,7 @@ export function renderMap(game) {
     const map = MAPS[id];
     const isCurrent = state.currentMap === id;
     const { visited, text } = nodeStatus(state, id, map);
+    const wanderer = visited ? wandererStatus(state, map) : null;
     const classes = ['map-node'];
     if (isCurrent) classes.push('map-node-current');
     if (!visited) classes.push('map-node-unvisited');
@@ -44,6 +54,7 @@ export function renderMap(game) {
       <div class="${classes.join(' ')}">
         <div class="map-node-name">${visited ? map.name : 'Unexplored'}</div>
         <div class="map-node-status">${text}</div>
+        ${wanderer ? `<div class="map-node-wanderer">${wanderer}</div>` : ''}
       </div>
     `;
   });
