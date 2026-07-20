@@ -4,6 +4,6 @@
   "type": "module",
   "description": "Prism & Photon: Candela's Reach - an optics/materials-science teaching RPG. Static site, no build step; this file only exists so Node's test runner treats the source as ES modules.",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/*.test.js"
   }
 }

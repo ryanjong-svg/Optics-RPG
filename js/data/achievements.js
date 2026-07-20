@@ -6,6 +6,7 @@ import { LORE, isLoreUnlocked } from './lore.js';
 import { RECIPES } from './equipment.js';
 import { QUESTS } from './quests.js';
 import { MAPS } from './maps.js';
+import { ENEMIES } from './enemies.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
@@ -70,6 +71,11 @@ export const ACHIEVEMENTS = {
     title: 'Cycle Walker',
     desc: 'Begin a New Game+.',
     check: state => (state.flags.ngPlusCycle || 0) >= 1
+  },
+  bestiary_completionist: {
+    title: 'Bestiary Completionist',
+    desc: 'Defeat every enemy type at least once.',
+    check: state => Object.keys(ENEMIES).every(id => state.flags.enemiesDefeated[id])
   }
 };
 

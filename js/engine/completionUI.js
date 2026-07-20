@@ -4,6 +4,7 @@ import { RECIPES } from '../data/equipment.js';
 import { QUESTS } from '../data/quests.js';
 import { MAPS } from '../data/maps.js';
 import { ACHIEVEMENTS, unlockedAchievements } from '../data/achievements.js';
+import { ENEMIES } from '../data/enemies.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
@@ -15,6 +16,7 @@ function computeStats(state) {
   const chronicleUnlocked = Object.keys(LORE).filter(id => isLoreUnlocked(state, LORE[id])).length;
   const equipmentCrafted = RECIPES.filter(r => state.player.ownedGear[r.id]).length;
   const secretsFound = SECRET_MAP_IDS.filter(id => state.flags.secretsFound && state.flags.secretsFound[id]).length;
+  const enemiesCataloged = Object.keys(ENEMIES).filter(id => state.flags.enemiesDefeated[id]).length;
 
   const rows = [
     { label: 'Guardians Defeated', done: guardiansDefeated, total: GUARDIAN_MAP_IDS.length },
@@ -23,7 +25,8 @@ function computeStats(state) {
     { label: 'Codex Entries Unlocked', done: codexUnlocked, total: Object.keys(CODEX).length },
     { label: 'Chronicle Entries Unlocked', done: chronicleUnlocked, total: Object.keys(LORE).length },
     { label: 'Equipment Crafted', done: equipmentCrafted, total: RECIPES.length },
-    { label: 'Hidden Caches Found', done: secretsFound, total: SECRET_MAP_IDS.length }
+    { label: 'Hidden Caches Found', done: secretsFound, total: SECRET_MAP_IDS.length },
+    { label: 'Bestiary Entries Cataloged', done: enemiesCataloged, total: Object.keys(ENEMIES).length }
   ];
 
   const totalDone = rows.reduce((s, r) => s + r.done, 0);

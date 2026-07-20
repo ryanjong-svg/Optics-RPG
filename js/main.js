@@ -4,6 +4,7 @@ import { findDifficulty } from './data/difficulty.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
+import { openBestiary, closeBestiary } from './engine/bestiaryUI.js';
 import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
 import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
@@ -68,6 +69,12 @@ const dom = {
   codexList: q('codex-list'),
   codexClose: q('codex-close'),
 
+  bestiaryPanel: q('bestiary-panel'),
+  bestiaryProgress: q('bestiary-progress'),
+  bestiaryList: q('bestiary-list'),
+  btnBestiary: q('btn-bestiary'),
+  bestiaryClose: q('bestiary-close'),
+
   chroniclePanel: q('chronicle-panel'),
   chronicleList: q('chronicle-list'),
   chronicleClose: q('chronicle-close'),
@@ -112,7 +119,7 @@ const dom = {
   victoryNgPlus: q('victory-ngplus')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'victory-panel', 'dialogue-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -124,9 +131,9 @@ const game = {
     PANELS.forEach(id => document.getElementById(id).classList.add('hidden'));
     if (name === 'overworld') return;
     const map = {
-      battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', chronicle: 'chronicle-panel',
-      questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel', settings: 'settings-panel',
-      victory: 'victory-panel', dialogue: 'dialogue-panel'
+      battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', bestiary: 'bestiary-panel',
+      chronicle: 'chronicle-panel', questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel',
+      settings: 'settings-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
     };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
@@ -176,6 +183,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 dom.btnCodex.addEventListener('click', () => openCodex(game));
+dom.btnBestiary.addEventListener('click', () => openBestiary(game));
+dom.bestiaryClose.addEventListener('click', () => closeBestiary(game));
 dom.btnChronicle.addEventListener('click', () => openChronicle(game));
 dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
 dom.btnQuestlog.addEventListener('click', () => openQuestLog(game));

@@ -23,6 +23,7 @@
     <button id="btn-map" class="action-btn ghost">Map</button>
     <button id="btn-chronicle" class="action-btn ghost">Chronicle</button>
     <button id="btn-codex" class="action-btn ghost">Codex</button>
+    <button id="btn-bestiary" class="action-btn ghost">Bestiary</button>
     <button id="btn-questlog" class="action-btn ghost">Quests</button>
     <button id="btn-completion" class="action-btn ghost">Log</button>
     <button id="btn-settings" class="action-btn ghost">Settings</button>
@@ -101,6 +102,13 @@
   <div id="chronicle-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Chronicle of the Reach</h2><button id="chronicle-close" class="action-btn ghost">Close</button></div>
     <div id="chronicle-list" class="codex-list"></div>
+  </div>
+
+  <div id="bestiary-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Bestiary</h2><button id="bestiary-close" class="action-btn ghost">Close</button></div>
+    <p class="ngplus-hint" style="margin-top:0;">Defeat an enemy once to catalog its known weakness and resistance here.</p>
+    <div id="bestiary-progress" class="codex-progress"></div>
+    <div id="bestiary-list" class="codex-list"></div>
   </div>
 
   <div id="questlog-panel" class="panel bracketed hidden">

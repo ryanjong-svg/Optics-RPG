@@ -1,5 +1,5 @@
 import { ABILITIES, findAbility } from '../data/abilities.js';
-import { makeEnemyInstance } from '../data/enemies.js';
+import { makeEnemyInstance, weaknessResistanceText } from '../data/enemies.js';
 import { MATERIALS } from '../data/materials.js';
 import { MAPS } from '../data/maps.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
@@ -18,12 +18,8 @@ import * as audio from './audio.js';
 // weakness/resistance is surfaced up front on the next encounter, turning
 // "remember what worked last time" into an explicit part of the teaching.
 export function bestiaryHintText(enemy) {
-  const weak = (enemy.weakTo || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
-  const resist = (enemy.resists || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
-  const parts = [];
-  if (weak.length) parts.push(`Weak to: ${weak.join(', ')}.`);
-  if (resist.length) parts.push(`Resists: ${resist.join(', ')}.`);
-  return parts.length ? `📖 Bestiary: You've fought this before. ${parts.join(' ')}` : null;
+  const text = weaknessResistanceText(enemy);
+  return text ? `📖 Bestiary: You've fought this before. ${text}` : null;
 }
 
 function unlockAchievement(state, id, log) {

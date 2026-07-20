@@ -1,3 +1,5 @@
+import { findAbility } from './abilities.js';
+
 export const ENEMIES = {
   wisp: {
     id: 'wisp', name: 'Will-o’-Wisp', hp: 22, atk: 5, def: 1, xp: 10, mats: ['water'],
@@ -219,4 +221,15 @@ export const ENEMIES = {
 export function makeEnemyInstance(id) {
   const base = ENEMIES[id];
   return { ...base, curHp: base.hp, phaseIdx: 0 };
+}
+
+// Shared by the in-battle Bestiary hint and the Bestiary panel, so both
+// describe an enemy's known matchups the same way.
+export function weaknessResistanceText(enemy) {
+  const weak = (enemy.weakTo || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
+  const resist = (enemy.resists || []).map(id => findAbility(id)).filter(Boolean).map(a => a.name);
+  const parts = [];
+  if (weak.length) parts.push(`Weak to: ${weak.join(', ')}.`);
+  if (resist.length) parts.push(`Resists: ${resist.join(', ')}.`);
+  return parts.join(' ');
 }
