@@ -26,6 +26,11 @@ export function migrateState(state) {
     if (!state.flags.badgeSeen) state.flags.badgeSeen = { bestiary: 0, codex: 0, chronicle: 0 };
     if (state.flags.snellHits === undefined) state.flags.snellHits = 0;
     if (!state.flags.specializationsTried) state.flags.specializationsTried = {};
+    if (state.flags.totalDamageDealt === undefined) state.flags.totalDamageDealt = 0;
+    if (!state.flags.abilityUseCountsLifetime) state.flags.abilityUseCountsLifetime = {};
+    if (state.flags.fastestBossKillTurns === undefined) state.flags.fastestBossKillTurns = null;
+    if (state.flags.totalVictories === undefined) state.flags.totalVictories = 0;
+    if (state.flags.allAchievementsEarned === undefined) state.flags.allAchievementsEarned = false;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';

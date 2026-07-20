@@ -91,6 +91,11 @@ export const LORE = {
     title: 'On the Avalanche Well',
     unlock: { type: 'map', map: 'lab_deep' },
     body: `The Photonic Vanguard built the Labs to prove that light could be counted, one grain at a time. Somewhere below the counting room, someone biased a junction so far past its own breakdown point that a single grain stopped being countable at all — it became a verdict. The Vanguard does not discuss who, or why, or whether the well is still deciding.`
+  },
+  full_circle: {
+    title: 'On the Apprentice Who Stayed',
+    unlock: { type: 'allAchievements' },
+    body: `Most apprentices leave the moment the Bending is resolved — one good answer, one closed case, one trophy for the mantel. You didn't. You went back for the guardian you'd already beaten cleanly, the specialization you'd never tried, the fringe you almost missed by three degrees. The three rival professors who founded this village never agreed on anything except this: understanding isn't a thing you finish. It's a thing you keep choosing to do again, past the point it stops being required. Candela's Reach doesn't have a real ending. It only has the apprentices willing to stay long enough to find that out.`
   }
 };
 
@@ -99,5 +104,6 @@ export function isLoreUnlocked(state, entry) {
   if (u.type === 'always') return true;
   if (u.type === 'map') return !!(state.flags.visitedMaps && state.flags.visitedMaps[u.map]);
   if (u.type === 'npc') return !!(state.flags.metNpc && state.flags.metNpc[u.npc]);
+  if (u.type === 'allAchievements') return !!state.flags.allAchievementsEarned;
   return false;
 }

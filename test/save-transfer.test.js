@@ -35,6 +35,11 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.secretsFound, {});
   assert.deepEqual(migrated.flags.achievements, {});
   assert.equal(migrated.flags.ngPlusCycle, 0);
+  assert.equal(migrated.flags.totalDamageDealt, 0);
+  assert.deepEqual(migrated.flags.abilityUseCountsLifetime, {});
+  assert.equal(migrated.flags.fastestBossKillTurns, null);
+  assert.equal(migrated.flags.totalVictories, 0);
+  assert.equal(migrated.flags.allAchievementsEarned, false);
   assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1 });
 });
 

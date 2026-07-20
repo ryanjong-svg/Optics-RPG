@@ -182,6 +182,7 @@ const OUTLINE = '#100a1a';
 
 export const PALETTES = {
   player: { K: OUTLINE, H: '#5a3a22', S: '#f2c18c', E: '#151018', J: '#2e8b57', G: '#ffd166', P: '#2b4c8c' },
+  player_ascended: { K: OUTLINE, H: '#e8e8ff', S: '#ffe8c8', E: '#ffe14d', J: '#b06dff', G: '#4dc8ff', P: '#2b2b4c' },
   prof_lumen: { K: OUTLINE, H: '#d8d8e6', S: '#f2c18c', E: '#151018', J: '#7c4dff', G: '#ffe28a', P: '#3a2f5c' },
   prof_mirrors: { K: OUTLINE, H: '#2a2020', S: '#e8b384', E: '#151018', J: '#26a69a', G: '#dff7f4', P: '#1f4d48' },
   prof_labs: { K: OUTLINE, H: '#161616', S: '#c98a5b', E: '#151018', J: '#ff7043', G: '#ffe0b3', P: '#5c3a1f' },

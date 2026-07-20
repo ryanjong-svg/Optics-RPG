@@ -2,7 +2,7 @@ import { MAPS, mapWidth, mapHeight } from '../data/maps.js';
 import { MATERIALS } from '../data/materials.js';
 import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
-import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience } from './pixelSprites.js';
+import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
 import { startBattle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
@@ -302,7 +302,7 @@ export function renderOverworld(game) {
 
   putEntity(state.pos.x, state.pos.y, (sx, sy) => {
     drawSelectionCursor(ctx2d, sx, sy);
-    drawIsoSprite(ctx2d, 'humanoid', 'player', sx, sy);
+    drawIsoSprite(ctx2d, 'humanoid', playerPaletteFor(state.flags.ngPlusCycle), sx, sy);
   });
 
   const maxDepth = (mapWidth() - 1) + (mapHeight() - 1);

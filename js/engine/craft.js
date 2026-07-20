@@ -5,6 +5,7 @@ import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
 import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from './consumables.js';
 import { SPECIALIZATIONS } from '../data/specializations.js';
+import { startBattle } from './battle.js';
 import * as audio from './audio.js';
 
 const SPECIALIZATION_LEVEL = 5;
@@ -180,6 +181,13 @@ export function meditate(game) {
   renderCraft(game);
 }
 
+// A zero-risk battle against a training dummy: no damage taken, no XP,
+// materials, Bestiary entry, or achievements — purely for trying out a
+// loadout/specialization/puzzle timing before it matters for real.
+export function practiceAtDummy(game) {
+  startBattle(game, 'training_dummy', { practice: true, introText: 'You set up the training dummy for a sparring round.' });
+}
+
 export function loadLoadout(game, slot) {
   if (!applyLoadLoadout(game.state, slot)) return;
   saveGame(game.state);
@@ -210,6 +218,15 @@ export function renderCraft(game) {
     btn.disabled = full;
     btn.onclick = () => meditate(game);
     d.craftMeditate.querySelector('.recipe-row').appendChild(btn);
+  }
+
+  if (d.craftPractice) {
+    d.craftPractice.innerHTML = '<div class="recipe-row"><div class="recipe-req">Training Dummy: 60 HP, deals no damage</div></div>';
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = 'Spar';
+    btn.onclick = () => practiceAtDummy(game);
+    d.craftPractice.querySelector('.recipe-row').appendChild(btn);
   }
 
   d.craftMaterials.innerHTML = Object.values(MATERIALS).map(m => {

@@ -1,5 +1,13 @@
 import { SHAPES, PALETTES } from '../data/pixelArt.js';
 
+// New Game+ cycle 3+ cosmetic reward: the player sprite takes on a distinct
+// "ascended" palette, a purely visual payoff for long-term replay on top of
+// the existing adaptive-resistance/bonus-boss-phase mechanics.
+const ASCENDED_CYCLE = 3;
+export function playerPaletteFor(cycle) {
+  return (cycle || 0) >= ASCENDED_CYCLE ? 'player_ascended' : 'player';
+}
+
 const rowCache = new Map();
 
 function fullRows(shapeKey) {

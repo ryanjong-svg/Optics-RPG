@@ -36,7 +36,12 @@ export function newGameState() {
       enemiesDefeated: {},
       badgeSeen: { bestiary: 0, codex: 0, chronicle: 0 },
       snellHits: 0,
-      specializationsTried: {}
+      specializationsTried: {},
+      totalDamageDealt: 0,
+      abilityUseCountsLifetime: {},
+      fastestBossKillTurns: null,
+      totalVictories: 0,
+      allAchievementsEarned: false
     },
     settings: {
       difficulty: 'normal',

@@ -8,7 +8,7 @@ import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../d
 import { CODEX } from '../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
-import { drawSprite, drawZoneBackdrop } from './pixelSprites.js';
+import { drawSprite, drawZoneBackdrop, playerPaletteFor } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
@@ -128,11 +128,23 @@ export function applyDifficultyScaling(enemy, difficultyId) {
   enemy.def = Math.round(enemy.def * mult);
 }
 
+// A practice-only opponent, deliberately kept out of ENEMIES — it must never
+// be reachable by ZONE_ENCOUNTERS, the Bestiary, or "defeat every enemy type"
+// completion tracking, since fighting it is meant to leave zero trace.
+const TRAINING_DUMMY = {
+  id: 'training_dummy', name: 'Training Dummy', hp: 60, atk: 0, def: 0, xp: 0, mats: [],
+  weakTo: [], resists: [],
+  flavor: 'A silent stand-in for testing loadouts and timing — it won\'t fight back, and nothing here counts for real.'
+};
+
 export function startBattle(game, enemyId, opts = {}) {
-  const enemy = makeEnemyInstance(enemyId);
-  applyDifficultyScaling(enemy, game.state.settings.difficulty);
-  applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
-  if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
+  const isDummy = enemyId === 'training_dummy';
+  const enemy = isDummy ? { ...TRAINING_DUMMY, curHp: TRAINING_DUMMY.hp, phaseIdx: 0 } : makeEnemyInstance(enemyId);
+  if (!isDummy) {
+    applyDifficultyScaling(enemy, game.state.settings.difficulty);
+    applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
+    if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
+  }
   // Snapshot atk right after run-level scaling (NG+/difficulty) but before any
   // in-fight escalation (phase2/enrage) — telegraphed hits scale off this
   // baseline instead of an already-escalated atk, so the two mechanics don't
@@ -313,6 +325,7 @@ function enemyTurn(game) {
   const enemy = battle.enemy;
   const player = game.state.player;
   if (enemy.curHp <= 0) return { dmg: 0 };
+  if (battle.opts.practice) return { dmg: 0 };
 
   const gear = buildGear(player);
 
@@ -573,6 +586,7 @@ export function chooseAbility(game, abilityId) {
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
   battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
+  battle.turnCount = (battle.turnCount || 0) + 1;
 
   const actionResult = applyPlayerAction(game, ability, ctx);
   if (ability.cooldown) battle.cooldowns[abilityId] = ability.cooldown;
@@ -583,6 +597,14 @@ export function chooseAbility(game, abilityId) {
       else audio.playHit();
     }
     showHitFx(game, game.dom.battleEnemyCanvas, actionResult.dmg, actionResult.isCrit);
+  }
+  // Lifetime stats (Field Log) - a practice fight is meant to leave zero
+  // trace, so it's excluded here the same way it already skips XP/mats/save.
+  if (!battle.opts.practice) {
+    const flags = game.state.flags;
+    flags.totalDamageDealt = (flags.totalDamageDealt || 0) + (actionResult.dmg || 0);
+    if (!flags.abilityUseCountsLifetime) flags.abilityUseCountsLifetime = {};
+    flags.abilityUseCountsLifetime[ability.id] = (flags.abilityUseCountsLifetime[ability.id] || 0) + 1;
   }
 
   if (allEnemiesDefeated(battle)) {
@@ -733,8 +755,14 @@ function resolveVictory(game) {
   const battle = game.battle;
   const enemy = battle.enemy;
   const state = game.state;
-  const allDefeated = [enemy, ...battle.packMates];
   battle.over = true;
+  if (battle.opts.practice) {
+    logMsg(game, `${enemy.name} is defeated! No rewards or records in practice — come back anytime.`);
+    audio.stopMusic();
+    audio.playVictory();
+    return;
+  }
+  const allDefeated = [enemy, ...battle.packMates];
   logMsg(game, battle.packMates.length ? 'The pack is defeated!' : `${enemy.name} is defeated!`);
   const newlyCataloged = new Set();
   allDefeated.forEach(e => {
@@ -768,7 +796,11 @@ function resolveVictory(game) {
     state.flags.bossDefeated = true;
     state.mode = 'victory';
     if (enemy.ngPlusBonusPhase) unlockAchievement(state, 'fifth_property', m => logMsg(game, m));
+    if (state.flags.fastestBossKillTurns == null || battle.turnCount < state.flags.fastestBossKillTurns) {
+      state.flags.fastestBossKillTurns = battle.turnCount;
+    }
   }
+  state.flags.totalVictories = (state.flags.totalVictories || 0) + 1;
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
   formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
@@ -816,7 +848,7 @@ export function renderBattle(game) {
     drawSprite(d.battleEnemyCtx, enemySprite.shape, enemySprite.palette, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, px);
   }
   drawZoneBackdrop(d.battlePlayerCtx, d.battlePlayerCanvas.width, d.battlePlayerCanvas.height, enemy.zone);
-  drawSprite(d.battlePlayerCtx, 'humanoid', 'player', d.battlePlayerCanvas.width / 2, d.battlePlayerCanvas.height / 2 + 6, PORTRAIT_PX);
+  drawSprite(d.battlePlayerCtx, 'humanoid', playerPaletteFor(game.state.flags.ngPlusCycle), d.battlePlayerCanvas.width / 2, d.battlePlayerCanvas.height / 2 + 6, PORTRAIT_PX);
 
   d.battleEnemyName.textContent = enemy.isBoss ? enemy.name + ' (?!)' : enemy.name;
   const enemyPct = Math.max(0, Math.round((enemy.curHp / enemy.hp) * 100));

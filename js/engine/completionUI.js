@@ -5,6 +5,7 @@ import { QUESTS } from '../data/quests.js';
 import { MAPS } from '../data/maps.js';
 import { ACHIEVEMENTS, unlockedAchievements } from '../data/achievements.js';
 import { ENEMIES } from '../data/enemies.js';
+import { findAbility } from '../data/abilities.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
@@ -36,6 +37,29 @@ function computeStats(state) {
   return { rows, overallPct };
 }
 
+// Lifetime totals, distinct from the completion-percentage rows above: those
+// track "how much of the game have you seen," this tracks "how have you
+// actually played it" — kept purely additive so a training-dummy practice
+// fight (which never touches these flags) can't distort it.
+export function computeLifetimeStats(state) {
+  const flags = state.flags;
+  const useCounts = flags.abilityUseCountsLifetime || {};
+  let mostUsedAbility = null;
+  let mostUsedCount = 0;
+  for (const [id, count] of Object.entries(useCounts)) {
+    if (count > mostUsedCount) { mostUsedCount = count; mostUsedAbility = id; }
+  }
+  const mostUsedName = mostUsedAbility ? (findAbility(mostUsedAbility) || {}).name || mostUsedAbility : null;
+
+  return {
+    totalDamageDealt: flags.totalDamageDealt || 0,
+    totalVictories: flags.totalVictories || 0,
+    fastestBossKillTurns: flags.fastestBossKillTurns != null ? flags.fastestBossKillTurns : null,
+    mostUsedAbilityName: mostUsedName,
+    mostUsedAbilityCount: mostUsedCount
+  };
+}
+
 export function openCompletion(game) {
   game.state.mode = 'completion';
   game.showPanel('completion');
@@ -62,6 +86,17 @@ export function renderCompletion(game) {
       </div>
     `;
   }).join('');
+
+  if (game.dom.completionStats) {
+    const s = computeLifetimeStats(game.state);
+    const rows = [
+      `Total Damage Dealt: ${s.totalDamageDealt}`,
+      `Battles Won: ${s.totalVictories}`,
+      `Fastest Null Medium Kill: ${s.fastestBossKillTurns != null ? `${s.fastestBossKillTurns} turn${s.fastestBossKillTurns === 1 ? '' : 's'}` : 'Not yet defeated'}`,
+      `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`
+    ];
+    game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
+  }
 
   if (game.dom.completionAchievements) {
     const unlockedIds = new Set(unlockedAchievements(game.state).map(([id]) => id));

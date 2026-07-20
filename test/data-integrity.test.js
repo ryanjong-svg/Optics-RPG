@@ -194,6 +194,13 @@ test('every depth zone is reachable only from its designated parent zone, and re
   }
 });
 
+test('the training dummy is not a real enemy - it must stay out of ENEMIES/ZONE_ENCOUNTERS so practice fights never pollute the Bestiary', () => {
+  assert.equal(ENEMIES.training_dummy, undefined);
+  for (const [zone, enemyIds] of Object.entries(ZONE_ENCOUNTERS)) {
+    assert.ok(!enemyIds.includes('training_dummy'), `zone "${zone}" should never encounter the training dummy`);
+  }
+});
+
 test('every depth zone declares a codexConcept that matches a real Codex entry', () => {
   for (const childId of Object.keys(DEPTH_ZONE_PARENTS)) {
     const map = MAPS[childId];

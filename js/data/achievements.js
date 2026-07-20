@@ -92,6 +92,11 @@ export const ACHIEVEMENTS = {
     title: 'The Fifth Property',
     desc: 'Defeat the Null Medium\'s bonus coherence phase, on New Game+ cycle 2 or later.',
     check: state => !!(state.flags.achievements && state.flags.achievements.fifth_property)
+  },
+  ascendant: {
+    title: 'Ascendant',
+    desc: 'Reach New Game+ cycle 3.',
+    check: state => (state.flags.ngPlusCycle || 0) >= 3
   }
 };
 
@@ -114,6 +119,10 @@ export function checkNewAchievements(state) {
       newly.push(a);
     }
   }
+  // Kept as a plain state flag (rather than lore.js importing ACHIEVEMENTS
+  // directly) so the Chronicle epilogue can check it without creating a
+  // circular import back into this module.
+  state.flags.allAchievementsEarned = Object.values(ACHIEVEMENTS).every(a => a.check(state));
   return newly;
 }
 

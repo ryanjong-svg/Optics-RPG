@@ -67,6 +67,7 @@ const dom = {
   craftLoadouts: q('craft-loadouts'),
   craftSpecialization: q('craft-specialization'),
   craftMeditate: q('craft-meditate'),
+  craftPractice: q('craft-practice'),
   craftConsumables: q('craft-consumables'),
 
   snellPuzzlePanel: q('snell-puzzle-panel'),
@@ -121,6 +122,7 @@ const dom = {
   completionPanel: q('completion-panel'),
   completionOverall: q('completion-overall'),
   completionList: q('completion-list'),
+  completionStats: q('completion-stats'),
   completionAchievements: q('completion-achievements'),
   completionClose: q('completion-close'),
   btnExportSave: q('btn-export-save'),
