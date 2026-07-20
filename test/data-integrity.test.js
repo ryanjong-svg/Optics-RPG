@@ -16,6 +16,7 @@ import { QUESTS } from '../js/data/quests.js';
 import { LORE } from '../js/data/lore.js';
 import { CODEX } from '../js/data/codex.js';
 import { CHARACTER_SPRITES, PALETTES, SHAPES, itemSprite } from '../js/data/pixelArt.js';
+import { BACKDROP_THEMES } from '../js/engine/pixelSprites.js';
 import { ZONE_ENCOUNTERS, ZONE_WALL_COLORS } from '../js/engine/overworld.js';
 import { CONSUMABLES } from '../js/data/consumables.js';
 
@@ -31,7 +32,8 @@ const DEPTH_ZONE_PARENTS = {
   prism_deep: 'prism',
   fiber_deep: 'fiber',
   grating_deep: 'grating',
-  hologram_deep: 'hologram'
+  hologram_deep: 'hologram',
+  lab_deep: 'lab'
 };
 
 test('every recipe requires materials that exist', () => {
@@ -103,6 +105,12 @@ test('every zone encounter pool references a real enemy that actually belongs to
 test('every non-village, non-boss-only map has a wall color and every wall color maps to a real map', () => {
   for (const map of Object.values(MAPS)) {
     assert.ok(ZONE_WALL_COLORS[map.zone], `map "${map.id}" (zone "${map.zone}") has no wall color entry`);
+  }
+});
+
+test('every zone has a battle backdrop theme, so no zone silently falls back to the default look', () => {
+  for (const map of Object.values(MAPS)) {
+    assert.ok(BACKDROP_THEMES[map.zone], `map "${map.id}" (zone "${map.zone}") has no BACKDROP_THEMES entry`);
   }
 });
 

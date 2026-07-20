@@ -86,6 +86,11 @@ export const LORE = {
     title: 'On the Volume Vault',
     unlock: { type: 'map', map: 'hologram_deep' },
     body: `The Hologram Archive records light on its surfaces. Beneath it, in the Volume Vault, an older and stranger crystal records light through its entire depth, and answers to a voltage that no living hand at the Archive remembers wiring in. Whatever it is still listening for, it has been listening for a very long time, and it has not yet decided that the answer isn't coming.`
+  },
+  avalanche_well: {
+    title: 'On the Avalanche Well',
+    unlock: { type: 'map', map: 'lab_deep' },
+    body: `The Photonic Vanguard built the Labs to prove that light could be counted, one grain at a time. Somewhere below the counting room, someone biased a junction so far past its own breakdown point that a single grain stopped being countable at all — it became a verdict. The Vanguard does not discuss who, or why, or whether the well is still deciding.`
   }
 };
 

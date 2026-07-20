@@ -153,6 +153,14 @@ export const RECIPES = [
       return { hologramBonus: 0.35 };
     },
     fact: 'Lithium niobate’s electro-optic effect lets a voltage bend light on demand — real fiber-optic modulators and the sharpest volume holograms both depend on this crystal.'
+  },
+  {
+    id: 'avalanche_photodetector', name: 'Avalanche Photodetector', slot: 'filter', glyph: '\u{1F4A5}',
+    materials: ['avalanche_silicon'], count: 2, upgradesFrom: 'photodetector',
+    build() {
+      return { bandgapPierce: true, bandgapEV: MATERIALS.avalanche_silicon.bandgapEV, bandgapPierceEV: 1.5 };
+    },
+    fact: 'Impact ionization multiplies a single absorbed photon into a cascade of carriers — real avalanche photodiodes use exactly this gain mechanism for single-photon-level sensitivity.'
   }
 ];
 

@@ -8,7 +8,7 @@ const LAYOUT = [
   ['mirrors_deep', 'grating_deep', 'prism_deep'],
   [null, 'village', null],
   ['fiber', 'hologram', 'lab'],
-  ['fiber_deep', 'hologram_deep', null]
+  ['fiber_deep', 'hologram_deep', 'lab_deep']
 ];
 
 export function openMap(game) {

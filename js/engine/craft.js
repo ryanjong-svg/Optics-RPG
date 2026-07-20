@@ -40,7 +40,8 @@ function describeStats(stats) {
     lines.push(`+${Math.round(stats.tirBonus * 100)}% TIR Shield block chance`);
   }
   if (stats.bandgapPierce) {
-    lines.push(`Photoelectric Shock always clears the band gap`);
+    const bonus = stats.bandgapPierceEV != null ? stats.bandgapPierceEV : 0.8;
+    lines.push(`+${bonus.toFixed(1)} eV photon energy for Photoelectric Shock — always clears the band gap`);
   }
   if (stats.diffractionBonus) {
     lines.push(`+${Math.round(stats.diffractionBonus * 100)}% Diffraction Wave defense-ignore`);
@@ -140,16 +141,24 @@ export function saveLoadout(game, slot) {
 
 // Free to pick and re-pick at will once unlocked (level 5+) — this is a
 // build-identity choice, not a resource sink, so there's no reason to punish
-// experimenting with the other path.
-export function applySetSpecialization(player, specId) {
+// experimenting with the other path. Also records which specializations have
+// ever been chosen (state.flags.specializationsTried), for the "tried both
+// paths" achievement — that's a lifetime record, so it's not cleared when
+// switching back to null.
+export function applySetSpecialization(state, specId) {
+  const player = state.player;
   if (player.level < SPECIALIZATION_LEVEL) return false;
   if (specId !== null && !SPECIALIZATIONS[specId]) return false;
   player.specialization = specId;
+  if (specId !== null) {
+    if (!state.flags.specializationsTried) state.flags.specializationsTried = {};
+    state.flags.specializationsTried[specId] = true;
+  }
   return true;
 }
 
 export function setSpecialization(game, specId) {
-  if (!applySetSpecialization(game.state.player, specId)) return;
+  if (!applySetSpecialization(game.state, specId)) return;
   audio.playCraftSuccess();
   saveGame(game.state);
   renderCraft(game);

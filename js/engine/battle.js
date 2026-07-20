@@ -8,7 +8,7 @@ import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../d
 import { CODEX } from '../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
-import { drawSprite } from './pixelSprites.js';
+import { drawSprite, drawZoneBackdrop } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
@@ -16,6 +16,7 @@ import { applyConsumable } from './consumables.js';
 import { showToast } from './toastUI.js';
 import { SPECIALIZATIONS } from '../data/specializations.js';
 import { openSnellPuzzle } from './snellPuzzleUI.js';
+import { openDiffractionPuzzle } from './diffractionPuzzleUI.js';
 import * as audio from './audio.js';
 
 // A personal "Bestiary": once you've beaten an enemy type before, its known
@@ -502,7 +503,10 @@ function applyOffensiveModifiers(game, ability, result) {
   const player = game.state.player;
   const battle = game.battle;
   let mult = specializationDamageMult(player, ability) * adaptiveResistMultiplier(game, ability);
-  if (ability.id === 'refraction_bend' && battle.snellBonusMult) mult *= battle.snellBonusMult;
+  // Set (and cleared) by whichever aiming puzzle's onFire callback is
+  // currently resolving — only one can be active per chooseAbility() call,
+  // so a single shared field is enough regardless of which puzzle it was.
+  if (battle.puzzleBonusMult) mult *= battle.puzzleBonusMult;
   if (mult === 1) return result;
   if (result.dmg != null) result.dmg = Math.max(1, Math.round(result.dmg * mult));
   if (result.perHit != null) result.perHit = Math.max(1, Math.round(result.perHit * mult));
@@ -584,17 +588,37 @@ export function chooseAbility(game, abilityId) {
 
 // Refraction Bend's button opens the Snell's-law aiming puzzle instead of
 // casting directly (see renderBattle) — this is the puzzle's onFire
-// callback, applying the resulting bonus/normal multiplier via the same
-// battle.snellBonusMult hook applyOffensiveModifiers already reads.
+// callback, applying the resulting bonus/normal multiplier via the shared
+// battle.puzzleBonusMult hook applyOffensiveModifiers reads.
 function resolveSnellPuzzleShot(game, hit, refractedDeg) {
   const battle = game.battle;
   if (!battle || battle.over) return;
-  battle.snellBonusMult = hit ? 1.8 : 1;
+  battle.puzzleBonusMult = hit ? 1.8 : 1;
   logMsg(game, hit
     ? `The beam refracts to ${refractedDeg.toFixed(1)}° — right on target! Bonus damage.`
     : `The beam refracts to ${refractedDeg.toFixed(1)}° — off the mark, but still lands. Normal damage.`);
+  if (hit) {
+    game.state.flags.snellHits = (game.state.flags.snellHits || 0) + 1;
+    const newlyUnlocked = checkNewAchievements(game.state);
+    if (newlyUnlocked.length) {
+      audio.playAchievement();
+      formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
+    }
+  }
   chooseAbility(game, 'refraction_bend');
-  delete battle.snellBonusMult;
+  delete battle.puzzleBonusMult;
+}
+
+// Diffraction Wave's button opens the fringe-finding puzzle the same way.
+function resolveDiffractionPuzzleShot(game, hit, angleDeg) {
+  const battle = game.battle;
+  if (!battle || battle.over) return;
+  battle.puzzleBonusMult = hit ? 1.8 : 1;
+  logMsg(game, hit
+    ? `The angle lands on the first bright fringe at ${angleDeg}° — constructive interference! Bonus damage.`
+    : `${angleDeg}° falls between fringes, mostly destructive. Normal damage.`);
+  chooseAbility(game, 'diffraction_wave');
+  delete battle.puzzleBonusMult;
 }
 
 export function flee(game) {
@@ -738,12 +762,12 @@ export function renderBattle(game) {
   const d = game.dom;
 
   const enemySprite = CHARACTER_SPRITES[enemy.id];
-  d.battleEnemyCtx.clearRect(0, 0, d.battleEnemyCanvas.width, d.battleEnemyCanvas.height);
+  drawZoneBackdrop(d.battleEnemyCtx, d.battleEnemyCanvas.width, d.battleEnemyCanvas.height, enemy.zone);
   if (enemySprite) {
     const px = enemy.isBoss ? PORTRAIT_PX * 1.15 : PORTRAIT_PX;
     drawSprite(d.battleEnemyCtx, enemySprite.shape, enemySprite.palette, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, px);
   }
-  d.battlePlayerCtx.clearRect(0, 0, d.battlePlayerCanvas.width, d.battlePlayerCanvas.height);
+  drawZoneBackdrop(d.battlePlayerCtx, d.battlePlayerCanvas.width, d.battlePlayerCanvas.height, enemy.zone);
   drawSprite(d.battlePlayerCtx, 'humanoid', 'player', d.battlePlayerCanvas.width / 2, d.battlePlayerCanvas.height / 2 + 6, PORTRAIT_PX);
 
   d.battleEnemyName.textContent = enemy.isBoss ? enemy.name + ' (?!)' : enemy.name;
@@ -789,6 +813,16 @@ export function renderBattle(game) {
     return actionIndex <= 9 ? `<span class="key-hint">${actionIndex}</span> ` : '';
   }
 
+  // Abilities that open an aiming puzzle instead of resolving instantly.
+  const PUZZLE_ABILITIES = {
+    refraction_bend: (g, cb) => openSnellPuzzle(g, cb),
+    diffraction_wave: (g, cb) => openDiffractionPuzzle(g, cb)
+  };
+  const PUZZLE_RESOLVERS = {
+    refraction_bend: resolveSnellPuzzleShot,
+    diffraction_wave: resolveDiffractionPuzzleShot
+  };
+
   ABILITIES.forEach(a => {
     const cd = battle.cooldowns[a.id] || 0;
     const cost = effectiveChargeCost(player, a);
@@ -796,10 +830,10 @@ export function renderBattle(game) {
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
     const costTag = cost ? ` <span class="charge-tag">${cost}⚡</span>` : '';
-    // Refraction Bend is aimed through the Snell's-law puzzle instead of
-    // resolving instantly — a small tag marks it so the button doesn't look
-    // identical to an ordinary instant-cast ability.
-    const aimTag = a.id === 'refraction_bend' ? ' <span class="charge-tag">🎯 Aim</span>' : '';
+    // Puzzle abilities are aimed instead of resolving instantly — a small
+    // tag marks them so the button doesn't look identical to an ordinary
+    // instant-cast ability.
+    const aimTag = PUZZLE_ABILITIES[a.id] ? ' <span class="charge-tag">🎯 Aim</span>' : '';
     btn.innerHTML = `<strong>${keyHint()}${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}${aimTag}</strong><span class="ability-desc">${a.desc}</span>`;
     // The button already shows a one-line gameplay blurb; the full Codex
     // explanation (once unlocked) goes in the title attribute so the deeper
@@ -809,8 +843,13 @@ export function renderBattle(game) {
       btn.title = `${codexEntry.title}\n\n${codexEntry.body}`;
     }
     btn.disabled = cd > 0 || shortOnCharge;
-    btn.onclick = a.id === 'refraction_bend'
-      ? () => openSnellPuzzle(game, (hit, refractedDeg) => resolveSnellPuzzleShot(game, hit, refractedDeg))
+    btn.onclick = PUZZLE_ABILITIES[a.id]
+      ? () => {
+          if (claimHint(game.state, 'aimingPuzzle')) {
+            logMsg(game, '💡 Tip: This ability opens an aiming puzzle — landing the target zone deals bonus damage, but missing still lands a normal hit.');
+          }
+          PUZZLE_ABILITIES[a.id](game, (hit, value) => PUZZLE_RESOLVERS[a.id](game, hit, value));
+        }
       : () => chooseAbility(game, a.id);
     d.battleActions.appendChild(btn);
   });

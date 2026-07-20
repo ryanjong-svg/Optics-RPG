@@ -12,6 +12,7 @@ import { openMap, closeMap } from './engine/mapUI.js';
 import { openQuestLog, closeQuestLog, hasReadyQuest } from './engine/questLogUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { renderSnellPuzzle, fireSnellPuzzle, closeSnellPuzzle } from './engine/snellPuzzleUI.js';
+import { renderDiffractionPuzzle, fireDiffractionPuzzle, closeDiffractionPuzzle } from './engine/diffractionPuzzleUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
 import * as audio from './engine/audio.js';
@@ -74,6 +75,15 @@ const dom = {
   snellReadout: q('snell-readout'),
   snellFire: q('snell-fire'),
   snellCancel: q('snell-cancel'),
+
+  diffractionPuzzlePanel: q('diffraction-puzzle-panel'),
+  diffractionCanvas: q('diffraction-canvas'),
+  diffractionAngle: q('diffraction-angle'),
+  diffractionAngleValue: q('diffraction-angle-value'),
+  diffractionReadout: q('diffraction-readout'),
+  diffractionFire: q('diffraction-fire'),
+  diffractionCancel: q('diffraction-cancel'),
+
   craftRecipes: q('craft-recipes'),
   craftClose: q('craft-close'),
 
@@ -208,10 +218,17 @@ document.addEventListener('keydown', unlockAndStartMusic, { once: true });
 document.addEventListener('pointerdown', unlockAndStartMusic, { once: true });
 
 document.addEventListener('keydown', (e) => {
-  if (e.code === 'Escape' && !dom.snellPuzzlePanel.classList.contains('hidden')) {
-    e.preventDefault();
-    closeSnellPuzzle(game);
-    return;
+  if (e.code === 'Escape') {
+    if (!dom.snellPuzzlePanel.classList.contains('hidden')) {
+      e.preventDefault();
+      closeSnellPuzzle(game);
+      return;
+    }
+    if (!dom.diffractionPuzzlePanel.classList.contains('hidden')) {
+      e.preventDefault();
+      closeDiffractionPuzzle(game);
+      return;
+    }
   }
   const keyMap = {
     ArrowUp: [0, -1], KeyW: [0, -1],
@@ -289,6 +306,10 @@ dom.craftClose.addEventListener('click', () => closeCraft(game));
 dom.snellAngle.addEventListener('input', () => renderSnellPuzzle(game));
 dom.snellFire.addEventListener('click', () => fireSnellPuzzle(game));
 dom.snellCancel.addEventListener('click', () => closeSnellPuzzle(game));
+
+dom.diffractionAngle.addEventListener('input', () => renderDiffractionPuzzle(game));
+dom.diffractionFire.addEventListener('click', () => fireDiffractionPuzzle(game));
+dom.diffractionCancel.addEventListener('click', () => closeDiffractionPuzzle(game));
 
 function showSaveMsg(text) {
   dom.saveTransferMsg.textContent = text;

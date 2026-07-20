@@ -51,14 +51,15 @@ export const ZONE_ENCOUNTERS = {
   prism_deep: ['fire_moth', 'ember_shard'],
   fiber_deep: ['mode_flicker', 'core_leech'],
   grating_deep: ['lattice_wisp', 'forbidden_mote'],
-  hologram_deep: ['phase_echo', 'fringe_ghost']
+  hologram_deep: ['phase_echo', 'fringe_ghost'],
+  lab_deep: ['dark_current_wisp', 'gain_specter']
 };
 
-// The 5 depth zones occasionally throw 2 regular enemies at once instead of
+// The 6 depth zones occasionally throw 2 regular enemies at once instead of
 // 1 — "later zones" get real multi-enemy tactical texture (every attack
 // ability cleaves to all living targets in a pack) without touching the
 // original 7 outer zones' pacing at all.
-const PACK_ELIGIBLE_ZONES = new Set(['mirrors_deep', 'prism_deep', 'fiber_deep', 'grating_deep', 'hologram_deep']);
+const PACK_ELIGIBLE_ZONES = new Set(['mirrors_deep', 'prism_deep', 'fiber_deep', 'grating_deep', 'hologram_deep', 'lab_deep']);
 
 // Each zone gets a distinct raised-block palette (top/left/right face shading)
 // so a glance at the walls alone tells you which area you're in.
@@ -74,7 +75,8 @@ export const ZONE_WALL_COLORS = {
   prism_deep: { top: '#8a3a2a', left: '#6b2a1e', right: '#4a1c14' },
   fiber_deep: { top: '#2a6b6b', left: '#1e4a4a', right: '#143434' },
   grating_deep: { top: '#5c4a8a', left: '#3f3266', right: '#2a2248' },
-  hologram_deep: { top: '#8a2a60', left: '#6b1e4a', right: '#4a1434' }
+  hologram_deep: { top: '#8a2a60', left: '#6b1e4a', right: '#4a1434' },
+  lab_deep: { top: '#8a7a2a', left: '#6b5c1e', right: '#4a3f14' }
 };
 
 function tileAt(map, x, y) {

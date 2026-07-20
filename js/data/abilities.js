@@ -98,7 +98,9 @@ export const ABILITIES = [
     type: 'attack', basePower: 14, cooldown: 2, chargeCost: 2,
     desc: 'Only works if photon energy clears the target’s band gap — but hits hard when it does.',
     effect(ctx) {
-      const photonEV = 1.0 + ctx.player.focus * 0.05 + (ctx.gear.filter && ctx.gear.filter.bandgapPierce ? 0.8 : 0);
+      const filter = ctx.gear.filter;
+      const pierceBonus = filter && filter.bandgapPierce ? (filter.bandgapPierceEV != null ? filter.bandgapPierceEV : 0.8) : 0;
+      const photonEV = 1.0 + ctx.player.focus * 0.05 + pierceBonus;
       const gap = ctx.enemy.bandgapEV != null ? ctx.enemy.bandgapEV : 0;
       if (photonEV <= gap) {
         return { dmg: 0, note: `Photon energy ${photonEV.toFixed(1)} eV can’t clear the ${gap.toFixed(1)} eV band gap — no current flows.` };

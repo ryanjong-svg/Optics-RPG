@@ -210,6 +210,26 @@ export const ENEMIES = {
     resists: ['laser_focus', 'reflect_strike'], resistNote: 'a coherent beam and a clean reflection are exactly the two things a volume hologram is built to answer with — both just feed it.',
     zone: 'hologram_deep', flavor: 'A guardian recorded so deep in the vault’s crystal that it doesn’t just show a memory of a defender anymore — the electro-optic field holding it up simply refuses to switch off.'
   },
+  dark_current_wisp: {
+    id: 'dark_current_wisp', name: 'Dark Current Wisp', hp: 28, atk: 6, def: 3, xp: 17, mats: ['avalanche_silicon'],
+    weakTo: ['laser_focus'], weakNote: 'a tuned coherent beam overwhelms its noise floor far more precisely than scattered light ever could.',
+    resists: ['diffraction_wave'], resistNote: 'spread-out light never concentrates enough to register above its own thermal leakage.',
+    zone: 'lab_deep', flavor: 'A flicker of current that was never triggered by light at all — pure thermal noise, leaking through the junction in the dark.'
+  },
+  gain_specter: {
+    id: 'gain_specter', name: 'Gain Specter', hp: 34, atk: 8, def: 5, xp: 21, mats: ['avalanche_silicon', 'silicon'],
+    bandgapEV: 1.6,
+    weakTo: ['photoelectric_shock'], weakNote: 'one photon clearing its 1.6 eV gap is all the trigger a reverse-biased junction needs to cascade.',
+    resists: ['reflect_strike'], resistNote: 'a reflection carries no absorption event — nothing for the avalanche to start from.',
+    zone: 'lab_deep', flavor: 'A single freed electron that never stopped multiplying, each collision knocking another loose behind it.'
+  },
+  multiplication_warden: {
+    id: 'multiplication_warden', name: 'The Multiplication Warden', hp: 56, atk: 12, def: 9, xp: 39, mats: ['avalanche_silicon', 'silicon'],
+    bandgapEV: 1.8,
+    weakTo: ['photoelectric_shock'], weakNote: 'exactly like every band gap before it, only a photon energetic enough clears its threshold — but once it does, the avalanche it triggers is total.',
+    resists: ['dispersion_burst', 'diffraction_wave'], resistNote: 'splitting or spreading the beam only produces photons individually too weak to clear the gap — the avalanche needs one carrier, not many faint ones.',
+    zone: 'lab_deep', flavor: 'The Labs’ deepest safeguard, a junction biased so far past breakdown that one stray photon is already a chain reaction waiting to happen.'
+  },
   null_medium: {
     id: 'null_medium', name: 'The Null Medium', hp: 70, atk: 11, def: 5, xp: 80, mats: [],
     isBoss: true,

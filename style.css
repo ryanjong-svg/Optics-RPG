@@ -194,14 +194,15 @@ canvas#overworld-canvas {
 
 /* A floating modal over the battle panel, not another full-bleed panel in
    the normal show/hide rotation — the player needs to see the puzzle
-   without losing the battle state underneath it. */
-#snell-puzzle-panel {
+   without losing the battle state underneath it. Shared by every aiming
+   puzzle (Snell's law, diffraction fringe, ...). */
+.puzzle-overlay {
   position: fixed; inset: auto; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: min(320px, 90vw); max-height: 85vh; overflow-y: auto;
   z-index: 600; box-shadow: 0 0 30px rgba(0,0,0,0.6);
 }
-#snell-canvas { display: block; margin: 8px auto; background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); }
-#snell-fire { width: 100%; margin-top: 10px; }
+.puzzle-overlay canvas { display: block; margin: 8px auto; background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); }
+.puzzle-overlay .puzzle-fire { width: 100%; margin-top: 10px; }
 
 #dialogue-panel {
   position: absolute; left: 0; right: 0; bottom: 0;

@@ -86,6 +86,11 @@ export const MATERIALS = {
     id: 'lithium_niobate', name: 'Lithium Niobate', glyph: '\u{26A1}', n: 2.2, abbe: 30, hardness: 5,
     transparency: 0.85, density: 4.65,
     fact: 'Lithium niobate’s electro-optic effect lets an applied voltage change its refractive index on demand — the crystal at the heart of most real fiber-optic modulators and many volume holograms.'
+  },
+  avalanche_silicon: {
+    id: 'avalanche_silicon', name: 'Avalanche Silicon', glyph: '\u{1F4A5}', n: 3.6, abbe: 0, hardness: 7,
+    transparency: 0.03, bandgapEV: 1.6, density: 2.4,
+    fact: 'Under a strong enough reverse-bias field, one photo-generated carrier gains enough kinetic energy to knock loose another on impact — each new carrier repeats the process, multiplying a single absorbed photon into a cascade.'
   }
 };
 

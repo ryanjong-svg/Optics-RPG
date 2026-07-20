@@ -83,3 +83,26 @@ test('applyCraftRecipe: refuses to re-craft something already owned', () => {
   const ok = applyCraftRecipe(state.player, findRecipe('converging_lens'));
   assert.equal(ok, false);
 });
+
+test('canCraftRecipe: the Avalanche Photodetector is refused without the Silicon Photodetector, even with enough materials', () => {
+  const state = withMaterials(newGameState(), { avalanche_silicon: 2 });
+  assert.equal(canCraftRecipe(state.player, findRecipe('avalanche_photodetector')), false);
+});
+
+test('applyCraftRecipe: combining the Avalanche Photodetector consumes the Silicon Photodetector and grants the upgrade', () => {
+  const state = withMaterials(newGameState(), { avalanche_silicon: 2 });
+  state.player.ownedGear.photodetector = true;
+  const ok = applyCraftRecipe(state.player, findRecipe('avalanche_photodetector'));
+  assert.equal(ok, true);
+  assert.equal(state.player.ownedGear.photodetector, false, 'the predecessor should be consumed');
+  assert.equal(state.player.ownedGear.avalanche_photodetector, true);
+  assert.equal(state.player.materials.avalanche_silicon, 0);
+});
+
+test('applyCraftRecipe: if the Silicon Photodetector was equipped, the Avalanche Photodetector takes its place', () => {
+  const state = withMaterials(newGameState(), { avalanche_silicon: 2 });
+  state.player.ownedGear.photodetector = true;
+  state.player.equipped.filter = 'photodetector';
+  applyCraftRecipe(state.player, findRecipe('avalanche_photodetector'));
+  assert.equal(state.player.equipped.filter, 'avalanche_photodetector');
+});

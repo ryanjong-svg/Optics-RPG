@@ -83,6 +83,23 @@ test('photoelectric_shock: deals zero damage strictly below the band gap, positi
   assert.ok(withPiercingFilter.dmg > 0, 'a piercing filter should clear a band gap that would otherwise block the hit');
 });
 
+test('photoelectric_shock: a larger bandgapPierceEV (e.g. the Avalanche Photodetector) clears a higher band gap and deals more excess damage than the default 0.8 eV pierce', () => {
+  const ability = findAbility('photoelectric_shock');
+  const player = { focus: 0 };
+  const enemy = { bandgapEV: 1.6, weakTo: [], resists: [] }; // just above the default pierce's 1.8 eV total, so default alone still clears it — use a higher gap to differentiate
+  const highGapEnemy = { bandgapEV: 2.0, weakTo: [], resists: [] };
+
+  const defaultPierce = ability.effect({ player, gear: { filter: { bandgapPierce: true } }, log: noop, enemy: highGapEnemy });
+  assert.equal(defaultPierce.dmg, 0, 'the default 0.8 eV pierce should not clear a 2.0 eV gap');
+
+  const strongerPierce = ability.effect({ player, gear: { filter: { bandgapPierce: true, bandgapPierceEV: 1.5 } }, log: noop, enemy: highGapEnemy });
+  assert.ok(strongerPierce.dmg > 0, 'the Avalanche Photodetector\'s 1.5 eV pierce should clear a 2.0 eV gap');
+
+  const bothClear = ability.effect({ player, gear: { filter: { bandgapPierce: true, bandgapPierceEV: 1.5 } }, log: noop, enemy });
+  const defaultClear = ability.effect({ player, gear: { filter: { bandgapPierce: true } }, log: noop, enemy });
+  assert.ok(bothClear.dmg > defaultClear.dmg, 'a bigger pierce bonus should deal more excess-energy damage once both clear the gap');
+});
+
 test('laser_focus: a guaranteed crit applies the 1.8x crit multiplier on top of base damage', () => {
   const ability = findAbility('laser_focus');
   const player = { focus: 6 };

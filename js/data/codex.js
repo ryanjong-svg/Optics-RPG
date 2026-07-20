@@ -76,6 +76,10 @@ export const CODEX = {
   photobiomodulation: {
     title: 'Photobiomodulation & the Therapeutic Window',
     body: `Blood and water absorb most visible and infrared light strongly — except for a narrow "therapeutic window" around 650-1350nm, where both absorb comparatively little and light can penetrate several centimeters into tissue. Low-power red or near-infrared light in that window can be absorbed by mitochondrial cytochrome c oxidase, mildly stimulating cellular energy production and repair — the real mechanism behind "cold laser therapy," used clinically for wound healing and pain relief.`
+  },
+  avalanche_multiplication: {
+    title: 'Avalanche Multiplication & Impact Ionization',
+    body: `Under a strong enough reverse-bias field, a single photo-generated electron gains enough kinetic energy between collisions to knock loose an additional electron-hole pair on impact — impact ionization. Each new carrier repeats the process, so one absorbed photon can trigger a cascade of thousands of electrons. Real avalanche photodiodes (APDs) exploit exactly this gain mechanism to detect single photons.`
   }
 };
 

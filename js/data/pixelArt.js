@@ -232,6 +232,7 @@ export const PALETTES = {
   gem_ge_doped_silica: { K: OUTLINE, A: '#7fe0c8', D: '#eafff8' },
   gem_photonic_crystal: { K: OUTLINE, A: '#b088e0', D: '#e8d9ff' },
   gem_lithium_niobate: { K: OUTLINE, A: '#d94aa0', D: '#ffd9ef' },
+  gem_avalanche_silicon: { K: OUTLINE, A: '#ffcc33', D: '#ffffff' },
 
   split_ray_wisp: { K: OUTLINE, A: '#bfe3ff', E: '#0a2a3a' },
   twin_flicker: { K: OUTLINE, A: '#8fc7e0', C: '#e8f7ff', E: '#0a2a3a' },
@@ -251,7 +252,11 @@ export const PALETTES = {
 
   phase_echo: { K: OUTLINE, A: '#d94aa0', E: '#2a0a1e' },
   fringe_ghost: { K: '#2a0a1e', A: '#b23a80', E: '#ffd9ef' },
-  volume_warden: { K: OUTLINE, A: '#8a2a60', B: '#5c1a40', D: '#ffb0dd' }
+  volume_warden: { K: OUTLINE, A: '#8a2a60', B: '#5c1a40', D: '#ffb0dd' },
+
+  dark_current_wisp: { K: OUTLINE, A: '#3a3a4a', E: '#ffee88' },
+  gain_specter: { K: OUTLINE, A: '#ffcc33', C: '#ffffff', E: '#1a1a2e' },
+  multiplication_warden: { K: OUTLINE, A: '#2a2a55', B: '#ffcc33', D: '#ffffff' }
 };
 
 // enemyId/npcId -> { shape, palette }
@@ -300,7 +305,11 @@ export const CHARACTER_SPRITES = {
 
   phase_echo: { shape: 'ghost', palette: 'phase_echo' },
   fringe_ghost: { shape: 'wraith', palette: 'fringe_ghost' },
-  volume_warden: { shape: 'golem', palette: 'volume_warden' }
+  volume_warden: { shape: 'golem', palette: 'volume_warden' },
+
+  dark_current_wisp: { shape: 'ghost', palette: 'dark_current_wisp' },
+  gain_specter: { shape: 'imp', palette: 'gain_specter' },
+  multiplication_warden: { shape: 'colossus', palette: 'multiplication_warden' }
 };
 
 export function itemSprite(materialId) {

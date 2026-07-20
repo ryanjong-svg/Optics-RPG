@@ -154,7 +154,10 @@ export const MAPS = {
     ],
     spawn: { x: 2, y: 5 },
     arrival: 'The silence here has a texture — the hush of machines that powered down mid-thought.',
-    exits: [{ x: 2, y: 5, to: 'village', label: 'Lumen Village' }],
+    exits: [
+      { x: 2, y: 5, to: 'village', label: 'Lumen Village' },
+      { x: 2, y: 9, to: 'lab_deep', label: 'The Avalanche Well' }
+    ],
     items: [
       { x: 2, y: 2, material: 'silicon' },
       { x: 14, y: 9, material: 'diamond' }
@@ -237,6 +240,21 @@ export const MAPS = {
     guardian: { x: 13, y: 9, enemyId: 'volume_warden' },
     wanderer: { x: 2, y: 5, enemyId: 'phase_echo' },
     secret: { x: 8, y: 3, material: 'photonic_crystal', findText: 'A shard of engineered lattice, forbidding light in a way nothing in this vault was built to do.' }
+  },
+  lab_deep: {
+    id: 'lab_deep', name: 'The Avalanche Well', zone: 'lab_deep',
+    rows: borderedGrassBlock(),
+    spawn: { x: 2, y: 1 },
+    arrival: 'The hush down here isn’t silence — it’s a field held just short of breaking, waiting for one grain of light to decide it.',
+    codexConcept: 'avalanche_multiplication',
+    exits: [{ x: 2, y: 1, to: 'lab', label: 'Semiconductor Labs' }],
+    items: [
+      { x: 13, y: 1, material: 'avalanche_silicon' },
+      { x: 2, y: 9, material: 'silicon' }
+    ],
+    guardian: { x: 13, y: 9, enemyId: 'multiplication_warden' },
+    wanderer: { x: 2, y: 5, enemyId: 'dark_current_wisp' },
+    secret: { x: 8, y: 3, material: 'photonic_crystal', findText: 'A shard of forbidden-band lattice, humming faintly out of phase with the Well’s own current — as if it remembers being struck by a photon that never should have arrived.' }
   }
 };
 

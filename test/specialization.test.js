@@ -11,25 +11,36 @@ import { SPECIALIZATIONS } from '../js/data/specializations.js';
 test('applySetSpecialization: refused below the level requirement', () => {
   const state = newGameState();
   state.player.level = 4;
-  assert.equal(applySetSpecialization(state.player, 'photon_focus'), false);
+  assert.equal(applySetSpecialization(state, 'photon_focus'), false);
   assert.equal(state.player.specialization, null);
 });
 
 test('applySetSpecialization: succeeds at the level requirement, and can be switched freely', () => {
   const state = newGameState();
   state.player.level = 5;
-  assert.equal(applySetSpecialization(state.player, 'photon_focus'), true);
+  assert.equal(applySetSpecialization(state, 'photon_focus'), true);
   assert.equal(state.player.specialization, 'photon_focus');
-  assert.equal(applySetSpecialization(state.player, 'wave_mechanics'), true);
+  assert.equal(applySetSpecialization(state, 'wave_mechanics'), true);
   assert.equal(state.player.specialization, 'wave_mechanics');
-  assert.equal(applySetSpecialization(state.player, null), true, 'clearing back to no specialization should be allowed');
+  assert.equal(applySetSpecialization(state, null), true, 'clearing back to no specialization should be allowed');
   assert.equal(state.player.specialization, null);
 });
 
 test('applySetSpecialization: refuses an unknown specialization id', () => {
   const state = newGameState();
   state.player.level = 10;
-  assert.equal(applySetSpecialization(state.player, 'not_a_real_spec'), false);
+  assert.equal(applySetSpecialization(state, 'not_a_real_spec'), false);
+});
+
+test('applySetSpecialization: records every specialization ever tried, for the "tried both paths" achievement', () => {
+  const state = newGameState();
+  state.player.level = 5;
+  applySetSpecialization(state, 'photon_focus');
+  assert.deepEqual(state.flags.specializationsTried, { photon_focus: true });
+  applySetSpecialization(state, 'wave_mechanics');
+  assert.deepEqual(state.flags.specializationsTried, { photon_focus: true, wave_mechanics: true });
+  applySetSpecialization(state, null);
+  assert.deepEqual(state.flags.specializationsTried, { photon_focus: true, wave_mechanics: true }, 'clearing back to null should not erase the lifetime record');
 });
 
 test('specializationDamageMult: 1x with no specialization, boosted only for that path\'s abilities', () => {

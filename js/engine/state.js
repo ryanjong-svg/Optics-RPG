@@ -34,7 +34,9 @@ export function newGameState() {
       ngPlusCycle: 0,
       hintsShown: {},
       enemiesDefeated: {},
-      badgeSeen: { bestiary: 0, codex: 0, chronicle: 0 }
+      badgeSeen: { bestiary: 0, codex: 0, chronicle: 0 },
+      snellHits: 0,
+      specializationsTried: {}
     },
     settings: {
       difficulty: 'normal',

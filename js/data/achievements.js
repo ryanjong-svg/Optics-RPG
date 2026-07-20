@@ -76,6 +76,17 @@ export const ACHIEVEMENTS = {
     title: 'Bestiary Completionist',
     desc: 'Defeat every enemy type at least once.',
     check: state => Object.keys(ENEMIES).every(id => state.flags.enemiesDefeated[id])
+  },
+  perfect_refraction: {
+    title: 'Perfect Refraction',
+    desc: 'Land the aiming puzzle\'s bonus zone 10 times.',
+    check: state => (state.flags.snellHits || 0) >= 10
+  },
+  dual_nature: {
+    title: 'Dual Nature',
+    desc: 'Try both specializations.',
+    check: state => !!(state.flags.specializationsTried &&
+      state.flags.specializationsTried.photon_focus && state.flags.specializationsTried.wave_mechanics)
   }
 };
 

@@ -152,7 +152,8 @@ const ZONE_AMBIENCE = {
   prism_deep: { freq: 220, freq2: null, lfoRate: 0.5, gain: 0.024 },
   fiber_deep: { freq: 110, freq2: null, lfoRate: 0.12, gain: 0.027 },
   grating_deep: { freq: 246, freq2: null, lfoRate: 0.9, gain: 0.02 },
-  hologram_deep: { freq: 196, freq2: 197.5, lfoRate: 0.14, gain: 0.02 }
+  hologram_deep: { freq: 196, freq2: 197.5, lfoRate: 0.14, gain: 0.02 },
+  lab_deep: { freq: 65, freq2: 65.5, lfoRate: 1.2, gain: 0.032 }
 };
 
 let ambienceNodes = null;
