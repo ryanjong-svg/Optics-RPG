@@ -10,16 +10,17 @@ import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 import { unlockCodex } from './state.js';
 import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
+import { showToast } from './toastUI.js';
 import * as audio from './audio.js';
 
-// Overworld actions (pickups, secrets, zone arrivals) have no per-turn log
-// stream like battle does, so this appends any newly-crossed milestone
-// achievement onto whichever message queue is already about to be shown,
-// instead of leaving it to surface only later in the Field Log.
-function withAchievementLines(state, lines) {
+// Toasts (not the modal showMessages queue used for pickup/secret/arrival
+// text) so a milestone achievement never blocks or gets tangled up with
+// whatever informational message is already about to be shown.
+function announceNewAchievements(game, state) {
   const newlyUnlocked = checkNewAchievements(state);
-  if (newlyUnlocked.length) audio.playAchievement();
-  return [...lines, ...formatAchievementLines(newlyUnlocked)];
+  if (!newlyUnlocked.length) return;
+  audio.playAchievement();
+  formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
 }
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
@@ -379,7 +380,8 @@ export function handleMove(game, dx, dy) {
     state.player.materials[item.material] = (state.player.materials[item.material] || 0) + 1;
     const mat = MATERIALS[item.material];
     audio.playPickup();
-    showMessages(game, withAchievementLines(state, [`Picked up ${mat.name}! ${mat.fact}`]));
+    showMessages(game, [`Picked up ${mat.name}! ${mat.fact}`]);
+    announceNewAchievements(game, state);
     game.renderHud();
     saveGame(state);
     return;
@@ -391,7 +393,8 @@ export function handleMove(game, dx, dy) {
     state.player.materials[secret.material] = (state.player.materials[secret.material] || 0) + 1;
     const mat = MATERIALS[secret.material];
     audio.playQuestComplete();
-    showMessages(game, withAchievementLines(state, [`A hidden cache! ${secret.findText} (+1 ${mat.name})`]));
+    showMessages(game, [`A hidden cache! ${secret.findText} (+1 ${mat.name})`]);
+    announceNewAchievements(game, state);
     game.renderHud();
     saveGame(state);
     return;
@@ -410,9 +413,8 @@ export function handleMove(game, dx, dy) {
     }
     saveGame(state);
     renderOverworld(game);
-    const arrivalLines = firstVisit && target.arrival ? [target.arrival] : [];
-    const lines = withAchievementLines(state, arrivalLines);
-    if (lines.length) showMessages(game, lines);
+    if (firstVisit && target.arrival) showMessages(game, [target.arrival]);
+    announceNewAchievements(game, state);
     return;
   }
 

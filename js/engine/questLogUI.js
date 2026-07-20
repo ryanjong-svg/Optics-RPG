@@ -2,6 +2,13 @@ import { QUESTS, isObjectiveMet } from '../data/quests.js';
 import { MATERIALS } from '../data/materials.js';
 import { MAPS } from '../data/maps.js';
 
+// A live "action needed" signal (not a since-last-seen diff, unlike the
+// Bestiary/Codex/Chronicle badges) — it should stay lit until the quest
+// is actually turned in, not just until the Quest Log has been opened once.
+export function hasReadyQuest(state) {
+  return Object.entries(QUESTS).some(([id, quest]) => state.flags.quests[id] === 'active' && isObjectiveMet(state, quest));
+}
+
 export function openQuestLog(game) {
   game.state.mode = 'questlog';
   game.showPanel('questlog');

@@ -5,10 +5,18 @@ const ZONE_NAMES = Object.fromEntries(Object.values(MAPS).map(m => [m.zone, m.na
 const ZONE_ORDER = [...new Set(Object.values(MAPS).map(m => m.zone))];
 const BOSS_ZONE = '__boss'; // null_medium has no zone of its own; grouped into its own section
 
+export function bestiaryCaughtCount(state) {
+  return Object.keys(ENEMIES).filter(id => state.flags.enemiesDefeated[id]).length;
+}
+
 export function openBestiary(game) {
   game.state.mode = 'bestiary';
   game.showPanel('bestiary');
   renderBestiary(game);
+  const state = game.state;
+  if (!state.flags.badgeSeen) state.flags.badgeSeen = {};
+  state.flags.badgeSeen.bestiary = bestiaryCaughtCount(state);
+  if (game.updateBadges) game.updateBadges();
 }
 
 export function closeBestiary(game) {

@@ -13,6 +13,7 @@ import { buildGear } from './gear.js';
 import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
 import { applyConsumable } from './consumables.js';
+import { showToast } from './toastUI.js';
 import * as audio from './audio.js';
 
 // A personal "Bestiary": once you've beaten an enemy type before, its known
@@ -627,7 +628,7 @@ function resolveVictory(game) {
   }
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
-  formatAchievementLines(newlyUnlocked).forEach(m => logMsg(game, m));
+  formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
   saveGame(state);
 }
 

@@ -11,6 +11,7 @@
 </head>
 <body>
 <div id="app">
+  <div id="toast-container" role="status" aria-live="polite"></div>
   <header id="hud" class="bracketed">
     <div class="hud-title">Prism &amp; Photon</div>
     <div class="hud-stats">
@@ -29,7 +30,7 @@
     <button id="btn-completion" class="action-btn ghost">Log</button>
     <button id="btn-settings" class="action-btn ghost">Settings</button>
     <button id="btn-help" class="action-btn ghost">Help</button>
-    <button id="btn-mute" class="action-btn ghost" title="Toggle sound">&#128266;</button>
+    <button id="btn-mute" class="action-btn ghost" title="Toggle sound" aria-label="Toggle sound">&#128266;</button>
   </header>
 
   <div id="map-label">Lumen Village</div>
@@ -72,7 +73,7 @@
       </div>
     </div>
     <div id="battle-pack-mates"></div>
-    <div id="battle-log"></div>
+    <div id="battle-log" role="log" aria-live="polite"></div>
     <div id="battle-actions" class="action-grid"></div>
   </div>
 

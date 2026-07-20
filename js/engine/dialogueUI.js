@@ -4,6 +4,7 @@ import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
 import { grantXp, claimHint } from './state.js';
 import { saveGame } from './save.js';
 import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
+import { showToast } from './toastUI.js';
 import * as audio from './audio.js';
 
 function grantXpWithSound(state, amount, log) {
@@ -69,10 +70,9 @@ export function startNpcInteraction(game, npcId) {
         const newlyUnlocked = completeQuest(game, questId, quest);
         if (newlyUnlocked.length) {
           audio.playAchievement();
-          showMessages(game, formatAchievementLines(newlyUnlocked), () => startQuiz(game, npcId));
-        } else {
-          startQuiz(game, npcId);
+          formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
         }
+        startQuiz(game, npcId);
       });
       return;
     }

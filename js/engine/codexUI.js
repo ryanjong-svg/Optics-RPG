@@ -1,9 +1,17 @@
 import { CODEX } from '../data/codex.js';
 
+export function codexUnlockedCount(state) {
+  return Object.keys(CODEX).filter(id => state.codexUnlocked[id]).length;
+}
+
 export function openCodex(game) {
   game.state.mode = 'codex';
   game.showPanel('codex');
   renderCodex(game);
+  const state = game.state;
+  if (!state.flags.badgeSeen) state.flags.badgeSeen = {};
+  state.flags.badgeSeen.codex = codexUnlockedCount(state);
+  if (game.updateBadges) game.updateBadges();
 }
 
 export function closeCodex(game) {

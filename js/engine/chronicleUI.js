@@ -1,9 +1,17 @@
 import { LORE, isLoreUnlocked } from '../data/lore.js';
 
+export function chronicleUnlockedCount(state) {
+  return Object.values(LORE).filter(entry => isLoreUnlocked(state, entry)).length;
+}
+
 export function openChronicle(game) {
   game.state.mode = 'chronicle';
   game.showPanel('chronicle');
   renderChronicle(game);
+  const state = game.state;
+  if (!state.flags.badgeSeen) state.flags.badgeSeen = {};
+  state.flags.badgeSeen.chronicle = chronicleUnlockedCount(state);
+  if (game.updateBadges) game.updateBadges();
 }
 
 export function closeChronicle(game) {

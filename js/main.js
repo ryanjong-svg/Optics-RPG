@@ -3,13 +3,13 @@ import { loadGame, saveGame, exportSaveString, importSaveString, clearSave } fro
 import { findDifficulty } from './data/difficulty.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
-import { openCodex, closeCodex } from './engine/codexUI.js';
-import { openBestiary, closeBestiary } from './engine/bestiaryUI.js';
+import { openCodex, closeCodex, codexUnlockedCount } from './engine/codexUI.js';
+import { openBestiary, closeBestiary, bestiaryCaughtCount } from './engine/bestiaryUI.js';
 import { openHelp, closeHelp } from './engine/helpUI.js';
-import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
+import { openChronicle, closeChronicle, chronicleUnlockedCount } from './engine/chronicleUI.js';
 import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
-import { openQuestLog, closeQuestLog } from './engine/questLogUI.js';
+import { openQuestLog, closeQuestLog, hasReadyQuest } from './engine/questLogUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
@@ -22,6 +22,7 @@ const dom = {
   ctx2d: q('overworld-canvas').getContext('2d'),
   mapLabel: q('map-label'),
   mapExits: q('map-exits'),
+  toastContainer: q('toast-container'),
 
   hudLevel: q('hud-level'),
   hudCycle: q('hud-cycle'),
@@ -168,8 +169,23 @@ function renderHud() {
   dom.hudHpBar.classList.toggle('critical', p.hp / p.maxHp < 0.25);
   dom.hudXpBar.style.width = Math.max(0, Math.round((p.xp / p.xpToNext) * 100)) + '%';
   dom.hudXpText.textContent = `${p.xp}/${p.xpToNext} XP`;
+  updateBadges();
 }
 game.renderHud = renderHud;
+
+// A small dot on Bestiary/Codex/Chronicle marks unseen new entries (cleared
+// the moment that panel is opened, in each module's own openX()); Quests
+// instead stays lit for as long as any active quest is ready to turn in.
+function updateBadges() {
+  const state = game.state;
+  if (!state.flags.badgeSeen) state.flags.badgeSeen = {};
+  const seen = state.flags.badgeSeen;
+  dom.btnBestiary.classList.toggle('has-badge', bestiaryCaughtCount(state) > (seen.bestiary || 0));
+  dom.btnCodex.classList.toggle('has-badge', codexUnlockedCount(state) > (seen.codex || 0));
+  dom.btnChronicle.classList.toggle('has-badge', chronicleUnlockedCount(state) > (seen.chronicle || 0));
+  dom.btnQuestlog.classList.toggle('has-badge', hasReadyQuest(state));
+}
+game.updateBadges = updateBadges;
 
 function unlockAndStartMusic() {
   audio.unlockAudio();
