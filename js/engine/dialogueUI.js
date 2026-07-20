@@ -3,7 +3,7 @@ import { NPC_INTRO } from '../data/dialogue.js';
 import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
 import { grantXp, claimHint } from './state.js';
 import { saveGame } from './save.js';
-import { checkNewAchievements } from '../data/achievements.js';
+import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
 import * as audio from './audio.js';
 
 function grantXpWithSound(state, amount, log) {
@@ -68,7 +68,7 @@ export function startNpcInteraction(game, npcId) {
       showMessages(game, [quest.complete], () => {
         const newlyUnlocked = completeQuest(game, questId, quest);
         if (newlyUnlocked.length) {
-          showMessages(game, newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`), () => startQuiz(game, npcId));
+          showMessages(game, formatAchievementLines(newlyUnlocked), () => startQuiz(game, npcId));
         } else {
           startQuiz(game, npcId);
         }

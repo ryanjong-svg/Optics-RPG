@@ -100,3 +100,10 @@ export function checkNewAchievements(state) {
   }
   return newly;
 }
+
+// Shared by every caller that announces newly-unlocked achievements (battle
+// victory, quest completion, overworld actions), so the message shape only
+// has to change in one place.
+export function formatAchievementLines(newly) {
+  return newly.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`);
+}

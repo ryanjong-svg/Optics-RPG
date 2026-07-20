@@ -226,18 +226,19 @@ function setMuted(muted) {
 }
 dom.btnMute.addEventListener('click', () => setMuted(!audio.isMuted()));
 dom.settingsMuteToggle.addEventListener('click', () => setMuted(!audio.isMuted()));
-dom.settingsMusicVolume.addEventListener('input', () => {
-  const v = Number(dom.settingsMusicVolume.value) / 100;
-  audio.setMusicVolume(v);
-  game.state.settings.musicVolume = v;
-  saveGame(game.state);
-});
-dom.settingsSfxVolume.addEventListener('input', () => {
-  const v = Number(dom.settingsSfxVolume.value) / 100;
-  audio.setSfxVolume(v);
-  game.state.settings.sfxVolume = v;
-  saveGame(game.state);
-});
+// 'input' fires continuously while dragging (live audio/state feedback);
+// saving is deferred to 'change' (fires once, on release) so a drag doesn't
+// re-serialize and re-persist the whole save file dozens of times.
+function bindVolumeSlider(el, setter, settingsKey) {
+  el.addEventListener('input', () => {
+    const v = Number(el.value) / 100;
+    setter(v);
+    game.state.settings[settingsKey] = v;
+  });
+  el.addEventListener('change', () => saveGame(game.state));
+}
+bindVolumeSlider(dom.settingsMusicVolume, audio.setMusicVolume, 'musicVolume');
+bindVolumeSlider(dom.settingsSfxVolume, audio.setSfxVolume, 'sfxVolume');
 
 dom.craftClose.addEventListener('click', () => closeCraft(game));
 

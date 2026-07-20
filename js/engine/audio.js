@@ -25,9 +25,9 @@ export function isMuted() { return muted; }
 function applyAmbienceGain() {
   if (!ambienceNodes) return;
   const c = getCtx();
-  const gain = muted ? 0 : ambienceNodes.baseGain * musicVolume;
-  ambienceNodes.master.gain.setValueAtTime(gain, c.currentTime);
-  ambienceNodes.lfoGain.gain.setValueAtTime(muted ? 0 : ambienceNodes.baseGain * 0.5 * musicVolume, c.currentTime);
+  const vol = muted ? 0 : musicVolume;
+  ambienceNodes.master.gain.setValueAtTime(ambienceNodes.baseGain * vol, c.currentTime);
+  ambienceNodes.lfoGain.gain.setValueAtTime(ambienceNodes.baseGain * 0.5 * vol, c.currentTime);
 }
 
 export function setMuted(value) {
@@ -164,15 +164,12 @@ export function playZoneAmbience(zone) {
   ambienceZone = zone;
 
   const c = getCtx();
-  const startGain = muted ? 0 : config.gain * musicVolume;
   const master = c.createGain();
-  master.gain.setValueAtTime(startGain, c.currentTime);
   master.connect(c.destination);
 
   const lfo = c.createOscillator();
   const lfoGain = c.createGain();
   lfo.frequency.value = config.lfoRate;
-  lfoGain.gain.value = muted ? 0 : config.gain * 0.5 * musicVolume;
   lfo.connect(lfoGain);
   lfoGain.connect(master.gain);
   lfo.start();
@@ -189,6 +186,7 @@ export function playZoneAmbience(zone) {
   }
 
   ambienceNodes = { master, lfoGain, baseGain: config.gain, oscillators };
+  applyAmbienceGain();
 }
 
 export function stopZoneAmbience() {

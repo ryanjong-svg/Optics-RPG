@@ -9,7 +9,7 @@ import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
 import { saveGame } from './save.js';
 import { unlockCodex } from './state.js';
-import { checkNewAchievements } from '../data/achievements.js';
+import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
 import * as audio from './audio.js';
 
 // Overworld actions (pickups, secrets, zone arrivals) have no per-turn log
@@ -17,8 +17,7 @@ import * as audio from './audio.js';
 // achievement onto whichever message queue is already about to be shown,
 // instead of leaving it to surface only later in the Field Log.
 function withAchievementLines(state, lines) {
-  const newlyUnlocked = checkNewAchievements(state);
-  return [...lines, ...newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`)];
+  return [...lines, ...formatAchievementLines(checkNewAchievements(state))];
 }
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels
@@ -409,14 +408,9 @@ export function handleMove(game, dx, dy) {
     }
     saveGame(state);
     renderOverworld(game);
-    if (firstVisit && target.arrival) {
-      showMessages(game, withAchievementLines(state, [target.arrival]));
-    } else {
-      const newlyUnlocked = checkNewAchievements(state);
-      if (newlyUnlocked.length) {
-        showMessages(game, newlyUnlocked.map(a => `🏆 Achievement unlocked: ${a.title} — ${a.desc}`));
-      }
-    }
+    const arrivalLines = firstVisit && target.arrival ? [target.arrival] : [];
+    const lines = withAchievementLines(state, arrivalLines);
+    if (lines.length) showMessages(game, lines);
     return;
   }
 

@@ -4,7 +4,7 @@ import { MATERIALS } from '../data/materials.js';
 import { MAPS } from '../data/maps.js';
 import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
 import { CHARACTER_SPRITES } from '../data/pixelArt.js';
-import { ACHIEVEMENTS, checkNewAchievements } from '../data/achievements.js';
+import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
 import { CODEX } from '../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
@@ -625,7 +625,7 @@ function resolveVictory(game) {
     state.flags.bossDefeated = true;
     state.mode = 'victory';
   }
-  checkNewAchievements(state).forEach(a => logMsg(game, `🏆 Achievement unlocked: ${a.title} — ${a.desc}`));
+  formatAchievementLines(checkNewAchievements(state)).forEach(m => logMsg(game, m));
   saveGame(state);
 }
 
