@@ -27,6 +27,7 @@
     <button id="btn-questlog" class="action-btn ghost">Quests</button>
     <button id="btn-completion" class="action-btn ghost">Log</button>
     <button id="btn-settings" class="action-btn ghost">Settings</button>
+    <button id="btn-help" class="action-btn ghost">Help</button>
     <button id="btn-mute" class="action-btn ghost" title="Toggle sound">&#128266;</button>
   </header>
 
@@ -143,6 +144,12 @@
     <h3 class="completion-subhead">Save Data</h3>
     <button id="settings-reset-save" class="action-btn">Reset Save</button>
     <p class="ngplus-hint">Wipes all progress and starts a brand new game. Export a save first from the Field Log if you want a backup.</p>
+  </div>
+
+  <div id="help-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>How to Play</h2><button id="help-close" class="action-btn ghost">Close</button></div>
+    <p class="ngplus-hint" style="margin-top:0;">A permanent reference for mechanics you may have only seen once as a passing tip.</p>
+    <div id="help-list" class="codex-list"></div>
   </div>
 
   <div id="completion-panel" class="panel bracketed hidden">

@@ -588,7 +588,14 @@ function resolveVictory(game) {
   const allDefeated = [enemy, ...battle.packMates];
   battle.over = true;
   logMsg(game, battle.packMates.length ? 'The pack is defeated!' : `${enemy.name} is defeated!`);
-  allDefeated.forEach(e => { state.flags.enemiesDefeated[e.id] = true; });
+  const newlyCataloged = new Set();
+  allDefeated.forEach(e => {
+    if (!state.flags.enemiesDefeated[e.id]) newlyCataloged.add(e.id);
+    state.flags.enemiesDefeated[e.id] = true;
+  });
+  newlyCataloged.forEach(id => {
+    logMsg(game, `📖 New Bestiary entry: ${allDefeated.find(e => e.id === id).name} cataloged!`);
+  });
   audio.stopMusic();
   audio.playVictory();
   const totalXp = allDefeated.reduce((sum, e) => sum + e.xp, 0);

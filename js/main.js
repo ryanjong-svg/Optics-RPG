@@ -5,6 +5,7 @@ import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex } from './engine/codexUI.js';
 import { openBestiary, closeBestiary } from './engine/bestiaryUI.js';
+import { openHelp, closeHelp } from './engine/helpUI.js';
 import { openChronicle, closeChronicle } from './engine/chronicleUI.js';
 import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
@@ -108,6 +109,11 @@ const dom = {
   settingsMuteToggle: q('settings-mute-toggle'),
   settingsResetSave: q('settings-reset-save'),
 
+  helpPanel: q('help-panel'),
+  helpList: q('help-list'),
+  btnHelp: q('btn-help'),
+  helpClose: q('help-close'),
+
   dpadUp: q('dpad-up'),
   dpadDown: q('dpad-down'),
   dpadLeft: q('dpad-left'),
@@ -119,7 +125,11 @@ const dom = {
   victoryNgPlus: q('victory-ngplus')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel', 'victory-panel', 'dialogue-panel'];
+
+// Panels a player can back out of with Escape, each with a "<name>-close" button.
+// Battle, victory, and dialogue are deliberately excluded — they require an explicit choice, not a dismissal.
+const ESCAPABLE_PANELS = ['craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -133,7 +143,7 @@ const game = {
     const map = {
       battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', bestiary: 'bestiary-panel',
       chronicle: 'chronicle-panel', questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel',
-      settings: 'settings-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
+      settings: 'settings-panel', help: 'help-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
     };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
@@ -179,12 +189,20 @@ document.addEventListener('keydown', (e) => {
   } else if (game.state.mode === 'dialogue' && (e.code === 'Enter' || e.code === 'Space')) {
     e.preventDefault();
     advanceDialogue(game);
+  } else if (e.code === 'Escape') {
+    const openPanelId = ESCAPABLE_PANELS.find(id => !document.getElementById(id).classList.contains('hidden'));
+    if (openPanelId) {
+      e.preventDefault();
+      document.getElementById(openPanelId.replace('-panel', '-close')).click();
+    }
   }
 });
 
 dom.btnCodex.addEventListener('click', () => openCodex(game));
 dom.btnBestiary.addEventListener('click', () => openBestiary(game));
 dom.bestiaryClose.addEventListener('click', () => closeBestiary(game));
+dom.btnHelp.addEventListener('click', () => openHelp(game));
+dom.helpClose.addEventListener('click', () => closeHelp(game));
 dom.btnChronicle.addEventListener('click', () => openChronicle(game));
 dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
 dom.btnQuestlog.addEventListener('click', () => openQuestLog(game));
