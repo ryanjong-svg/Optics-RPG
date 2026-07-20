@@ -58,8 +58,9 @@ Tests run automatically on every push and pull request via GitHub Actions
   resource that gates your strongest attacks
 - Multi-enemy pack encounters, overworld "wanderers" with a surprise-attack bonus, and
   telegraphed heavy attacks from guardians/the boss
-- Crafting system (materials → gear), gear loadout presets, consumable recovery items,
-  and a Meditate action to restore Charge
+- Crafting system (materials → gear) with end-game recipes that combine/upgrade an
+  owned predecessor item instead of building from scratch, gear loadout presets,
+  consumable recovery items, and a Meditate action to restore Charge
 - Codex (physics concepts), Chronicle (world lore), Quest Log, a personal Bestiary of
   every enemy you've fought, and a Field Log tracking overall completion and named
   achievements

@@ -625,7 +625,9 @@ function resolveVictory(game) {
     state.flags.bossDefeated = true;
     state.mode = 'victory';
   }
-  formatAchievementLines(checkNewAchievements(state)).forEach(m => logMsg(game, m));
+  const newlyUnlocked = checkNewAchievements(state);
+  if (newlyUnlocked.length) audio.playAchievement();
+  formatAchievementLines(newlyUnlocked).forEach(m => logMsg(game, m));
   saveGame(state);
 }
 
@@ -707,6 +709,14 @@ export function renderBattle(game) {
     return;
   }
 
+  // Number-key shortcuts (see main.js's keydown handler) select buttons by
+  // DOM order, so each gets a visible key hint in that same order.
+  let actionIndex = 0;
+  function keyHint() {
+    actionIndex += 1;
+    return actionIndex <= 9 ? `<span class="key-hint">${actionIndex}</span> ` : '';
+  }
+
   ABILITIES.forEach(a => {
     const cd = battle.cooldowns[a.id] || 0;
     const cost = a.chargeCost || 0;
@@ -714,7 +724,7 @@ export function renderBattle(game) {
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
     const costTag = cost ? ` <span class="charge-tag">${cost}⚡</span>` : '';
-    btn.innerHTML = `<strong>${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}</strong><span class="ability-desc">${a.desc}</span>`;
+    btn.innerHTML = `<strong>${keyHint()}${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}</strong><span class="ability-desc">${a.desc}</span>`;
     // The button already shows a one-line gameplay blurb; the full Codex
     // explanation (once unlocked) goes in the title attribute so the deeper
     // "why" is a hover away without leaving battle for the Codex panel.
@@ -732,7 +742,7 @@ export function renderBattle(game) {
     if (owned <= 0) return;
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
-    btn.innerHTML = `<strong>Use ${item.name} (x${owned})</strong><span class="ability-desc">Restores ${item.heal} HP.</span>`;
+    btn.innerHTML = `<strong>${keyHint()}Use ${item.name} (x${owned})</strong><span class="ability-desc">Restores ${item.heal} HP.</span>`;
     if (item.fact) btn.title = item.fact;
     btn.onclick = () => useItemInBattle(game, item.id);
     d.battleActions.appendChild(btn);
@@ -740,7 +750,7 @@ export function renderBattle(game) {
 
   const fleeBtn = document.createElement('button');
   fleeBtn.className = 'action-btn flee-btn';
-  fleeBtn.textContent = (battle.opts.guardianMap || enemy.isBoss) ? 'Flee (unavailable)' : 'Flee';
+  fleeBtn.innerHTML = keyHint() + ((battle.opts.guardianMap || enemy.isBoss) ? 'Flee (unavailable)' : 'Flee');
   fleeBtn.disabled = !!(battle.opts.guardianMap || enemy.isBoss);
   fleeBtn.onclick = () => flee(game);
   d.battleActions.appendChild(fleeBtn);

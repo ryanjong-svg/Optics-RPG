@@ -69,17 +69,35 @@ export function closeCraft(game) {
   saveGame(game.state);
 }
 
-function canAfford(player, recipe) {
+// A recipe with `upgradesFrom` combines an owned predecessor with fresh
+// materials into a stronger item in the same slot, instead of building from
+// raw materials alone — so it also requires already owning that predecessor.
+export function canCraftRecipe(player, recipe) {
+  if (recipe.upgradesFrom && !player.ownedGear[recipe.upgradesFrom]) return false;
   return recipe.materials.every(matId => (player.materials[matId] || 0) >= recipe.count);
+}
+
+// Pure state mutation (no dom/save/audio side effects) so it stays
+// unit-testable; craftItem() below is the UI-wired version callers use.
+// Combining consumes the predecessor recipe (no longer owned), and carries
+// its equipped slot over to the new item — a seamless upgrade, not a swap
+// to nothing.
+export function applyCraftRecipe(player, recipe) {
+  if (player.ownedGear[recipe.id] || !canCraftRecipe(player, recipe)) return false;
+  recipe.materials.forEach(matId => { player.materials[matId] -= recipe.count; });
+  if (recipe.upgradesFrom) {
+    player.ownedGear[recipe.upgradesFrom] = false;
+  }
+  player.ownedGear[recipe.id] = true;
+  if (!player.equipped[recipe.slot] || player.equipped[recipe.slot] === recipe.upgradesFrom) {
+    player.equipped[recipe.slot] = recipe.id;
+  }
+  return true;
 }
 
 export function craftItem(game, recipeId) {
   const recipe = findRecipe(recipeId);
-  const player = game.state.player;
-  if (!recipe || player.ownedGear[recipeId] || !canAfford(player, recipe)) return;
-  recipe.materials.forEach(matId => { player.materials[matId] -= recipe.count; });
-  player.ownedGear[recipeId] = true;
-  if (!player.equipped[recipe.slot]) player.equipped[recipe.slot] = recipeId;
+  if (!recipe || !applyCraftRecipe(game.state.player, recipe)) return;
   unlockCodex(game.state, CONCEPT_BY_SLOT_HINT[recipe.slot], null);
   audio.playCraftSuccess();
   saveGame(game.state);
@@ -234,31 +252,51 @@ export function renderCraft(game) {
   });
 
   d.craftRecipes.innerHTML = '';
-  RECIPES.forEach(recipe => {
-    const owned = !!player.ownedGear[recipe.id];
-    const affordable = canAfford(player, recipe);
-    const reqText = recipe.materials.map(mId => `${MATERIALS[mId].name} x${recipe.count}`).join(', ');
-    const effectLines = describeStats(recipe.build());
-    const row = document.createElement('div');
-    row.className = 'recipe-row';
-    row.innerHTML = `
-      <div class="recipe-head"><span>${recipe.glyph}</span> <strong>${recipe.name}</strong> <span class="slot-tag">${recipe.slot}</span></div>
-      <div class="recipe-req">Needs: ${reqText}</div>
-      <ul class="recipe-effects">${effectLines.map(l => `<li>${l}</li>`).join('')}</ul>
-      <div class="recipe-fact">${recipe.fact}</div>
-    `;
-    const btn = document.createElement('button');
-    btn.className = 'action-btn';
-    if (owned) {
-      btn.textContent = 'Crafted';
-      btn.disabled = true;
-    } else {
-      btn.textContent = affordable ? 'Craft' : 'Need materials';
-      btn.disabled = !affordable;
-      btn.onclick = () => craftItem(game, recipe.id);
-    }
-    row.appendChild(btn);
-    d.craftRecipes.appendChild(row);
+  const SLOT_LABELS = { lens: 'Lenses', mirror: 'Mirrors', prism: 'Prisms', filter: 'Filters' };
+  ['lens', 'mirror', 'prism', 'filter'].forEach(slot => {
+    const slotRecipes = RECIPES.filter(r => r.slot === slot);
+    if (!slotRecipes.length) return;
+    const heading = document.createElement('h3');
+    heading.className = 'completion-subhead';
+    heading.textContent = SLOT_LABELS[slot];
+    d.craftRecipes.appendChild(heading);
+
+    slotRecipes.forEach(recipe => {
+      const owned = !!player.ownedGear[recipe.id];
+      const predecessor = recipe.upgradesFrom ? findRecipe(recipe.upgradesFrom) : null;
+      const matReqText = recipe.materials.map(mId => `${MATERIALS[mId].name} x${recipe.count}`).join(', ');
+      const reqText = predecessor ? `${predecessor.name} + ${matReqText}` : matReqText;
+      const effectLines = describeStats(recipe.build());
+      const row = document.createElement('div');
+      row.className = 'recipe-row';
+      row.innerHTML = `
+        <div class="recipe-head"><span>${recipe.glyph}</span> <strong>${recipe.name}</strong> <span class="slot-tag">${recipe.slot}</span></div>
+        <div class="recipe-req">Needs: ${reqText}</div>
+        <ul class="recipe-effects">${effectLines.map(l => `<li>${l}</li>`).join('')}</ul>
+        <div class="recipe-fact">${recipe.fact}</div>
+      `;
+      const btn = document.createElement('button');
+      btn.className = 'action-btn';
+      if (owned) {
+        btn.textContent = 'Crafted';
+        btn.disabled = true;
+      } else if (predecessor && !player.ownedGear[predecessor.id]) {
+        btn.textContent = `Craft ${predecessor.name} first`;
+        btn.disabled = true;
+      } else {
+        const craftable = canCraftRecipe(player, recipe);
+        btn.textContent = craftable ? (predecessor ? 'Combine' : 'Craft') : 'Need materials';
+        btn.disabled = !craftable;
+        btn.onclick = () => {
+          if (predecessor && !window.confirm(
+            `Combine your ${predecessor.name} with these materials into a ${recipe.name}? The ${predecessor.name} will be consumed.`
+          )) return;
+          craftItem(game, recipe.id);
+        };
+      }
+      row.appendChild(btn);
+      d.craftRecipes.appendChild(row);
+    });
   });
 
   d.craftEquipped.innerHTML = '';

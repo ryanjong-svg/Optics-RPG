@@ -17,7 +17,9 @@ import * as audio from './audio.js';
 // achievement onto whichever message queue is already about to be shown,
 // instead of leaving it to surface only later in the Field Log.
 function withAchievementLines(state, lines) {
-  return [...lines, ...formatAchievementLines(checkNewAchievements(state))];
+  const newlyUnlocked = checkNewAchievements(state);
+  if (newlyUnlocked.length) audio.playAchievement();
+  return [...lines, ...formatAchievementLines(newlyUnlocked)];
 }
 
 const SPRITE_PX = 2; // one sprite-pixel = 2 real canvas pixels

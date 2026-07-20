@@ -73,7 +73,7 @@ export const RECIPES = [
   },
   {
     id: 'diamond_loupe', name: 'Diamond Loupe', slot: 'lens', glyph: '\u{1F48E}',
-    materials: ['diamond'], count: 1,
+    materials: ['diamond'], count: 1, upgradesFrom: 'converging_lens',
     build() {
       const n = MATERIALS.diamond.n;
       return { focusPower: Math.round((n - 1) * 40), critBonus: 0.4, abbe: MATERIALS.diamond.abbe };
@@ -90,7 +90,7 @@ export const RECIPES = [
   },
   {
     id: 'sapphire_window', name: 'Sapphire Window', slot: 'mirror', glyph: '\u{1F535}',
-    materials: ['sapphire'], count: 2,
+    materials: ['sapphire'], count: 2, upgradesFrom: 'silver_mirror',
     build() {
       return { reflectivity: 0.3, defenseBonus: 8 };
     },
@@ -124,7 +124,7 @@ export const RECIPES = [
   },
   {
     id: 'rutile_prism', name: 'Rutile Prism', slot: 'prism', glyph: '\u{1F525}',
-    materials: ['rutile'], count: 2,
+    materials: ['rutile'], count: 2, upgradesFrom: 'prism',
     build() {
       return { abbe: MATERIALS.rutile.abbe, dispersionBonus: 3 };
     },
@@ -132,7 +132,7 @@ export const RECIPES = [
   },
   {
     id: 'graded_index_core', name: 'Graded-Index Fiber Core', slot: 'filter', glyph: '\u{1F4E1}',
-    materials: ['ge_doped_silica'], count: 2,
+    materials: ['ge_doped_silica'], count: 2, upgradesFrom: 'optical_fiber',
     build() {
       return { tirBonus: 0.6 };
     },
@@ -140,7 +140,7 @@ export const RECIPES = [
   },
   {
     id: 'photonic_lattice_grating', name: 'Photonic Crystal Grating', slot: 'prism', glyph: '\u{1F52C}',
-    materials: ['photonic_crystal'], count: 2,
+    materials: ['photonic_crystal'], count: 2, upgradesFrom: 'diffraction_grating',
     build() {
       return { abbe: MATERIALS.photonic_crystal.abbe, diffractionBonus: 0.35 };
     },
@@ -148,7 +148,7 @@ export const RECIPES = [
   },
   {
     id: 'electro_optic_modulator', name: 'Electro-Optic Modulator', slot: 'filter', glyph: '\u{26A1}',
-    materials: ['lithium_niobate'], count: 2,
+    materials: ['lithium_niobate'], count: 2, upgradesFrom: 'holographic_plate',
     build() {
       return { hologramBonus: 0.35 };
     },

@@ -68,6 +68,7 @@ export function startNpcInteraction(game, npcId) {
       showMessages(game, [quest.complete], () => {
         const newlyUnlocked = completeQuest(game, questId, quest);
         if (newlyUnlocked.length) {
+          audio.playAchievement();
           showMessages(game, formatAchievementLines(newlyUnlocked), () => startQuiz(game, npcId));
         } else {
           startQuiz(game, npcId);

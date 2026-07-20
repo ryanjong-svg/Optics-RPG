@@ -24,6 +24,7 @@ const dom = {
   mapExits: q('map-exits'),
 
   hudLevel: q('hud-level'),
+  hudCycle: q('hud-cycle'),
   hudHpBar: q('hud-hp-bar'),
   hudHpText: q('hud-hp-text'),
   hudXpBar: q('hud-xp-bar'),
@@ -159,6 +160,9 @@ const game = {
 function renderHud() {
   const p = game.state.player;
   dom.hudLevel.textContent = `Lv.${p.level}`;
+  const cycle = game.state.flags.ngPlusCycle || 0;
+  dom.hudCycle.textContent = `Cycle ${cycle}`;
+  dom.hudCycle.classList.toggle('hidden', cycle <= 0);
   dom.hudHpBar.style.width = Math.max(0, Math.round((p.hp / p.maxHp) * 100)) + '%';
   dom.hudHpText.textContent = `${p.hp}/${p.maxHp}`;
   dom.hudHpBar.classList.toggle('critical', p.hp / p.maxHp < 0.25);
@@ -191,6 +195,15 @@ document.addEventListener('keydown', (e) => {
   } else if (game.state.mode === 'dialogue' && (e.code === 'Enter' || e.code === 'Space')) {
     e.preventDefault();
     advanceDialogue(game);
+  } else if (game.state.mode === 'battle') {
+    const digitMatch = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);
+    if (digitMatch) {
+      const btn = dom.battleActions.querySelectorAll('button')[Number(digitMatch[1]) - 1];
+      if (btn && !btn.disabled) {
+        e.preventDefault();
+        btn.click();
+      }
+    }
   } else if (e.code === 'Escape') {
     const openPanelId = ESCAPABLE_PANELS.find(id => !document.getElementById(id).classList.contains('hidden'));
     if (openPanelId) {

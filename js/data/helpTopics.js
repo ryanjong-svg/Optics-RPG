@@ -39,6 +39,12 @@ export const HELP_TOPICS = [
       '— handy for switching between builds without revisiting every equipment dropdown.'
   },
   {
+    title: 'Combining Gear',
+    body: 'A few end-game recipes are upgrades rather than fresh builds — the Workbench shows a "Combine" button ' +
+      'once you own the right predecessor item. Combining consumes that predecessor (it is no longer owned), and ' +
+      'the upgrade takes its place if it was equipped, so nothing is lost in the process.'
+  },
+  {
     title: 'Difficulty Settings',
     body: 'Change difficulty anytime from the Settings panel. Easy weakens enemies and raises XP gain; Hard ' +
       'toughens enemies and lowers it. This does not require starting over.'

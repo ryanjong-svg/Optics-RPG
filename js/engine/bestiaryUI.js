@@ -48,7 +48,9 @@ export function renderBestiary(game) {
 
   game.dom.bestiaryList.innerHTML = zoneOrder.map(zone => {
     const label = zone === BOSS_ZONE ? 'The Null Medium' : ZONE_NAMES[zone];
-    const entries = byZone.get(zone).map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
-    return `<h3 class="completion-subhead">${label}</h3>${entries}`;
+    const zoneIds = byZone.get(zone);
+    const zoneCaught = zoneIds.filter(id => defeated[id]).length;
+    const entries = zoneIds.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
+    return `<h3 class="completion-subhead">${label} — ${zoneCaught} / ${zoneIds.length}</h3>${entries}`;
   }).join('');
 }

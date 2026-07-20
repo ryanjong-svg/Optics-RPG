@@ -1,0 +1,85 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { newGameState } from '../js/engine/state.js';
+import { canCraftRecipe, applyCraftRecipe } from '../js/engine/craft.js';
+import { findRecipe } from '../js/data/equipment.js';
+
+function withMaterials(state, mats) {
+  Object.entries(mats).forEach(([id, count]) => { state.player.materials[id] = count; });
+  return state;
+}
+
+test('canCraftRecipe: a plain (non-upgrade) recipe only needs materials', () => {
+  const state = withMaterials(newGameState(), { crown_glass: 2 });
+  assert.equal(canCraftRecipe(state.player, findRecipe('converging_lens')), true);
+});
+
+test('canCraftRecipe: an upgrade recipe is refused without the predecessor, even with enough materials', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  assert.equal(canCraftRecipe(state.player, findRecipe('diamond_loupe')), false);
+});
+
+test('canCraftRecipe: an upgrade recipe is allowed once the predecessor is owned and materials suffice', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  state.player.ownedGear.converging_lens = true;
+  assert.equal(canCraftRecipe(state.player, findRecipe('diamond_loupe')), true);
+});
+
+test('applyCraftRecipe: a plain recipe deducts materials and grants ownership', () => {
+  const state = withMaterials(newGameState(), { crown_glass: 2 });
+  const ok = applyCraftRecipe(state.player, findRecipe('converging_lens'));
+  assert.equal(ok, true);
+  assert.equal(state.player.materials.crown_glass, 0);
+  assert.equal(state.player.ownedGear.converging_lens, true);
+});
+
+test('applyCraftRecipe: refuses (returns false, no side effects) when the predecessor is not owned', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  const ok = applyCraftRecipe(state.player, findRecipe('diamond_loupe'));
+  assert.equal(ok, false);
+  assert.equal(state.player.materials.diamond, 1, 'materials should not be deducted on a refused craft');
+  assert.equal(state.player.ownedGear.diamond_loupe, undefined);
+});
+
+test('applyCraftRecipe: combining consumes the predecessor and grants the upgrade', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  state.player.ownedGear.converging_lens = true;
+  const ok = applyCraftRecipe(state.player, findRecipe('diamond_loupe'));
+  assert.equal(ok, true);
+  assert.equal(state.player.ownedGear.converging_lens, false, 'the predecessor should be consumed');
+  assert.equal(state.player.ownedGear.diamond_loupe, true);
+  assert.equal(state.player.materials.diamond, 0);
+});
+
+test('applyCraftRecipe: if the predecessor was equipped, the upgrade takes its place', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  state.player.ownedGear.converging_lens = true;
+  state.player.equipped.lens = 'converging_lens';
+  applyCraftRecipe(state.player, findRecipe('diamond_loupe'));
+  assert.equal(state.player.equipped.lens, 'diamond_loupe');
+});
+
+test('applyCraftRecipe: if a different item was equipped in that slot, combining does not touch it', () => {
+  const state = withMaterials(newGameState(), { diamond: 1, flint_glass: 2 });
+  state.player.ownedGear.converging_lens = true;
+  state.player.ownedGear.diverging_lens = true;
+  state.player.equipped.lens = 'diverging_lens';
+  applyCraftRecipe(state.player, findRecipe('diamond_loupe'));
+  assert.equal(state.player.equipped.lens, 'diverging_lens', 'unrelated equipped gear should be left alone');
+  assert.equal(state.player.ownedGear.diamond_loupe, true);
+});
+
+test('applyCraftRecipe: auto-equips the upgrade if nothing was equipped in that slot', () => {
+  const state = withMaterials(newGameState(), { diamond: 1 });
+  state.player.ownedGear.converging_lens = true;
+  applyCraftRecipe(state.player, findRecipe('diamond_loupe'));
+  assert.equal(state.player.equipped.lens, 'diamond_loupe');
+});
+
+test('applyCraftRecipe: refuses to re-craft something already owned', () => {
+  const state = withMaterials(newGameState(), { crown_glass: 2 });
+  state.player.ownedGear.converging_lens = true;
+  const ok = applyCraftRecipe(state.player, findRecipe('converging_lens'));
+  assert.equal(ok, false);
+});

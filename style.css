@@ -97,6 +97,10 @@ button, h2, h3, .hud-title, #map-label, .action-btn strong, .recipe-head strong 
 .hud-title { font-size: 0.95em; font-weight: 700; color: var(--cyan); text-transform: uppercase; margin-right: 4px; }
 .hud-stats { display: flex; align-items: center; gap: 8px; flex: 1; flex-wrap: wrap; }
 #hud-level { font-family: 'Orbitron', sans-serif; font-size: 0.85em; color: var(--text-light); }
+.hud-cycle-tag {
+  font-family: 'Orbitron', sans-serif; font-size: 0.7em; color: var(--hazard);
+  border: 1px solid var(--hazard); padding: 1px 5px;
+}
 #map-label {
   text-align: center; font-size: 0.8em; color: var(--cyan);
   background: var(--panel-bg-2); border: 1px solid var(--cyan-dim);
@@ -166,6 +170,11 @@ canvas#overworld-canvas {
 .action-btn.ability-btn { display: flex; flex-direction: column; gap: 6px; }
 .ability-desc { font-family: 'Share Tech Mono', monospace; font-size: 1.05em; color: var(--text-dim); }
 .charge-tag { font-size: 0.8em; color: var(--orange); }
+.key-hint {
+  display: inline-block; min-width: 1.2em; padding: 0 3px; margin-right: 4px;
+  background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace; font-size: 0.75em; text-align: center;
+}
 #battle-pack-mates { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
 .pack-mate { font-size: 0.9em; color: var(--text-light); background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); padding: 4px 8px; }
 .pack-mate-dead { color: var(--text-dim); text-decoration: line-through; opacity: 0.6; }

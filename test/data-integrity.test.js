@@ -43,6 +43,16 @@ test('every recipe requires materials that exist', () => {
   }
 });
 
+test('every recipe upgradesFrom reference is a real recipe in the same slot', () => {
+  for (const recipe of RECIPES) {
+    if (!recipe.upgradesFrom) continue;
+    const predecessor = RECIPES.find(r => r.id === recipe.upgradesFrom);
+    assert.ok(predecessor, `${recipe.id} upgradesFrom unknown recipe "${recipe.upgradesFrom}"`);
+    assert.equal(predecessor.slot, recipe.slot, `${recipe.id} upgradesFrom a recipe in a different slot`);
+    assert.notEqual(predecessor.id, recipe.id, `${recipe.id} cannot upgrade from itself`);
+  }
+});
+
 test('every consumable requires materials that exist', () => {
   for (const item of CONSUMABLES) {
     for (const matId of item.materials) {
