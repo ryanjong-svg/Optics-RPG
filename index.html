@@ -86,6 +86,9 @@
     <h3>Loadouts</h3>
     <p class="ngplus-hint">Save your current gear to a slot, then load it back anytime — handy for switching between builds without revisiting each dropdown.</p>
     <div id="craft-loadouts"></div>
+    <h3>Specialization</h3>
+    <p class="ngplus-hint">Free to switch anytime once unlocked — try both, there's no wrong choice.</p>
+    <div id="craft-specialization" class="recipe-list"></div>
     <h3>Meditation</h3>
     <p class="ngplus-hint">Fully restores Charge — the one place that can, since it otherwise only regenerates slowly during battle.</p>
     <div id="craft-meditate" class="recipe-list"></div>
@@ -94,6 +97,18 @@
     <div id="craft-consumables" class="recipe-list"></div>
     <h3>Recipes</h3>
     <div id="craft-recipes" class="recipe-list"></div>
+  </div>
+
+  <div id="snell-puzzle-panel" class="panel bracketed hidden">
+    <div class="panel-header"><h2>Aim the Beam</h2><button id="snell-cancel" class="action-btn ghost">Cancel</button></div>
+    <p class="ngplus-hint" style="margin-top:0;">Snell's Law: n&#8321;sin&theta;&#8321; = n&#8322;sin&theta;&#8322;. Set the incident angle so the refracted ray lands in the target zone for a bonus hit.</p>
+    <canvas id="snell-canvas" width="260" height="180"></canvas>
+    <p id="snell-readout" class="ngplus-hint"></p>
+    <div class="volume-row">
+      <label for="snell-angle">Incident angle: <span id="snell-angle-value">45&deg;</span></label>
+    </div>
+    <input id="snell-angle" type="range" min="1" max="89" step="1" value="45">
+    <button id="snell-fire" class="action-btn primary">Fire</button>
   </div>
 
   <div id="codex-panel" class="panel bracketed hidden">

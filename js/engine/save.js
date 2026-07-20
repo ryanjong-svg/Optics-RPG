@@ -11,6 +11,7 @@ export function migrateState(state) {
     state.player.charge = 3;
   }
   if (state.player && !state.player.loadouts) state.player.loadouts = { 1: null, 2: null };
+  if (state.player && state.player.specialization === undefined) state.player.specialization = null;
   if (state.flags) {
     if (!state.flags.visitedMaps) state.flags.visitedMaps = { [state.currentMap]: true };
     if (!state.flags.metNpc) state.flags.metNpc = {};

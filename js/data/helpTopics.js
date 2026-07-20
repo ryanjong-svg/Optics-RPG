@@ -53,6 +53,21 @@ export const HELP_TOPICS = [
     title: 'New Game+',
     body: 'After defeating the Null Medium, you can begin a New Game+ cycle: every guardian, secret, and quest ' +
       'resets for a tougher replay with escalating enemy stats, while your level, gear, materials, and ' +
-      'Codex/Chronicle/Bestiary knowledge all carry over.'
+      'Codex/Chronicle/Bestiary knowledge all carry over. From cycle 1 onward, guardians and the boss also ' +
+      '"adapt" to an overused ability — its damage drops noticeably if you keep repeating it, so rotating ' +
+      'abilities matters more each cycle, not just bigger enemy numbers.'
+  },
+  {
+    title: 'Specialization',
+    body: 'Once you reach character level 5, the Workbench lets you choose between Photon Focus (boosts Laser ' +
+      'Focus and Photoelectric Shock, and reduces their Charge cost) and Wave Mechanics (boosts Diffraction Wave, ' +
+      'Interference Cancel, and Dispersion Burst, and regenerates Charge faster). Switching is free and instant, ' +
+      'any time — try both and see which fits your playstyle.'
+  },
+  {
+    title: 'Aiming the Beam',
+    body: 'Refraction Bend opens a small puzzle instead of firing instantly: set the incident angle and Snell\'s ' +
+      'Law (n₁sinθ₁ = n₂sinθ₂) determines exactly where the refracted ray lands. Hit the target zone for bonus ' +
+      'damage — missing still lands a normal hit, so there is no risk in experimenting with the angle.'
   }
 ];

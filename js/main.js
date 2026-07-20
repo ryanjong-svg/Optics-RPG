@@ -11,6 +11,7 @@ import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
 import { openQuestLog, closeQuestLog, hasReadyQuest } from './engine/questLogUI.js';
 import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
+import { renderSnellPuzzle, fireSnellPuzzle, closeSnellPuzzle } from './engine/snellPuzzleUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
 import * as audio from './engine/audio.js';
@@ -62,8 +63,17 @@ const dom = {
   craftMaterials: q('craft-materials'),
   craftEquipped: q('craft-equipped'),
   craftLoadouts: q('craft-loadouts'),
+  craftSpecialization: q('craft-specialization'),
   craftMeditate: q('craft-meditate'),
   craftConsumables: q('craft-consumables'),
+
+  snellPuzzlePanel: q('snell-puzzle-panel'),
+  snellCanvas: q('snell-canvas'),
+  snellAngle: q('snell-angle'),
+  snellAngleValue: q('snell-angle-value'),
+  snellReadout: q('snell-readout'),
+  snellFire: q('snell-fire'),
+  snellCancel: q('snell-cancel'),
   craftRecipes: q('craft-recipes'),
   craftClose: q('craft-close'),
 
@@ -198,6 +208,11 @@ document.addEventListener('keydown', unlockAndStartMusic, { once: true });
 document.addEventListener('pointerdown', unlockAndStartMusic, { once: true });
 
 document.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape' && !dom.snellPuzzlePanel.classList.contains('hidden')) {
+    e.preventDefault();
+    closeSnellPuzzle(game);
+    return;
+  }
   const keyMap = {
     ArrowUp: [0, -1], KeyW: [0, -1],
     ArrowDown: [0, 1], KeyS: [0, 1],
@@ -270,6 +285,10 @@ bindVolumeSlider(dom.settingsMusicVolume, audio.setMusicVolume, 'musicVolume');
 bindVolumeSlider(dom.settingsSfxVolume, audio.setSfxVolume, 'sfxVolume');
 
 dom.craftClose.addEventListener('click', () => closeCraft(game));
+
+dom.snellAngle.addEventListener('input', () => renderSnellPuzzle(game));
+dom.snellFire.addEventListener('click', () => fireSnellPuzzle(game));
+dom.snellCancel.addEventListener('click', () => closeSnellPuzzle(game));
 
 function showSaveMsg(text) {
   dom.saveTransferMsg.textContent = text;

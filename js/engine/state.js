@@ -16,7 +16,8 @@ export function newGameState() {
       ownedGear: {},
       equipped: { lens: null, mirror: null, prism: null, filter: null },
       consumables: {},
-      loadouts: { 1: null, 2: null }
+      loadouts: { 1: null, 2: null },
+      specialization: null
     },
     flags: {
       seenIntro: false,

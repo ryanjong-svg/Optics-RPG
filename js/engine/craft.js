@@ -4,7 +4,10 @@ import { CONSUMABLES } from '../data/consumables.js';
 import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
 import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from './consumables.js';
+import { SPECIALIZATIONS } from '../data/specializations.js';
 import * as audio from './audio.js';
+
+const SPECIALIZATION_LEVEL = 5;
 
 const CONCEPT_BY_SLOT_HINT = {
   lens: 'snell', mirror: 'reflection', prism: 'dispersion', filter: 'polarization'
@@ -135,6 +138,23 @@ export function saveLoadout(game, slot) {
   renderCraft(game);
 }
 
+// Free to pick and re-pick at will once unlocked (level 5+) — this is a
+// build-identity choice, not a resource sink, so there's no reason to punish
+// experimenting with the other path.
+export function applySetSpecialization(player, specId) {
+  if (player.level < SPECIALIZATION_LEVEL) return false;
+  if (specId !== null && !SPECIALIZATIONS[specId]) return false;
+  player.specialization = specId;
+  return true;
+}
+
+export function setSpecialization(game, specId) {
+  if (!applySetSpecialization(game.state.player, specId)) return;
+  audio.playCraftSuccess();
+  saveGame(game.state);
+  renderCraft(game);
+}
+
 // Charge only otherwise recovers by 1 per completed battle round, and
 // persists between fights like HP does - Meditate is the one place (only
 // here, only at the Workbench) to fully top it off between adventures.
@@ -217,6 +237,40 @@ export function renderCraft(game) {
       row.appendChild(btnRow);
       d.craftLoadouts.appendChild(row);
     });
+  }
+
+  if (d.craftSpecialization) {
+    d.craftSpecialization.innerHTML = '';
+    if (player.level < SPECIALIZATION_LEVEL) {
+      const row = document.createElement('div');
+      row.className = 'recipe-row';
+      row.innerHTML = `<div class="recipe-req">Reach character level ${SPECIALIZATION_LEVEL} to choose a specialization.</div>`;
+      d.craftSpecialization.appendChild(row);
+    } else {
+      Object.values(SPECIALIZATIONS).forEach(spec => {
+        const active = player.specialization === spec.id;
+        const row = document.createElement('div');
+        row.className = `recipe-row${active ? ' quest-ready' : ''}`;
+        row.innerHTML = `
+          <div class="recipe-head"><strong>${spec.name}</strong>${active ? ' <span class="slot-tag">Active</span>' : ''}</div>
+          <div class="recipe-req">${spec.desc}</div>
+        `;
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.textContent = active ? 'Active' : 'Choose';
+        btn.disabled = active;
+        btn.onclick = () => setSpecialization(game, spec.id);
+        row.appendChild(btn);
+        d.craftSpecialization.appendChild(row);
+      });
+      if (player.specialization) {
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'action-btn ghost';
+        clearBtn.textContent = 'Clear Specialization';
+        clearBtn.onclick = () => setSpecialization(game, null);
+        d.craftSpecialization.appendChild(clearBtn);
+      }
+    }
   }
 
   d.craftConsumables.innerHTML = '';

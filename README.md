@@ -64,7 +64,11 @@ Tests run automatically on every push and pull request via GitHub Actions
 - Codex (physics concepts), Chronicle (world lore), Quest Log, a personal Bestiary of
   every enemy you've fought, and a Field Log tracking overall completion and named
   achievements
-- Difficulty settings, a New Game+ cycle with escalating enemy scaling, and save
-  export/import for backing up or transferring progress
+- Difficulty settings, a New Game+ cycle with escalating enemy stats and adaptive
+  guardian/boss resistance to an overused ability, and save export/import for backing
+  up or transferring progress
+- An interactive Snell's-Law aiming puzzle (real n₁sinθ₁ = n₂sinθ₂ math) that Refraction
+  Bend fires through instead of an instant cast, and a free-to-switch specialization
+  system (Photon Focus / Wave Mechanics) unlocked at level 5
 - Procedural audio (SFX + music via the Web Audio API) and a hand-authored pixel-art
   sprite system rendered in an isometric overworld with an XCOM-2-inspired tactical UI

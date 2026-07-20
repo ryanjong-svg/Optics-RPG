@@ -14,6 +14,8 @@ import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
 import { applyConsumable } from './consumables.js';
 import { showToast } from './toastUI.js';
+import { SPECIALIZATIONS } from '../data/specializations.js';
+import { openSnellPuzzle } from './snellPuzzleUI.js';
 import * as audio from './audio.js';
 
 // A personal "Bestiary": once you've beaten an enemy type before, its known
@@ -139,7 +141,7 @@ export function startBattle(game, enemyId, opts = {}) {
 
   game.battle = {
     enemy, packMates, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
-    damageTaken: 0, abilitiesUsed: new Set(), phase2Triggered: false, bossEnrageTriggered: false,
+    damageTaken: 0, abilitiesUsed: new Set(), abilityUseCounts: {}, phase2Triggered: false, bossEnrageTriggered: false,
     cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus
   };
   game.state.mode = 'battle';
@@ -168,7 +170,7 @@ function applyBossAction(game, ability, ctx, storedBonus) {
   const battle = game.battle;
   const enemy = battle.enemy;
   const neededId = enemy.phases[enemy.phaseIdx];
-  const result = ability.effect(ctx);
+  const result = applyOffensiveModifiers(game, ability, ability.effect(ctx));
   if (ability.id !== neededId) {
     logMsg(game, `${ability.name} passes right through The Null Medium — it hasn't taken on that property yet.`);
     return { isCrit: false, landed: false, dmg: 0 };
@@ -217,7 +219,7 @@ function applyPlayerAction(game, ability, ctx) {
     return applyPlayerActionPack(game, ability, ctx, storedBonus, surpriseMult);
   }
 
-  const result = ability.effect(ctx);
+  const result = ability.type === 'attack' ? applyOffensiveModifiers(game, ability, ability.effect(ctx)) : ability.effect(ctx);
 
   if (ability.type === 'attack') {
     let net;
@@ -259,7 +261,7 @@ function applyPlayerActionPack(game, ability, ctx, storedBonus, surpriseMult) {
   let anyCrit = false;
   targets.forEach((target, i) => {
     const targetCtx = { ...ctx, enemy: target, log: i === 0 ? ctx.log : () => {} };
-    const result = ability.effect(targetCtx);
+    const result = applyOffensiveModifiers(game, ability, ability.effect(targetCtx));
     let net;
     if (result.hits) {
       let total = 0;
@@ -449,9 +451,62 @@ export function telegraphDamageBase(enemy, telegraphed) {
 }
 
 // Charge regenerates by 1 every completed round (same points as
-// decrementCooldowns), capped at the player's current max.
+// decrementCooldowns), capped at the player's current max — Wave Mechanics
+// specialists regenerate 1 extra.
 export function regenCharge(player) {
-  if (player.charge < player.maxCharge) player.charge += 1;
+  const spec = SPECIALIZATIONS[player.specialization];
+  const bonus = spec && spec.chargeRegenBonus ? spec.chargeRegenBonus : 0;
+  player.charge = Math.min(player.maxCharge, player.charge + 1 + bonus);
+}
+
+export function specializationDamageMult(player, ability) {
+  const spec = SPECIALIZATIONS[player.specialization];
+  return spec && spec.concepts.includes(ability.concept) ? spec.damageMult : 1;
+}
+
+// Photon Focus specialists pay 1 less Charge (floor 1) for the abilities it
+// covers — the button's displayed cost and the affordability check both
+// need this, not just the final deduction, so it's exported for renderBattle.
+export function effectiveChargeCost(player, ability) {
+  const base = ability.chargeCost || 0;
+  if (!base) return 0;
+  const spec = SPECIALIZATIONS[player.specialization];
+  if (spec && spec.chargeCostReduction && spec.concepts.includes(ability.concept)) {
+    return Math.max(1, base - spec.chargeCostReduction);
+  }
+  return base;
+}
+
+// New Game+ cycle 1+ makes guardians/the boss "adapt" to an overused
+// ability: once its use count this fight crosses a cycle-scaled threshold,
+// its damage is halved for the rest of the fight — so replaying with a
+// higher cycle rewards rotating abilities instead of spamming one favorite,
+// rather than just being the same fight against bigger numbers.
+export function adaptiveResistMultiplier(game, ability) {
+  const battle = game.battle;
+  const cycle = game.state.flags.ngPlusCycle || 0;
+  if (!cycle || !isTelegraphEligible(battle)) return 1;
+  const threshold = Math.max(2, 4 - cycle);
+  const count = battle.abilityUseCounts[ability.id] || 0;
+  if (count <= threshold) return 1;
+  if (count === threshold + 1) {
+    logMsg(game, `${battle.enemy.name} has adapted to ${ability.name} — it's noticeably less effective now. Try something else.`);
+  }
+  return 0.5;
+}
+
+// Applied right after ability.effect(ctx) runs, in every damage-resolution
+// path (single target, boss, and per-target in a pack) — scales whichever
+// damage field that ability's effect actually returned.
+function applyOffensiveModifiers(game, ability, result) {
+  const player = game.state.player;
+  const battle = game.battle;
+  let mult = specializationDamageMult(player, ability) * adaptiveResistMultiplier(game, ability);
+  if (ability.id === 'refraction_bend' && battle.snellBonusMult) mult *= battle.snellBonusMult;
+  if (mult === 1) return result;
+  if (result.dmg != null) result.dmg = Math.max(1, Math.round(result.dmg * mult));
+  if (result.perHit != null) result.perHit = Math.max(1, Math.round(result.perHit * mult));
+  return result;
 }
 
 export function chooseAbility(game, abilityId) {
@@ -467,7 +522,7 @@ export function chooseAbility(game, abilityId) {
     return;
   }
   const player = game.state.player;
-  const chargeCost = ability.chargeCost || 0;
+  const chargeCost = effectiveChargeCost(player, ability);
   if (chargeCost > player.charge) {
     logMsg(game, `Not enough Charge for ${ability.name} — need ${chargeCost}, have ${player.charge}.`);
     if (claimHint(game.state, 'chargeEmpty')) {
@@ -480,6 +535,7 @@ export function chooseAbility(game, abilityId) {
   const ctx = { player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
+  battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
 
   const actionResult = applyPlayerAction(game, ability, ctx);
   if (ability.cooldown) battle.cooldowns[abilityId] = ability.cooldown;
@@ -524,6 +580,21 @@ export function chooseAbility(game, abilityId) {
   }
 
   renderBattle(game);
+}
+
+// Refraction Bend's button opens the Snell's-law aiming puzzle instead of
+// casting directly (see renderBattle) — this is the puzzle's onFire
+// callback, applying the resulting bonus/normal multiplier via the same
+// battle.snellBonusMult hook applyOffensiveModifiers already reads.
+function resolveSnellPuzzleShot(game, hit, refractedDeg) {
+  const battle = game.battle;
+  if (!battle || battle.over) return;
+  battle.snellBonusMult = hit ? 1.8 : 1;
+  logMsg(game, hit
+    ? `The beam refracts to ${refractedDeg.toFixed(1)}° — right on target! Bonus damage.`
+    : `The beam refracts to ${refractedDeg.toFixed(1)}° — off the mark, but still lands. Normal damage.`);
+  chooseAbility(game, 'refraction_bend');
+  delete battle.snellBonusMult;
 }
 
 export function flee(game) {
@@ -720,12 +791,16 @@ export function renderBattle(game) {
 
   ABILITIES.forEach(a => {
     const cd = battle.cooldowns[a.id] || 0;
-    const cost = a.chargeCost || 0;
+    const cost = effectiveChargeCost(player, a);
     const shortOnCharge = cost > player.charge;
     const btn = document.createElement('button');
     btn.className = 'action-btn ability-btn';
     const costTag = cost ? ` <span class="charge-tag">${cost}⚡</span>` : '';
-    btn.innerHTML = `<strong>${keyHint()}${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}</strong><span class="ability-desc">${a.desc}</span>`;
+    // Refraction Bend is aimed through the Snell's-law puzzle instead of
+    // resolving instantly — a small tag marks it so the button doesn't look
+    // identical to an ordinary instant-cast ability.
+    const aimTag = a.id === 'refraction_bend' ? ' <span class="charge-tag">🎯 Aim</span>' : '';
+    btn.innerHTML = `<strong>${keyHint()}${a.name}${cd > 0 ? ` (${cd})` : ''}${costTag}${aimTag}</strong><span class="ability-desc">${a.desc}</span>`;
     // The button already shows a one-line gameplay blurb; the full Codex
     // explanation (once unlocked) goes in the title attribute so the deeper
     // "why" is a hover away without leaving battle for the Codex panel.
@@ -734,7 +809,9 @@ export function renderBattle(game) {
       btn.title = `${codexEntry.title}\n\n${codexEntry.body}`;
     }
     btn.disabled = cd > 0 || shortOnCharge;
-    btn.onclick = () => chooseAbility(game, a.id);
+    btn.onclick = a.id === 'refraction_bend'
+      ? () => openSnellPuzzle(game, (hit, refractedDeg) => resolveSnellPuzzleShot(game, hit, refractedDeg))
+      : () => chooseAbility(game, a.id);
     d.battleActions.appendChild(btn);
   });
 
