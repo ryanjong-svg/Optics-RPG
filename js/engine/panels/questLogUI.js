@@ -1,4 +1,4 @@
-import { QUESTS, isObjectiveMet, reputationTier } from '../../data/narrative/quests.js';
+import { QUESTS, isObjectiveMet, reputationTier, reputationProgress } from '../../data/narrative/quests.js';
 import { MATERIALS } from '../../data/content/materials.js';
 import { MAPS } from '../../data/world/maps.js';
 
@@ -45,7 +45,18 @@ export function renderQuestLog(game) {
   if (game.dom.questlogStanding) {
     game.dom.questlogStanding.innerHTML = PROFESSOR_IDS.map(npcId => {
       const rep = (state.flags.npcReputation && state.flags.npcReputation[npcId]) || 0;
-      return `<div class="codex-entry"><h3>${npcName(npcId)}</h3><p>${reputationTier(rep)}</p></div>`;
+      const progress = reputationProgress(rep);
+      const progressLine = progress.nextLabel
+        ? `${Math.round(progress.pct * 100)}% to ${progress.nextLabel}`
+        : 'Max standing reached';
+      return `
+        <div class="codex-entry">
+          <h3>${npcName(npcId)}</h3>
+          <p>${reputationTier(rep)}</p>
+          <div class="bar-wrap"><div class="bar-fill rep" style="width:${Math.round(progress.pct * 100)}%"></div></div>
+          <p class="ngplus-hint">${progressLine}</p>
+        </div>
+      `;
     }).join('');
   }
 

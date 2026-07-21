@@ -77,6 +77,7 @@ const dom = {
   tradingFrom: q('trading-from'),
   tradingTo: q('trading-to'),
   tradingRate: q('trading-rate'),
+  tradingLast: q('trading-last'),
   tradingTrade: q('trading-trade'),
 
   snellPuzzlePanel: q('snell-puzzle-panel'),

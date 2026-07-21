@@ -88,6 +88,20 @@ export function reputationTier(rep) {
   return REPUTATION_TIERS[reputationTierIndex(rep || 0)].label;
 }
 
+// How far into the current tier a raw reputation number sits, for a Quest
+// Log progress bar. `nextLabel` is null once the top tier (Cherished) is
+// reached, since there's nothing further to progress toward.
+export function reputationProgress(rep) {
+  const value = rep || 0;
+  const idx = reputationTierIndex(value);
+  const current = REPUTATION_TIERS[idx];
+  const next = REPUTATION_TIERS[idx + 1];
+  if (!next) return { pct: 1, tierLabel: current.label, nextLabel: null };
+  const span = next.min - current.min;
+  const progressed = value - current.min;
+  return { pct: Math.min(1, Math.max(0, progressed / span)), tierLabel: current.label, nextLabel: next.label };
+}
+
 // Pure state mutation - returns the newly-reached tier label if this change
 // crossed into a higher one, or null if it didn't (so callers can decide
 // whether a "your standing improved" announcement is warranted).
@@ -99,6 +113,14 @@ export function applyReputationChange(state, npcId, amount) {
   const tierBefore = reputationTierIndex(before);
   const tierAfter = reputationTierIndex(after);
   return tierAfter > tierBefore ? REPUTATION_TIERS[tierAfter].label : null;
+}
+
+// Whether the player has earned Trusted (or higher) standing with at least
+// one professor - the threshold for the Trading Post's loyalty discount.
+export function hasTrustedStanding(state) {
+  const trustedMin = REPUTATION_TIERS.find(t => t.label === 'Trusted').min;
+  const rep = state.flags.npcReputation || {};
+  return Object.values(rep).some(v => v >= trustedMin);
 }
 
 export function findQuestsForNpc(npcId) {

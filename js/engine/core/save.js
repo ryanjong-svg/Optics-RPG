@@ -103,7 +103,15 @@ export function migrateState(state) {
     if (!state.flags.bestiaryFavorites) state.flags.bestiaryFavorites = {};
     if (state.flags.hardcorePuzzleHits === undefined) state.flags.hardcorePuzzleHits = 0;
     if (!state.flags.npcReputation) state.flags.npcReputation = {};
-    if (state.flags.glareEvent === undefined) state.flags.glareEvent = null;
+    // glareEvent was the original, single-weather-type shape - fold any live
+    // one into the generalized zoneWeather field it was replaced by.
+    if (state.flags.glareEvent !== undefined) {
+      if (state.flags.glareEvent && state.flags.glareEvent.battlesLeft > 0) {
+        state.flags.zoneWeather = { type: 'glare', zone: state.flags.glareEvent.zone, battlesLeft: state.flags.glareEvent.battlesLeft };
+      }
+      delete state.flags.glareEvent;
+    }
+    if (state.flags.zoneWeather === undefined) state.flags.zoneWeather = null;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';

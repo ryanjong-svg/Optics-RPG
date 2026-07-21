@@ -124,37 +124,59 @@ export function allEnemiesDefeated(battle) {
   return battle.enemy.curHp <= 0 && battle.packMates.every(m => m.curHp <= 0);
 }
 
-// Zone weather: a temporary "glare" condition that can roll in on the two
-// spectrum-themed zones (bright, prismatic light everywhere) each time the
-// player walks in, and boosts Polarize Filter's glare-blocking for a few
-// fights - a reason to revisit those zones beyond grinding materials.
-export const GLARE_EVENT_ZONES = ['prism', 'prism_deep'];
-const GLARE_EVENT_CHANCE = 0.15;
-const GLARE_EVENT_BATTLES = 3;
-export const GLARE_EVENT_GLARE_BONUS = 0.15;
+// Zone weather: a temporary condition that can roll in on certain zones each
+// time the player walks in, boosting one particular defensive ability for a
+// few fights - a reason to revisit those zones beyond grinding materials.
+// Only one weather event is active at a time, tracked in flags.zoneWeather.
+export const ZONE_WEATHER = {
+  glare: {
+    zones: ['prism', 'prism_deep'], ability: 'polarize_filter', bonus: 0.15,
+    arrivalMessage: '☀️ Harsh glare rolls across the light here — Polarize Filter blocks even more for the next few fights.',
+    battleFlavor: 'The lingering glare stings your eyes — but everything reflective out here looks just as harsh to the enemy.'
+  },
+  fog: {
+    zones: ['fiber', 'fiber_deep'], ability: 'tir_shield', bonus: 0.15,
+    arrivalMessage: '🌫️ Thick fog rolls through the tunnels — TIR Shield blocks even more for the next few fights.',
+    battleFlavor: 'Fog swallows the tunnel whole — you can barely see three feet of fiber ahead.'
+  }
+};
+const ZONE_WEATHER_CHANCE = 0.15;
+const ZONE_WEATHER_BATTLES = 3;
 
 // `roll` is injectable so tests can force the trigger/non-trigger path
-// instead of depending on Math.random().
-export function maybeTriggerGlareEvent(state, zone, roll = Math.random()) {
-  if (!GLARE_EVENT_ZONES.includes(zone)) return false;
-  if (state.flags.glareEvent && state.flags.glareEvent.battlesLeft > 0) return false;
-  if (roll >= GLARE_EVENT_CHANCE) return false;
-  state.flags.glareEvent = { zone, battlesLeft: GLARE_EVENT_BATTLES };
-  return true;
+// instead of depending on Math.random(). Returns the weather type that
+// triggered, or null if nothing did.
+export function maybeTriggerZoneWeather(state, zone, roll = Math.random()) {
+  if (state.flags.zoneWeather && state.flags.zoneWeather.battlesLeft > 0) return null;
+  const type = Object.keys(ZONE_WEATHER).find(t => ZONE_WEATHER[t].zones.includes(zone));
+  if (!type) return null;
+  if (roll >= ZONE_WEATHER_CHANCE) return null;
+  state.flags.zoneWeather = { type, zone, battlesLeft: ZONE_WEATHER_BATTLES };
+  return type;
 }
 
-export function glareEventActive(state, zone) {
-  const event = state.flags.glareEvent;
-  return !!(event && event.zone === zone && event.battlesLeft > 0);
+export function zoneWeatherActive(state, zone) {
+  const w = state.flags.zoneWeather;
+  return !!(w && w.zone === zone && w.battlesLeft > 0);
+}
+
+// The damage-reduction bonus a specific ability gets from the currently
+// active weather, or 0 if that weather doesn't boost this ability (or isn't
+// active in this zone at all).
+export function zoneWeatherBonus(state, zone, abilityId) {
+  const w = state.flags.zoneWeather;
+  if (!w || w.zone !== zone || w.battlesLeft <= 0) return 0;
+  const cfg = ZONE_WEATHER[w.type];
+  return cfg.ability === abilityId ? cfg.bonus : 0;
 }
 
 // Called once per battle resolution (win or loss) - counts down and clears
 // itself once spent, regardless of which zone the fight happened in.
-export function decrementGlareEvent(state) {
-  const event = state.flags.glareEvent;
-  if (!event || event.battlesLeft <= 0) return;
-  event.battlesLeft -= 1;
-  if (event.battlesLeft <= 0) state.flags.glareEvent = null;
+export function decrementZoneWeather(state) {
+  const w = state.flags.zoneWeather;
+  if (!w || w.battlesLeft <= 0) return;
+  w.battlesLeft -= 1;
+  if (w.battlesLeft <= 0) state.flags.zoneWeather = null;
 }
 
 // A guardian that drops to half HP or below shudders and hits harder for the

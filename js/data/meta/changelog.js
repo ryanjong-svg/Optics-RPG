@@ -1,9 +1,18 @@
 // Bumped whenever a batch of player-visible changes ships. Compared against
 // state.flags.lastSeenVersion (see save.js/whatsNewUI.js) to decide whether
 // the What's New panel has anything unread to show.
-export const GAME_VERSION = '1.12.0';
+export const GAME_VERSION = '1.13.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.13.0',
+    highlights: [
+      'The Fiber Optic Tunnels and Graded Core can now roll a "fog" weather event, boosting TIR Shield for a few fights — the tunnels\' counterpart to Prism Peak\'s glare.',
+      'Reaching Trusted standing with any professor now unlocks a 15% Trading Post discount, plus a one-time bonus line of dialogue at Trusted and Cherished.',
+      'The Quest Log\'s Standing section now shows a progress bar toward each professor\'s next tier.',
+      'The Trading Post now shows a "Last trade" readout after every barter.'
+    ]
+  },
   {
     version: '1.12.0',
     highlights: [

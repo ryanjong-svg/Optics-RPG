@@ -180,13 +180,23 @@ export function drawEliteAura(ctx, cx, cy, radius, zone, reducedMotion) {
 // frame the way idleBob() already does for sprites.
 const AMBIENCE_PARTICLE_COUNT = 10;
 
-// `glareActive` brightens and enlarges every particle - the one visual tell
-// (besides the toast on arrival) that a glare weather event is running here.
-export function drawZoneAmbience(ctx, w, h, zone, glareActive = false) {
+const WEATHER_TINT = { glare: '#ffffff', fog: '#c8d0d8' };
+
+// `weatherType` ('glare' | 'fog' | null) brightens/tints and enlarges every
+// particle, and for fog adds a translucent haze over the whole board - the
+// one visual tell (besides the toast on arrival) that a weather event is
+// running here.
+export function drawZoneAmbience(ctx, w, h, zone, weatherType = null) {
   const theme = BACKDROP_THEMES[zone] || BACKDROP_THEMES.village;
   if (theme.pattern === 'none') return;
+  const tint = WEATHER_TINT[weatherType] || null;
   const t = Date.now() / 1000;
   ctx.save();
+  if (weatherType === 'fog') {
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = WEATHER_TINT.fog;
+    ctx.fillRect(0, 0, w, h);
+  }
   for (let i = 0; i < AMBIENCE_PARTICLE_COUNT; i++) {
     const seed = i * 91.7;
     const baseX = (Math.sin(seed) * 0.5 + 0.5) * w;
@@ -196,11 +206,11 @@ export function drawZoneAmbience(ctx, w, h, zone, glareActive = false) {
     const x = (baseX + driftX + w) % w;
     const y = (baseY + driftY + h) % h;
     const pulse = (Math.sin(t * 0.8 + seed) + 1) / 2; // 0..1
-    const color = glareActive ? '#ffffff' : (theme.accent || SPECTRUM_COLORS[i % SPECTRUM_COLORS.length]);
-    ctx.globalAlpha = glareActive ? 0.22 + pulse * 0.3 : 0.12 + pulse * 0.18;
+    const color = tint || (theme.accent || SPECTRUM_COLORS[i % SPECTRUM_COLORS.length]);
+    ctx.globalAlpha = tint ? 0.22 + pulse * 0.3 : 0.12 + pulse * 0.18;
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(x, y, (glareActive ? 1.8 : 1.2) + pulse * 1.3, 0, Math.PI * 2);
+    ctx.arc(x, y, (tint ? 1.8 : 1.2) + pulse * 1.3, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();

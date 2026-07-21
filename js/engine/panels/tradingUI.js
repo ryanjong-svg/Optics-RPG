@@ -1,5 +1,5 @@
-import { MATERIAL_LIST } from '../../data/content/materials.js';
-import { tradeCost, canTrade, applyTrade } from '../../data/content/trading.js';
+import { MATERIAL_LIST, MATERIALS } from '../../data/content/materials.js';
+import { tradeCost, effectiveTradeCost, canTrade, applyTrade } from '../../data/content/trading.js';
 import { saveGame } from '../core/save.js';
 import * as audio from '../audio.js';
 
@@ -17,9 +17,12 @@ function updateTradingRate(game) {
     d.tradingTrade.disabled = true;
     return;
   }
-  const cost = tradeCost(fromId, toId);
+  const baseCost = tradeCost(fromId, toId);
+  const cost = effectiveTradeCost(game.state, fromId, toId);
   const have = game.state.player.materials[fromId] || 0;
-  d.tradingRate.textContent = `${cost} for 1 (you have ${have}).`;
+  d.tradingRate.textContent = cost < baseCost
+    ? `${cost} for 1 (Trusted discount from ${baseCost}) — you have ${have}.`
+    : `${cost} for 1 (you have ${have}).`;
   d.tradingTrade.disabled = !canTrade(game.state, fromId, toId, 1);
 }
 
@@ -48,9 +51,15 @@ export function renderTrading(game) {
 
 export function tradeMaterials(game) {
   const d = game.dom;
-  const ok = applyTrade(game.state, d.tradingFrom.value, d.tradingTo.value, 1);
+  const fromId = d.tradingFrom.value;
+  const toId = d.tradingTo.value;
+  const cost = effectiveTradeCost(game.state, fromId, toId);
+  const ok = applyTrade(game.state, fromId, toId, 1);
   if (!ok) return;
   audio.playCraftSuccess();
+  if (d.tradingLast) {
+    d.tradingLast.textContent = `Last trade: ${cost} ${MATERIALS[fromId].name} → 1 ${MATERIALS[toId].name}.`;
+  }
   saveGame(game.state);
   renderTrading(game);
 }

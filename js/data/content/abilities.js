@@ -29,7 +29,13 @@ export const ABILITIES = [
     desc: 'Trap incoming light via total internal reflection — raises block chance this turn.',
     effect(ctx) {
       const bonus = ctx.gear.filter && ctx.gear.filter.tirBonus ? ctx.gear.filter.tirBonus : 0.15;
-      return { block: 0.45 + bonus, note: 'Light beyond the critical angle can’t escape — it reflects back inside.' };
+      const weatherBonus = ctx.weatherBonus || 0;
+      return {
+        block: 0.45 + bonus + weatherBonus,
+        note: weatherBonus
+          ? 'Light beyond the critical angle can’t escape — and this thick fog gives it a critical angle everywhere.'
+          : 'Light beyond the critical angle can’t escape — it reflects back inside.'
+      };
     }
   },
   {
@@ -50,10 +56,11 @@ export const ABILITIES = [
     type: 'defense', basePower: 0,
     effect(ctx) {
       const base = ctx.gear.filter && ctx.gear.filter.glareReduction ? ctx.gear.filter.glareReduction : 0.3;
-      const reduction = base + (ctx.glareBonus || 0);
+      const weatherBonus = ctx.weatherBonus || 0;
+      const reduction = base + weatherBonus;
       return {
         glareShield: reduction,
-        note: ctx.glareBonus
+        note: weatherBonus
           ? 'Only light aligned with the filter axis gets through — and this glare-heavy air makes the effect even stronger.'
           : 'Only light aligned with the filter axis gets through.'
       };

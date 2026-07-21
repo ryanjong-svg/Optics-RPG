@@ -54,8 +54,24 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.bestiaryFavorites, {});
   assert.equal(migrated.flags.hardcorePuzzleHits, 0);
   assert.deepEqual(migrated.flags.npcReputation, {});
-  assert.equal(migrated.flags.glareEvent, null);
+  assert.equal(migrated.flags.zoneWeather, null);
   assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1, reducedMotion: false, puzzleHints: true });
+});
+
+test('migrateState: folds an old-shape live glareEvent into the generalized zoneWeather field', () => {
+  const state = newGameState();
+  state.flags.glareEvent = { zone: 'prism', battlesLeft: 2 };
+  const migrated = migrateState(state);
+  assert.equal(migrated.flags.glareEvent, undefined, 'the old field should be removed');
+  assert.deepEqual(migrated.flags.zoneWeather, { type: 'glare', zone: 'prism', battlesLeft: 2 });
+});
+
+test('migrateState: drops a spent old-shape glareEvent instead of reviving it as zoneWeather', () => {
+  const state = newGameState();
+  state.flags.glareEvent = { zone: 'prism', battlesLeft: 0 };
+  const migrated = migrateState(state);
+  assert.equal(migrated.flags.glareEvent, undefined);
+  assert.equal(migrated.flags.zoneWeather, null);
 });
 
 test('migrateState: leaves already-present fields untouched', () => {

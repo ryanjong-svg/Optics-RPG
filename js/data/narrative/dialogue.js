@@ -13,6 +13,25 @@ export const NPC_INTRO = {
   prof_labs: 'Professor Gapp taps a silicon wafer. "Band gaps, the photoelectric effect — the Vanguard\'s modern stuff. Ready?"'
 };
 
+// A one-time bonus line of in-character flavor, shown alongside the standing
+// toast the moment a professor's reputation first crosses into Trusted or
+// Cherished - a small narrative payoff for reaching those tiers, on top of
+// the Trading Post discount that Trusted+ standing also unlocks.
+export const NPC_TIER_FLAVOR = {
+  prof_lumen: {
+    Trusted: 'Professor Lumen sets down her chalk. "You\'ve earned more than answers now — ask, and I\'ll explain the parts I usually skip."',
+    Cherished: 'Professor Lumen almost smiles. "Between us, apprentice — you\'ve out-studied half my old cohort at the Unbroken Ray."'
+  },
+  prof_mirrors: {
+    Trusted: 'Professor Silvers lowers her guard, just slightly. "Most people I still call \'apprentice.\' You I\'ll call by name, if you\'d like."',
+    Cherished: 'Professor Silvers exhales. "The Silvered Circle doesn\'t trust easily. I do, now — for what that\'s worth."'
+  },
+  prof_labs: {
+    Trusted: 'Professor Gapp grins wider than usual. "Alright, you\'ve earned lab-partner status. Don\'t make me regret it."',
+    Cherished: 'Professor Gapp claps you on the shoulder. "Vanguard\'s modern stuff, ancient trust — you\'ve got both from me now."'
+  }
+};
+
 export const GUARDIAN_INTRO = {
   reflection_wraith: 'An endless hallway of reflections coalesces into a shrieking wraith!',
   chroma_beast: 'Blurred rainbow fringes converge into a lumbering beast!',

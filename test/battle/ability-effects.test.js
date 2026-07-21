@@ -100,13 +100,22 @@ test('photoelectric_shock: a larger bandgapPierceEV (e.g. the Avalanche Photodet
   assert.ok(bothClear.dmg > defaultClear.dmg, 'a bigger pierce bonus should deal more excess-energy damage once both clear the gap');
 });
 
-test('polarize_filter: an active glare event adds ctx.glareBonus on top of the gear\'s base reduction', () => {
+test('polarize_filter: an active glare weather event adds ctx.weatherBonus on top of the gear\'s base reduction', () => {
   const ability = findAbility('polarize_filter');
   const base = ability.effect({ player: {}, gear: {}, log: noop, enemy: {} });
   assert.equal(base.glareShield, 0.3);
-  const withGlareEvent = ability.effect({ player: {}, gear: {}, log: noop, enemy: {}, glareBonus: 0.15 });
-  assert.ok(Math.abs(withGlareEvent.glareShield - 0.45) < 1e-9);
-  assert.notEqual(withGlareEvent.note, base.note, 'the note should call out the active glare event');
+  const withWeather = ability.effect({ player: {}, gear: {}, log: noop, enemy: {}, weatherBonus: 0.15 });
+  assert.ok(Math.abs(withWeather.glareShield - 0.45) < 1e-9);
+  assert.notEqual(withWeather.note, base.note, 'the note should call out the active weather event');
+});
+
+test('tir_shield: an active fog weather event adds ctx.weatherBonus on top of the gear\'s base block chance', () => {
+  const ability = findAbility('tir_shield');
+  const base = ability.effect({ player: {}, gear: {}, log: noop, enemy: {} });
+  assert.ok(Math.abs(base.block - 0.6) < 1e-9);
+  const withWeather = ability.effect({ player: {}, gear: {}, log: noop, enemy: {}, weatherBonus: 0.15 });
+  assert.ok(Math.abs(withWeather.block - 0.75) < 1e-9);
+  assert.notEqual(withWeather.note, base.note, 'the note should call out the active weather event');
 });
 
 test('laser_focus: a guaranteed crit applies the 1.8x crit multiplier on top of base damage', () => {

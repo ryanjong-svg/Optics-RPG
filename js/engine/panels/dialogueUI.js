@@ -1,5 +1,5 @@
 import { QUIZZES } from '../../data/narrative/quizzes.js';
-import { NPC_INTRO } from '../../data/narrative/dialogue.js';
+import { NPC_INTRO, NPC_TIER_FLAVOR } from '../../data/narrative/dialogue.js';
 import { pickQuestToPresent, isObjectiveMet, applyReputationChange } from '../../data/narrative/quests.js';
 import { grantXp, claimHint } from '../core/state.js';
 import { saveGame } from '../core/save.js';
@@ -10,7 +10,8 @@ import * as audio from '../audio.js';
 
 function announceReputationTier(game, npcId, newTier) {
   if (!newTier) return;
-  showToast(game, `${npcName(npcId)} now sees you as: ${newTier}.`);
+  const flavor = NPC_TIER_FLAVOR[npcId] && NPC_TIER_FLAVOR[npcId][newTier];
+  showToast(game, flavor ? `${npcName(npcId)} now sees you as: ${newTier}. ${flavor}` : `${npcName(npcId)} now sees you as: ${newTier}.`);
 }
 
 function grantXpWithSound(state, amount, log) {

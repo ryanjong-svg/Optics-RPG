@@ -1,3 +1,5 @@
+import { hasTrustedStanding } from '../narrative/quests.js';
+
 // A barter system, not a currency - the Workbench already tracks every
 // material the player holds, so exchanging one for another needs no new
 // resource, just a fixed ratio between them.
@@ -26,9 +28,19 @@ export function tradeCost(fromId, toId) {
   return Math.max(1, Math.ceil(toValue / fromValue));
 }
 
+const TRUSTED_DISCOUNT = 0.85; // 15% cheaper once any professor reaches Trusted+
+
+// The actual cost the player pays right now, folding in the Trading Post's
+// loyalty discount - tradeCost() alone stays the undiscounted base rate so
+// the rarity table itself doesn't need to know about reputation.
+export function effectiveTradeCost(state, fromId, toId) {
+  const base = tradeCost(fromId, toId);
+  return hasTrustedStanding(state) ? Math.max(1, Math.ceil(base * TRUSTED_DISCOUNT)) : base;
+}
+
 export function canTrade(state, fromId, toId, toAmount = 1) {
   if (!fromId || !toId || fromId === toId || toAmount <= 0) return false;
-  const cost = tradeCost(fromId, toId) * toAmount;
+  const cost = effectiveTradeCost(state, fromId, toId) * toAmount;
   return (state.player.materials[fromId] || 0) >= cost;
 }
 
@@ -36,7 +48,7 @@ export function canTrade(state, fromId, toId, toAmount = 1) {
 // unit-testable; tradeMaterials() in tradingUI.js is the UI-wired version.
 export function applyTrade(state, fromId, toId, toAmount = 1) {
   if (!canTrade(state, fromId, toId, toAmount)) return false;
-  const cost = tradeCost(fromId, toId) * toAmount;
+  const cost = effectiveTradeCost(state, fromId, toId) * toAmount;
   state.player.materials[fromId] -= cost;
   state.player.materials[toId] = (state.player.materials[toId] || 0) + toAmount;
   return true;

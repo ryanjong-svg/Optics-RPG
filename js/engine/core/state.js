@@ -56,7 +56,7 @@ export function newGameState() {
       bestiaryFavorites: {},
       hardcorePuzzleHits: 0,
       npcReputation: {},
-      glareEvent: null,
+      zoneWeather: null,
       // A brand new game starts fully caught up - only saves that predate
       // this system (backfilled to '1.0.0' in migrateState) should see the
       // What's New panel light up.

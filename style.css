@@ -161,6 +161,7 @@ body.reduced-motion .bar-fill.hp.critical {
 .bar-fill.hp { background-color: var(--red); box-shadow: 0 0 6px rgba(255,92,92,0.5); }
 .bar-fill.xp { background-color: var(--cyan); box-shadow: 0 0 6px rgba(79,216,255,0.5); }
 .bar-fill.charge { background-color: var(--orange); box-shadow: 0 0 6px rgba(255,204,51,0.5); }
+.bar-fill.rep { background-color: var(--green); box-shadow: 0 0 6px rgba(92,255,157,0.5); }
 .bar-fill.hp.critical { animation: hp-critical-pulse 0.8s ease-in-out infinite; }
 @keyframes hp-critical-pulse {
   0%, 100% { box-shadow: 0 0 6px rgba(255,92,92,0.5); filter: brightness(1); }

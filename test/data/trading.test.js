@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { tradeCost, canTrade, applyTrade } from '../../js/data/content/trading.js';
+import { tradeCost, effectiveTradeCost, canTrade, applyTrade } from '../../js/data/content/trading.js';
 
-function makeState(materials = {}) {
-  return { player: { materials } };
+function makeState(materials = {}, npcReputation = {}) {
+  return { player: { materials }, flags: { npcReputation } };
 }
 
 test('tradeCost: trading a common material for another common material costs 1-for-1', () => {
@@ -66,4 +66,33 @@ test('applyTrade: trading for a larger amount scales the cost accordingly', () =
   assert.equal(ok, true);
   assert.equal(state.player.materials.water, 0);
   assert.equal(state.player.materials.silver, 3);
+});
+
+test('effectiveTradeCost: matches the base rate with no Trusted+ standing anywhere', () => {
+  const state = makeState({ water: 10 });
+  assert.equal(effectiveTradeCost(state, 'water', 'silver'), tradeCost('water', 'silver'));
+});
+
+test('effectiveTradeCost: 15% cheaper (rounded up, floor 1) once any professor reaches Trusted', () => {
+  const state = makeState({ water: 10 }, { prof_lumen: 15 });
+  // base = ceil(8/1) = 8, discounted = ceil(8 * 0.85) = 7
+  assert.equal(effectiveTradeCost(state, 'water', 'geiger_mode_silicon'), 7);
+  assert.ok(effectiveTradeCost(state, 'water', 'geiger_mode_silicon') < tradeCost('water', 'geiger_mode_silicon'));
+});
+
+test('effectiveTradeCost: no discount below Trusted (Acquainted is not enough)', () => {
+  const state = makeState({ water: 10 }, { prof_lumen: 10 });
+  assert.equal(effectiveTradeCost(state, 'water', 'geiger_mode_silicon'), tradeCost('water', 'geiger_mode_silicon'));
+});
+
+test('applyTrade: the discount can make an otherwise-unaffordable trade go through', () => {
+  const base = tradeCost('water', 'geiger_mode_silicon'); // ceil(8/1) = 8
+  const discountedCost = effectiveTradeCost(makeState({}, { prof_mirrors: 30 }), 'water', 'geiger_mode_silicon');
+  assert.ok(discountedCost < base, 'the discount should actually reduce the cost for this pair');
+
+  const withoutDiscount = makeState({ water: discountedCost });
+  assert.equal(applyTrade(withoutDiscount, 'water', 'geiger_mode_silicon', 1), false, 'not enough water at the undiscounted rate');
+
+  const withDiscount = makeState({ water: discountedCost }, { prof_mirrors: 30 });
+  assert.equal(applyTrade(withDiscount, 'water', 'geiger_mode_silicon', 1), true, 'the same amount should be enough once Trusted+ standing is reached');
 });

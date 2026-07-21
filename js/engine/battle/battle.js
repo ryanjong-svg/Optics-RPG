@@ -24,7 +24,7 @@ import {
   allEnemiesDefeated, shouldTriggerGuardianPhase2, applyGuardianPhase2, shouldTriggerBossEnrage, applyBossEnrage,
   decrementCooldowns, isTelegraphEligible, telegraphDamageBase, regenCharge, specializationDamageMult,
   effectiveChargeCost, shouldApplySurprise, shouldGrantHardcorePuzzleBonus,
-  glareEventActive, decrementGlareEvent, GLARE_EVENT_GLARE_BONUS
+  zoneWeatherActive, zoneWeatherBonus, decrementZoneWeather, ZONE_WEATHER
 } from './battleFormulas.js';
 
 function unlockAchievement(state, id, log) {
@@ -132,6 +132,9 @@ export function startBattle(game, enemyId, opts = {}) {
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
+  if (!isDummy && zoneWeatherActive(game.state, enemy.zone)) {
+    logMsg(game, ZONE_WEATHER[game.state.flags.zoneWeather.type].battleFlavor);
+  }
   if (enemy.ngPlusBonusPhase) {
     logMsg(game, 'Something is different this cycle — The Null Medium has learned to borrow one more property: coherence itself.');
   }
@@ -456,8 +459,8 @@ export function chooseAbility(game, abilityId) {
     return;
   }
   const gear = buildGear(player);
-  const glareBonus = glareEventActive(game.state, battle.enemy.zone) ? GLARE_EVENT_GLARE_BONUS : 0;
-  const ctx = { player, enemy: battle.enemy, gear, glareBonus, log: m => logMsg(game, m) };
+  const weatherBonus = zoneWeatherBonus(game.state, battle.enemy.zone, ability.id);
+  const ctx = { player, enemy: battle.enemy, gear, weatherBonus, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
   battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
@@ -786,7 +789,7 @@ function resolveVictory(game) {
     }
   }
   state.flags.totalVictories = (state.flags.totalVictories || 0) + 1;
-  decrementGlareEvent(state);
+  decrementZoneWeather(state);
   logMsg(game, buildBattleReport(battle));
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
@@ -803,7 +806,7 @@ function resolveDefeat(game) {
   state.player.hp = state.player.maxHp;
   state.currentMap = 'village';
   state.pos = { x: 7, y: 8 };
-  decrementGlareEvent(state);
+  decrementZoneWeather(state);
   saveGame(state);
 }
 
