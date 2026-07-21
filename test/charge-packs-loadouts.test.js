@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { ABILITIES } from '../js/data/abilities.js';
 import { newGameState } from '../js/engine/state.js';
 import { regenCharge, shouldApplySurprise, allEnemiesDefeated } from '../js/engine/battle.js';
-import { applySaveLoadout, applyLoadLoadout } from '../js/engine/craft.js';
+import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../js/engine/craft.js';
 import { MAPS } from '../js/data/maps.js';
 
 test('every attack ability has a positive integer chargeCost; defense/utility abilities have none', () => {
@@ -65,7 +65,7 @@ test('applySaveLoadout/applyLoadLoadout: round-trips the equipped gear snapshot 
   state.player.equipped = { lens: 'converging_lens', mirror: 'silver_mirror', prism: null, filter: null };
 
   applySaveLoadout(state, 1);
-  assert.deepEqual(state.player.loadouts[1], { lens: 'converging_lens', mirror: 'silver_mirror', prism: null, filter: null });
+  assert.deepEqual(state.player.loadouts[1], { lens: 'converging_lens', mirror: 'silver_mirror', prism: null, filter: null, name: null });
 
   state.player.equipped = { lens: null, mirror: null, prism: null, filter: null };
   applyLoadLoadout(state, 1);
@@ -87,4 +87,32 @@ test('applyLoadLoadout: falls back to unequipped for gear no longer owned (defen
   // player does NOT own converging_lens in this scenario
   applyLoadLoadout(state, 1);
   assert.equal(state.player.equipped.lens, null);
+});
+
+test('applyRenameLoadout: refuses (returns false) for a never-saved slot', () => {
+  const state = newGameState();
+  assert.equal(applyRenameLoadout(state, 1, 'Speedrun'), false);
+});
+
+test('applyRenameLoadout: names a saved loadout, and a blank name clears it back to null', () => {
+  const state = newGameState();
+  state.player.equipped = { lens: null, mirror: null, prism: null, filter: null };
+  applySaveLoadout(state, 1);
+  assert.equal(applyRenameLoadout(state, 1, 'Glass Cannon'), true);
+  assert.equal(state.player.loadouts[1].name, 'Glass Cannon');
+  applyRenameLoadout(state, 1, '');
+  assert.equal(state.player.loadouts[1].name, null);
+});
+
+test('applySaveLoadout: re-saving (e.g. after changing gear) keeps the loadout\'s existing name', () => {
+  const state = newGameState();
+  state.player.ownedGear.converging_lens = true;
+  state.player.equipped = { lens: null, mirror: null, prism: null, filter: null };
+  applySaveLoadout(state, 1);
+  applyRenameLoadout(state, 1, 'Glass Cannon');
+
+  state.player.equipped = { lens: 'converging_lens', mirror: null, prism: null, filter: null };
+  applySaveLoadout(state, 1);
+  assert.equal(state.player.loadouts[1].name, 'Glass Cannon');
+  assert.equal(state.player.loadouts[1].lens, 'converging_lens');
 });

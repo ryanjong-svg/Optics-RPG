@@ -96,6 +96,11 @@ export const LORE = {
     title: 'On the Apprentice Who Stayed',
     unlock: { type: 'allAchievements' },
     body: `Most apprentices leave the moment the Bending is resolved — one good answer, one closed case, one trophy for the mantel. You didn't. You went back for the guardian you'd already beaten cleanly, the specialization you'd never tried, the fringe you almost missed by three degrees. The three rival professors who founded this village never agreed on anything except this: understanding isn't a thing you finish. It's a thing you keep choosing to do again, past the point it stops being required. Candela's Reach doesn't have a real ending. It only has the apprentices willing to stay long enough to find that out.`
+  },
+  elite_manifestations: {
+    title: 'On the Sharper Ones',
+    unlock: { type: 'flag', flag: 'elitesDefeated', min: 1 },
+    body: `Ordinary specimens are echoes — a shape the Bending settled into once and stopped questioning. Every so often, though, one refuses to settle. It holds its resonance a beat too long, gathers more of itself than the pattern should allow, and the difference shows: sharper reflections, harder edges, a glow that outlasts the strike that made it. The Vanguard has no formal name for these. Apprentices just call them elite, and treat every one of them as a small, temporary law of physics arguing with itself.`
   }
 };
 
@@ -105,5 +110,9 @@ export function isLoreUnlocked(state, entry) {
   if (u.type === 'map') return !!(state.flags.visitedMaps && state.flags.visitedMaps[u.map]);
   if (u.type === 'npc') return !!(state.flags.metNpc && state.flags.metNpc[u.npc]);
   if (u.type === 'allAchievements') return !!state.flags.allAchievementsEarned;
+  // A generic numeric-threshold gate on any state.flags counter - lets a lore
+  // entry unlock once you've actually experienced the thing it explains,
+  // without needing a new one-off unlock type per counter.
+  if (u.type === 'flag') return (state.flags[u.flag] || 0) >= (u.min != null ? u.min : 1);
   return false;
 }

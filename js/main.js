@@ -70,6 +70,7 @@ const dom = {
   craftSpecialization: q('craft-specialization'),
   craftMeditate: q('craft-meditate'),
   craftPractice: q('craft-practice'),
+  craftBounties: q('craft-bounties'),
   craftConsumables: q('craft-consumables'),
 
   snellPuzzlePanel: q('snell-puzzle-panel'),

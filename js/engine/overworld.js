@@ -3,7 +3,7 @@ import { MATERIALS } from '../data/materials.js';
 import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
-import { startBattle, ELITE_CHANCE } from './battle.js';
+import { startBattle, eliteChanceForCycle } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
@@ -441,7 +441,7 @@ export function handleMove(game, dx, dy) {
       const opts = { scaleToLevel: state.player.level };
       if (PACK_ELIGIBLE_ZONES.has(map.zone) && Math.random() < 0.3) {
         opts.packIds = [pool[Math.floor(Math.random() * pool.length)]];
-      } else if (Math.random() < ELITE_CHANCE) {
+      } else if (Math.random() < eliteChanceForCycle(state.flags.ngPlusCycle)) {
         opts.elite = true;
       }
       startBattle(game, enemyId, opts);

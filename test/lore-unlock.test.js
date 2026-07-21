@@ -38,6 +38,31 @@ test('the completionist epilogue exists and is wired to the allAchievements unlo
   assert.equal(LORE.full_circle.unlock.type, 'allAchievements');
 });
 
+test('isLoreUnlocked: "flag" entries gate on a state.flags counter reaching a minimum (default 1)', () => {
+  const state = newGameState();
+  const entry = { unlock: { type: 'flag', flag: 'elitesDefeated', min: 1 } };
+  assert.equal(isLoreUnlocked(state, entry), false);
+  state.flags.elitesDefeated = 1;
+  assert.equal(isLoreUnlocked(state, entry), true);
+});
+
+test('isLoreUnlocked: "flag" entries respect a higher explicit min', () => {
+  const state = newGameState();
+  const entry = { unlock: { type: 'flag', flag: 'combosLanded', min: 5 } };
+  state.flags.combosLanded = 4;
+  assert.equal(isLoreUnlocked(state, entry), false);
+  state.flags.combosLanded = 5;
+  assert.equal(isLoreUnlocked(state, entry), true);
+});
+
+test('the Elites Chronicle entry exists and unlocks after the first Elite is defeated', () => {
+  assert.ok(LORE.elite_manifestations, 'expected an elite_manifestations Chronicle entry');
+  const state = newGameState();
+  assert.equal(isLoreUnlocked(state, LORE.elite_manifestations), false);
+  state.flags.elitesDefeated = 1;
+  assert.equal(isLoreUnlocked(state, LORE.elite_manifestations), true);
+});
+
 test('checkNewAchievements: sets allAchievementsEarned once every achievement check() passes', () => {
   const state = newGameState();
   checkNewAchievements(state);

@@ -107,6 +107,11 @@ export const ACHIEVEMENTS = {
     title: 'Combo Master',
     desc: 'Land 15 ability combos.',
     check: state => (state.flags.combosLanded || 0) >= 15
+  },
+  bounty_hunter: {
+    title: 'Bounty Hunter',
+    desc: 'Claim 10 bounties from the Workbench board.',
+    check: state => (state.flags.bountiesClaimed || 0) >= 10
   }
 };
 

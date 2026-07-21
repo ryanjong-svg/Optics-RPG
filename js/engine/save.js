@@ -92,6 +92,9 @@ export function migrateState(state) {
     if (state.flags.lastSeenVersion === undefined) state.flags.lastSeenVersion = '1.0.0';
     if (state.flags.elitesDefeated === undefined) state.flags.elitesDefeated = 0;
     if (state.flags.combosLanded === undefined) state.flags.combosLanded = 0;
+    if (!state.flags.enemyKillCounts) state.flags.enemyKillCounts = {};
+    if (!state.flags.bounties) state.flags.bounties = [];
+    if (state.flags.bountiesClaimed === undefined) state.flags.bountiesClaimed = 0;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';

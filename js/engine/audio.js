@@ -96,6 +96,15 @@ export function playAchievement() { playSequence([[698, 0.06], [880, 0.06], [104
 export function playCorrect() { playSequence([[659, 0.07], [988, 0.14]], { type: 'triangle', gain: 0.13 }); }
 export function playIncorrect() { playSequence([[220, 0.12], [175, 0.18]], { type: 'sawtooth', gain: 0.11 }); }
 export function playHeal() { playSequence([[440, 0.09], [554, 0.09], [659, 0.09], [880, 0.22]], { type: 'sine', gain: 0.13 }); }
+// A rising, slightly harsh sting the moment an Elite encounter starts - a
+// distinct audio tell alongside the amber portrait glow and renamed label.
+export function playEliteEncounter() {
+  const c = getCtx();
+  const t = c.currentTime + 0.01;
+  tone(220, t, 0.07, { type: 'sawtooth', gain: 0.14 });
+  tone(330, t + 0.07, 0.07, { type: 'sawtooth', gain: 0.14 });
+  tone(440, t + 0.14, 0.16, { type: 'square', gain: 0.16 });
+}
 
 // ---------- Looping background music ----------
 const OVERWORLD_MELODY = [

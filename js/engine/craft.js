@@ -6,6 +6,7 @@ import { saveGame } from './save.js';
 import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from './consumables.js';
 import { SPECIALIZATIONS } from '../data/specializations.js';
 import { startBattle } from './battle.js';
+import { renderBounties } from './bountyUI.js';
 import * as audio from './audio.js';
 
 const SPECIALIZATION_LEVEL = 5;
@@ -120,7 +121,12 @@ export function equipItem(game, slot, recipeId) {
 // Pure state mutations (no dom/save side effects) so they stay unit-testable;
 // saveLoadout()/loadLoadout() below are the UI-wired versions callers use.
 export function applySaveLoadout(state, slot) {
-  state.player.loadouts[slot] = { ...state.player.equipped };
+  // A re-save overwrites the equipped snapshot but keeps whatever name was
+  // already set - naming a loadout shouldn't need to be redone every time
+  // its gear changes.
+  const existing = state.player.loadouts[slot];
+  const name = existing ? existing.name : null;
+  state.player.loadouts[slot] = { ...state.player.equipped, name: name || null };
 }
 
 export function applyLoadLoadout(state, slot) {
@@ -134,8 +140,25 @@ export function applyLoadLoadout(state, slot) {
   return true;
 }
 
+export function applyRenameLoadout(state, slot, name) {
+  const loadout = state.player.loadouts[slot];
+  if (!loadout) return false;
+  loadout.name = name || null;
+  return true;
+}
+
 export function saveLoadout(game, slot) {
   applySaveLoadout(game.state, slot);
+  saveGame(game.state);
+  renderCraft(game);
+}
+
+export function renameLoadout(game, slot) {
+  const loadout = game.state.player.loadouts[slot];
+  if (!loadout) return;
+  const name = window.prompt('Name this loadout:', loadout.name || '');
+  if (name === null) return;
+  applyRenameLoadout(game.state, slot, name.trim());
   saveGame(game.state);
   renderCraft(game);
 }
@@ -229,6 +252,8 @@ export function renderCraft(game) {
     d.craftPractice.querySelector('.recipe-row').appendChild(btn);
   }
 
+  renderBounties(game);
+
   d.craftMaterials.innerHTML = Object.values(MATERIALS).map(m => {
     const count = player.materials[m.id] || 0;
     return `<div class="mat-chip" title="${m.fact}"><span>${m.glyph}</span> ${m.name} <b>${count}</b></div>`;
@@ -241,10 +266,11 @@ export function renderCraft(game) {
       const summary = loadout
         ? ['lens', 'mirror', 'prism', 'filter'].map(s => loadout[s] ? findRecipe(loadout[s]).name : '(none)').join(' • ')
         : 'Empty — nothing saved yet.';
+      const heading = `Loadout ${slot}${loadout && loadout.name ? ` — ${loadout.name}` : ''}`;
       const row = document.createElement('div');
       row.className = 'recipe-row';
       row.innerHTML = `
-        <div class="recipe-head"><strong>Loadout ${slot}</strong></div>
+        <div class="recipe-head"><strong>${heading}</strong></div>
         <div class="recipe-req">${summary}</div>
       `;
       const btnRow = document.createElement('div');
@@ -258,8 +284,14 @@ export function renderCraft(game) {
       loadBtn.textContent = 'Load';
       loadBtn.disabled = !loadout;
       loadBtn.onclick = () => loadLoadout(game, slot);
+      const renameBtn = document.createElement('button');
+      renameBtn.className = 'action-btn ghost';
+      renameBtn.textContent = 'Rename';
+      renameBtn.disabled = !loadout;
+      renameBtn.onclick = () => renameLoadout(game, slot);
       btnRow.appendChild(saveBtn);
       btnRow.appendChild(loadBtn);
+      btnRow.appendChild(renameBtn);
       row.appendChild(btnRow);
       d.craftLoadouts.appendChild(row);
     });

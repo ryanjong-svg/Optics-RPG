@@ -81,7 +81,8 @@ export const HELP_TOPICS = [
   {
     title: 'Elite Enemies',
     body: 'Random encounters occasionally spawn as a tougher "Elite" variant, marked by a pulsing amber glow on ' +
-      'its portrait and a renamed label in the battle log. Elites hit harder and have more HP, but drop double ' +
-      'materials and far more XP — worth the extra fight if you can spare the Charge.'
+      'its portrait, a distinct sting when the fight starts, and a renamed label in the battle log. Elites hit ' +
+      'harder and have more HP, but drop double materials and far more XP — worth the extra fight if you can ' +
+      'spare the Charge. They also get more common with every New Game+ cycle.'
   }
 ];

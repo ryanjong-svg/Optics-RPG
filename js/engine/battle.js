@@ -154,8 +154,17 @@ export function isComboFollowUp(lastAbilityId, abilityId) {
 // same (so it still counts as the ordinary enemy for the Bestiary), only its
 // display name, stats, and rewards change.
 export const ELITE_CHANCE = 0.12;
+const ELITE_CHANCE_PER_CYCLE = 0.04;
+const ELITE_CHANCE_MAX = 0.32;
 const ELITE_STAT_MULT = 1.6;
 const ELITE_XP_MULT = 2.2;
+
+// Elites get more common each New Game+ cycle - a reason for late-game
+// replays to keep running into them, capped so a normal encounter never
+// becomes the exception rather than the rule.
+export function eliteChanceForCycle(cycle) {
+  return Math.min(ELITE_CHANCE_MAX, ELITE_CHANCE + (cycle || 0) * ELITE_CHANCE_PER_CYCLE);
+}
 
 export function applyEliteVariant(enemy) {
   enemy.isElite = true;
@@ -221,6 +230,7 @@ export function startBattle(game, enemyId, opts = {}) {
     logMsg(game, 'Something is different this cycle — The Null Medium has learned to borrow one more property: coherence itself.');
   }
   if (enemy.isElite) {
+    audio.playEliteEncounter();
     logMsg(game, '✨ This one is stronger than usual — but it hits harder, and drops more.');
     if (claimHint(game.state, 'firstElite')) {
       logMsg(game, '💡 Tip: Elite enemies are tougher random encounters with better rewards — watch for the amber glow.');
@@ -852,6 +862,11 @@ function resolveVictory(game) {
   allDefeated.forEach(e => {
     if (!state.flags.enemiesDefeated[e.id]) newlyCataloged.add(e.id);
     state.flags.enemiesDefeated[e.id] = true;
+    // Lifetime per-enemy count, distinct from the one-time flag above - the
+    // bounty board needs "how many since the bounty was issued," not just
+    // "have you ever beaten one."
+    if (!state.flags.enemyKillCounts) state.flags.enemyKillCounts = {};
+    state.flags.enemyKillCounts[e.id] = (state.flags.enemyKillCounts[e.id] || 0) + 1;
   });
   newlyCataloged.forEach(id => {
     logMsg(game, `📖 New Bestiary entry: ${allDefeated.find(e => e.id === id).name} cataloged!`);
