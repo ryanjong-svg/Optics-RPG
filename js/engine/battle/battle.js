@@ -427,12 +427,19 @@ function applyOffensiveModifiers(game, ability, result) {
 
 // The defense-side counterpart to applyOffensiveModifiers — only the puzzle
 // bonus mult applies here (specialization/adaptive-resist are damage-dealing
-// concepts, not defensive ones), scaling glareShield instead of dmg.
+// concepts, not defensive ones), scaling glareShield/block instead of dmg.
+//
+// The 0.95 clamp is unconditional (not just when mult !== 1): glareShield
+// feeds into `dmg * (1 - glareShield)` in enemyTurn(), so if it ever reached
+// 1.0 or above from gear + weather + puzzle/combo bonuses stacking, that
+// formula would go negative and silently heal the player on a "hit" instead
+// of just blocking it. block has no such failure mode (it only gates a
+// Math.random() check), but is clamped the same way for consistency.
 function applyDefensiveModifiers(game, ability, result) {
   const battle = game.battle;
   const mult = (battle.puzzleBonusMult || 1) * (battle.comboBonusMult || 1);
-  if (mult === 1) return result;
   if (result.glareShield != null) result.glareShield = Math.min(0.95, result.glareShield * mult);
+  if (result.block != null) result.block = Math.min(0.95, result.block * mult);
   return result;
 }
 
