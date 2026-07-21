@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
-import { canCraftRecipe, applyCraftRecipe } from '../js/engine/craft.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { canCraftRecipe, applyCraftRecipe } from '../js/engine/panels/craft.js';
 import { findRecipe } from '../js/data/equipment.js';
 
 function withMaterials(state, mats) {

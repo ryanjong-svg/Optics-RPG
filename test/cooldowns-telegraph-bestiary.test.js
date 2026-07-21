@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { ABILITIES } from '../js/data/abilities.js';
-import { decrementCooldowns, isTelegraphEligible, bestiaryHintText } from '../js/engine/battle.js';
+import { decrementCooldowns, isTelegraphEligible, bestiaryHintText } from '../js/engine/battle/battle.js';
 
 test('exactly the three strongest attack abilities have a positive integer cooldown', () => {
   const withCooldown = ABILITIES.filter(a => a.cooldown).map(a => a.id).sort();

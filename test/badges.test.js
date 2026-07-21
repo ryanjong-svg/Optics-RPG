@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
-import { migrateState } from '../js/engine/save.js';
-import { bestiaryCaughtCount } from '../js/engine/bestiaryUI.js';
-import { codexUnlockedCount } from '../js/engine/codexUI.js';
-import { chronicleUnlockedCount } from '../js/engine/chronicleUI.js';
-import { hasReadyQuest } from '../js/engine/questLogUI.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { migrateState } from '../js/engine/core/save.js';
+import { bestiaryCaughtCount } from '../js/engine/panels/bestiaryUI.js';
+import { codexUnlockedCount } from '../js/engine/panels/codexUI.js';
+import { chronicleUnlockedCount } from '../js/engine/panels/chronicleUI.js';
+import { hasReadyQuest } from '../js/engine/panels/questLogUI.js';
 import { ENEMIES } from '../js/data/enemies.js';
 import { CODEX } from '../js/data/codex.js';
 import { QUESTS } from '../js/data/quests.js';

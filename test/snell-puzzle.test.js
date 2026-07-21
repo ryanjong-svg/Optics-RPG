@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeRefractedDeg, makeSnellPuzzle, resolveSnellShot } from '../js/engine/snellPuzzle.js';
+import { computeRefractedDeg, makeSnellPuzzle, resolveSnellShot } from '../js/engine/puzzles/snellPuzzle.js';
 
 test('computeRefractedDeg: matches real Snell\'s law (n1=1) for a known case', () => {
   // n2 = 1.5, incident 30deg: sin(theta2) = sin(30)/1.5 = 0.3333... -> ~19.47deg

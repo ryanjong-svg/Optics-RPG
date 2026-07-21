@@ -15,8 +15,8 @@ global.localStorage = new MemoryStorage();
 import {
   SLOT_COUNT, getCurrentSlot, setCurrentSlot, saveGameToSlot, loadGameFromSlot,
   clearSlot, slotSummary, allSlotSummaries, getSlotName, setSlotName
-} from '../js/engine/save.js';
-import { newGameState } from '../js/engine/state.js';
+} from '../js/engine/core/save.js';
+import { newGameState } from '../js/engine/core/state.js';
 
 test('getCurrentSlot: defaults to 1 when nothing has been set', () => {
   global.localStorage = new MemoryStorage();

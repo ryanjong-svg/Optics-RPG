@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeFringeAngleDeg, makeDiffractionPuzzle, resolveDiffractionShot } from '../js/engine/diffractionPuzzle.js';
+import { computeFringeAngleDeg, makeDiffractionPuzzle, resolveDiffractionShot } from '../js/engine/puzzles/diffractionPuzzle.js';
 
 test('computeFringeAngleDeg: matches the first-order bright fringe condition d*sin(theta)=lambda', () => {
   // d/lambda = 2 -> sin(theta) = 1/2 -> theta = 30deg

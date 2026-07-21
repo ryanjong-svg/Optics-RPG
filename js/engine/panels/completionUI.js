@@ -1,12 +1,12 @@
-import { CODEX } from '../data/codex.js';
-import { LORE, isLoreUnlocked } from '../data/lore.js';
-import { RECIPES } from '../data/equipment.js';
-import { QUESTS } from '../data/quests.js';
-import { MAPS } from '../data/maps.js';
-import { ACHIEVEMENTS, unlockedAchievements } from '../data/achievements.js';
-import { ENEMIES } from '../data/enemies.js';
-import { findAbility } from '../data/abilities.js';
-import { COMBOS } from './battle.js';
+import { CODEX } from '../../data/codex.js';
+import { LORE, isLoreUnlocked } from '../../data/lore.js';
+import { RECIPES } from '../../data/equipment.js';
+import { QUESTS } from '../../data/quests.js';
+import { MAPS } from '../../data/maps.js';
+import { ACHIEVEMENTS, unlockedAchievements } from '../../data/achievements.js';
+import { ENEMIES } from '../../data/enemies.js';
+import { findAbility } from '../../data/abilities.js';
+import { COMBOS } from '../battle/battle.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);

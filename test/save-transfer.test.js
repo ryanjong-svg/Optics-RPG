@@ -4,8 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
-import { migrateState, looksLikeSave } from '../js/engine/save.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { migrateState, looksLikeSave } from '../js/engine/core/save.js';
 
 test('looksLikeSave: accepts a real game state shape', () => {
   const state = newGameState();

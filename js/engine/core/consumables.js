@@ -1,7 +1,7 @@
-import { findConsumable } from '../data/consumables.js';
+import { findConsumable } from '../../data/consumables.js';
 import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
-import * as audio from './audio.js';
+import * as audio from '../audio.js';
 
 export function canCraftConsumable(player, item) {
   return item.materials.every(matId => (player.materials[matId] || 0) >= item.count);

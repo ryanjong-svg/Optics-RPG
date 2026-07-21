@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 import { QUESTS } from '../js/data/quests.js';
 import { MATERIALS } from '../js/data/materials.js';
 import { MAPS } from '../js/data/maps.js';
-import { progressText, npcName } from '../js/engine/questLogUI.js';
+import { progressText, npcName } from '../js/engine/panels/questLogUI.js';
 
 test('progressText: a collect quest shows current/needed material count, capped at the requirement', () => {
   const state = newGameState();

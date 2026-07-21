@@ -4,9 +4,9 @@
 // (state.flags.enemyKillCounts) that battle.js increments on every victory,
 // completely separate from state.flags.enemiesDefeated (a one-time "have you
 // ever beaten this?" flag, not a running count).
-import { ZONE_ENCOUNTERS } from './overworld.js';
-import { ENEMIES } from '../data/enemies.js';
-import { grantXp } from './state.js';
+import { ZONE_ENCOUNTERS } from '../world/overworld.js';
+import { ENEMIES } from '../../data/enemies.js';
+import { grantXp } from '../core/state.js';
 
 export const BOUNTY_SLOT_COUNT = 3;
 const MIN_TARGET = 3;

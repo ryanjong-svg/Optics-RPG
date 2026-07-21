@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/achievements.js';
 
 test('perfect_refraction: locked below 10 puzzle hits, unlocks at 10', () => {

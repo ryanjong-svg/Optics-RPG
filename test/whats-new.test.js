@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { hasUnseenChangelog } from '../js/engine/whatsNewUI.js';
+import { hasUnseenChangelog } from '../js/engine/panels/whatsNewUI.js';
 import { GAME_VERSION, CHANGELOG } from '../js/data/changelog.js';
-import { newGameState } from '../js/engine/state.js';
-import { migrateState } from '../js/engine/save.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { migrateState } from '../js/engine/core/save.js';
 
 test('a brand new game starts fully caught up on the changelog', () => {
   const state = newGameState();

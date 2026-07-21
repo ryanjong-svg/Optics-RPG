@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { eliteAuraColor, drawEliteAura, BACKDROP_THEMES } from '../js/engine/pixelSprites.js';
+import { eliteAuraColor, drawEliteAura, BACKDROP_THEMES } from '../js/engine/world/pixelSprites.js';
 
 // A minimal fake 2D context capturing just enough for drawEliteAura's calls
 // to succeed and its final lineWidth/globalAlpha to be inspected - no real

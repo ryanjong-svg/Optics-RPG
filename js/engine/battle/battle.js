@@ -1,24 +1,24 @@
-import { ABILITIES, findAbility } from '../data/abilities.js';
-import { makeEnemyInstance, weaknessResistanceText } from '../data/enemies.js';
-import { MATERIALS } from '../data/materials.js';
-import { MAPS } from '../data/maps.js';
-import { GUARDIAN_INTRO, BOSS_INTRO } from '../data/dialogue.js';
-import { CHARACTER_SPRITES } from '../data/pixelArt.js';
-import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
-import { CODEX } from '../data/codex.js';
-import { CONSUMABLES, findConsumable } from '../data/consumables.js';
-import { findDifficulty } from '../data/difficulty.js';
-import { drawSprite, drawZoneBackdrop, playerPaletteFor, drawEliteAura } from './pixelSprites.js';
-import { buildGear } from './gear.js';
-import { grantXp, unlockCodex, claimHint } from './state.js';
-import { saveGame } from './save.js';
-import { applyConsumable } from './consumables.js';
-import { showToast } from './toastUI.js';
-import { SPECIALIZATIONS } from '../data/specializations.js';
-import { openSnellPuzzle } from './snellPuzzleUI.js';
-import { openDiffractionPuzzle } from './diffractionPuzzleUI.js';
-import { openBrewsterPuzzle } from './brewsterPuzzleUI.js';
-import * as audio from './audio.js';
+import { ABILITIES, findAbility } from '../../data/abilities.js';
+import { makeEnemyInstance, weaknessResistanceText } from '../../data/enemies.js';
+import { MATERIALS } from '../../data/materials.js';
+import { MAPS } from '../../data/maps.js';
+import { GUARDIAN_INTRO, BOSS_INTRO } from '../../data/dialogue.js';
+import { CHARACTER_SPRITES } from '../../data/pixelArt.js';
+import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
+import { CODEX } from '../../data/codex.js';
+import { CONSUMABLES, findConsumable } from '../../data/consumables.js';
+import { findDifficulty } from '../../data/difficulty.js';
+import { drawSprite, drawZoneBackdrop, playerPaletteFor, drawEliteAura } from '../world/pixelSprites.js';
+import { buildGear } from '../core/gear.js';
+import { grantXp, unlockCodex, claimHint } from '../core/state.js';
+import { saveGame } from '../core/save.js';
+import { applyConsumable } from '../core/consumables.js';
+import { showToast } from '../panels/toastUI.js';
+import { SPECIALIZATIONS } from '../../data/specializations.js';
+import { openSnellPuzzle } from '../puzzles/snellPuzzleUI.js';
+import { openDiffractionPuzzle } from '../puzzles/diffractionPuzzleUI.js';
+import { openBrewsterPuzzle } from '../puzzles/brewsterPuzzleUI.js';
+import * as audio from '../audio.js';
 
 // A personal "Bestiary": once you've beaten an enemy type before, its known
 // weakness/resistance is surfaced up front on the next encounter, turning

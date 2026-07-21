@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildBattleReport } from '../js/engine/battle.js';
+import { buildBattleReport } from '../js/engine/battle/battle.js';
 
 test('buildBattleReport: reports turns and hit ratio even with no damage tracked yet', () => {
   const report = buildBattleReport({ turnCount: 3, hitsLanded: 2, hitsMissed: 1 });

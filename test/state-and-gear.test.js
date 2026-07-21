@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { newGameState, grantXp, unlockCodex } from '../js/engine/state.js';
-import { buildGear } from '../js/engine/gear.js';
+import { newGameState, grantXp, unlockCodex } from '../js/engine/core/state.js';
+import { buildGear } from '../js/engine/core/gear.js';
 
 test('grantXp: accumulates XP without leveling up when below the threshold', () => {
   const state = newGameState();

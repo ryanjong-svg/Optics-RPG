@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ngPlusBonusPhaseAbility } from '../js/engine/battle.js';
+import { ngPlusBonusPhaseAbility } from '../js/engine/battle/battle.js';
 import { ACHIEVEMENTS } from '../js/data/achievements.js';
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 import { findAbility } from '../js/data/abilities.js';
 
 test('ngPlusBonusPhaseAbility: null below cycle 2, a real attack ability from cycle 2 on', () => {

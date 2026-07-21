@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { isComboFollowUp, COMBO_MULT, isComboChain, CHAIN_MULT } from '../js/engine/battle.js';
+import { isComboFollowUp, COMBO_MULT, isComboChain, CHAIN_MULT } from '../js/engine/battle/battle.js';
 import { ABILITIES } from '../js/data/abilities.js';
 
 test('isComboFollowUp: recognizes every documented setup/payoff pair', () => {

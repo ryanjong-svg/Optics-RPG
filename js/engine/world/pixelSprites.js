@@ -1,4 +1,4 @@
-import { SHAPES, PALETTES } from '../data/pixelArt.js';
+import { SHAPES, PALETTES } from '../../data/pixelArt.js';
 
 // New Game+ cycle 3+ cosmetic reward: the player sprite takes on a distinct
 // "ascended" palette, a purely visual payoff for long-term replay on top of

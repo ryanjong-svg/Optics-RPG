@@ -1,5 +1,5 @@
-import { MATERIAL_LIST } from '../data/materials.js';
-import { GAME_VERSION } from '../data/changelog.js';
+import { MATERIAL_LIST } from '../../data/materials.js';
+import { GAME_VERSION } from '../../data/changelog.js';
 
 export function newGameState() {
   const materials = {};

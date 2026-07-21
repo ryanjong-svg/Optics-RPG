@@ -1,4 +1,4 @@
-import { findRecipe } from '../data/equipment.js';
+import { findRecipe } from '../../data/equipment.js';
 
 // Resolves a player's equipped recipe ids into their built stat objects for battle math.
 export function buildGear(player) {

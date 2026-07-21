@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { renderBestiary, sortBestiaryIds } from '../js/engine/bestiaryUI.js';
+import { renderBestiary, sortBestiaryIds } from '../js/engine/panels/bestiaryUI.js';
 import { ENEMIES } from '../js/data/enemies.js';
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 
 // renderBestiary only ever assigns .textContent/.innerHTML and reads
 // bestiarySearch.value/bestiarySort.value - plain objects stand in fine for

@@ -1,17 +1,17 @@
-import { MAPS, mapWidth, mapHeight } from '../data/maps.js';
-import { MATERIALS } from '../data/materials.js';
-import { ENEMIES } from '../data/enemies.js';
-import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
+import { MAPS, mapWidth, mapHeight } from '../../data/maps.js';
+import { MATERIALS } from '../../data/materials.js';
+import { ENEMIES } from '../../data/enemies.js';
+import { CHARACTER_SPRITES, itemSprite } from '../../data/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
-import { startBattle, eliteChanceForCycle } from './battle.js';
-import { openCraft } from './craft.js';
-import { showMessages, startNpcInteraction } from './dialogueUI.js';
-import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
-import { saveGame } from './save.js';
-import { unlockCodex } from './state.js';
-import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
-import { showToast } from './toastUI.js';
-import * as audio from './audio.js';
+import { startBattle, eliteChanceForCycle } from '../battle/battle.js';
+import { openCraft } from '../panels/craft.js';
+import { showMessages, startNpcInteraction } from '../panels/dialogueUI.js';
+import { BOSS_LOCKED_MESSAGE } from '../../data/dialogue.js';
+import { saveGame } from '../core/save.js';
+import { unlockCodex } from '../core/state.js';
+import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
+import { showToast } from '../panels/toastUI.js';
+import * as audio from '../audio.js';
 
 // Toasts (not the modal showMessages queue used for pickup/secret/arrival
 // text) so a milestone achievement never blocks or gets tangled up with

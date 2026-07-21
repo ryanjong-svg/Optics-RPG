@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState } from '../js/engine/state.js';
-import { migrateState } from '../js/engine/save.js';
-import { applySetSpecialization } from '../js/engine/craft.js';
-import { specializationDamageMult, effectiveChargeCost, adaptiveResistMultiplier } from '../js/engine/battle.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { migrateState } from '../js/engine/core/save.js';
+import { applySetSpecialization } from '../js/engine/panels/craft.js';
+import { specializationDamageMult, effectiveChargeCost, adaptiveResistMultiplier } from '../js/engine/battle/battle.js';
 import { findAbility } from '../js/data/abilities.js';
 import { SPECIALIZATIONS } from '../js/data/specializations.js';
 

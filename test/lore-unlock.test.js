@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { LORE, isLoreUnlocked } from '../js/data/lore.js';
 import { ACHIEVEMENTS, checkNewAchievements } from '../js/data/achievements.js';
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 
 test('isLoreUnlocked: "always" entries are unlocked from a fresh game', () => {
   assert.equal(isLoreUnlocked(newGameState(), { unlock: { type: 'always' } }), true);

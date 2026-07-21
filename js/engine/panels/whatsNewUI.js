@@ -1,5 +1,5 @@
-import { CHANGELOG, GAME_VERSION } from '../data/changelog.js';
-import { saveGame } from './save.js';
+import { CHANGELOG, GAME_VERSION } from '../../data/changelog.js';
+import { saveGame } from '../core/save.js';
 
 export function hasUnseenChangelog(state) {
   return state.flags.lastSeenVersion !== GAME_VERSION;

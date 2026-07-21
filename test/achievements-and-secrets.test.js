@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { MAPS } from '../js/data/maps.js';
 import { MATERIALS } from '../js/data/materials.js';
 import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/achievements.js';
-import { newGameState } from '../js/engine/state.js';
+import { newGameState } from '../js/engine/core/state.js';
 
 test('every zone secret references a real material and sits on a walkable floor tile', () => {
   for (const map of Object.values(MAPS)) {

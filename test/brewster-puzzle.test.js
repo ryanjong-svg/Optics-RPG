@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeBrewsterAngleDeg, makeBrewsterPuzzle, resolveBrewsterShot } from '../js/engine/brewsterPuzzle.js';
+import { computeBrewsterAngleDeg, makeBrewsterPuzzle, resolveBrewsterShot } from '../js/engine/puzzles/brewsterPuzzle.js';
 
 test('computeBrewsterAngleDeg: matches tan(theta_B) = n for a known case (n=1, 45deg)', () => {
   assert.ok(Math.abs(computeBrewsterAngleDeg(1) - 45) < 0.01);

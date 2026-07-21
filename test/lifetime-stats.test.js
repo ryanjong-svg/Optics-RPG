@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeLifetimeStats, computeComboProgress } from '../js/engine/completionUI.js';
-import { newGameState } from '../js/engine/state.js';
-import { COMBOS } from '../js/engine/battle.js';
+import { computeLifetimeStats, computeComboProgress } from '../js/engine/panels/completionUI.js';
+import { newGameState } from '../js/engine/core/state.js';
+import { COMBOS } from '../js/engine/battle/battle.js';
 
 const TOTAL_COMBOS = Object.values(COMBOS).reduce((sum, payoffs) => sum + payoffs.length, 0);
 

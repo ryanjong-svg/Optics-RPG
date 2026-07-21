@@ -1,11 +1,11 @@
-import { QUIZZES } from '../data/quizzes.js';
-import { NPC_INTRO } from '../data/dialogue.js';
-import { pickQuestToPresent, isObjectiveMet } from '../data/quests.js';
-import { grantXp, claimHint } from './state.js';
-import { saveGame } from './save.js';
-import { checkNewAchievements, formatAchievementLines } from '../data/achievements.js';
+import { QUIZZES } from '../../data/quizzes.js';
+import { NPC_INTRO } from '../../data/dialogue.js';
+import { pickQuestToPresent, isObjectiveMet } from '../../data/quests.js';
+import { grantXp, claimHint } from '../core/state.js';
+import { saveGame } from '../core/save.js';
+import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
 import { showToast } from './toastUI.js';
-import * as audio from './audio.js';
+import * as audio from '../audio.js';
 
 function grantXpWithSound(state, amount, log) {
   grantXp(state, amount, msg => {

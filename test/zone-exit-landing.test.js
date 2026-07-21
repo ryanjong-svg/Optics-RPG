@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { exitLandingPos } from '../js/engine/overworld.js';
+import { exitLandingPos } from '../js/engine/world/overworld.js';
 import { MAPS } from '../js/data/maps.js';
 
 test('exitLandingPos: lands on the target\'s own exit back to the zone being left, not its spawn', () => {

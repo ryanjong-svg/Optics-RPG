@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { newGameState, claimHint } from '../js/engine/state.js';
-import { shouldTriggerBossEnrage, applyBossEnrage } from '../js/engine/battle.js';
+import { newGameState, claimHint } from '../js/engine/core/state.js';
+import { shouldTriggerBossEnrage, applyBossEnrage } from '../js/engine/battle/battle.js';
 import { SHAPES } from '../js/data/pixelArt.js';
 
 test('claimHint: returns true and marks the hint shown the first time, false ever after', () => {
