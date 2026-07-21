@@ -1,4 +1,5 @@
-import { QUESTS, isObjectiveMet, reputationTier, reputationProgress } from '../../data/narrative/quests.js';
+import { QUESTS, isObjectiveMet } from '../../data/narrative/quests.js';
+import { reputationTier, reputationProgress } from '../../data/meta/reputation.js';
 import { MATERIALS } from '../../data/content/materials.js';
 import { MAPS } from '../../data/world/maps.js';
 

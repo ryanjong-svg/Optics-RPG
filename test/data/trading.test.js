@@ -44,10 +44,10 @@ test('canTrade: false for a non-positive amount', () => {
   assert.equal(canTrade(state, 'water', 'silver', 0), false);
 });
 
-test('applyTrade: moves materials at the correct rate and returns true on success', () => {
+test('applyTrade: moves materials at the correct rate and returns the total cost paid', () => {
   const state = makeState({ water: 5 });
-  const ok = applyTrade(state, 'water', 'silver', 1);
-  assert.equal(ok, true);
+  const cost = applyTrade(state, 'water', 'silver', 1);
+  assert.equal(cost, 3); // tradeCost('water','silver') = ceil(3/1) = 3
   assert.equal(state.player.materials.water, 2);
   assert.equal(state.player.materials.silver, 1);
 });
@@ -60,10 +60,10 @@ test('applyTrade: is a no-op and returns false when the trade is not affordable'
   assert.equal(state.player.materials.silver, undefined);
 });
 
-test('applyTrade: trading for a larger amount scales the cost accordingly', () => {
+test('applyTrade: trading for a larger amount scales the returned cost accordingly', () => {
   const state = makeState({ water: 9 });
-  const ok = applyTrade(state, 'water', 'silver', 3);
-  assert.equal(ok, true);
+  const cost = applyTrade(state, 'water', 'silver', 3);
+  assert.equal(cost, 9); // 3 per unit * 3 units
   assert.equal(state.player.materials.water, 0);
   assert.equal(state.player.materials.silver, 3);
 });
@@ -94,5 +94,5 @@ test('applyTrade: the discount can make an otherwise-unaffordable trade go throu
   assert.equal(applyTrade(withoutDiscount, 'water', 'geiger_mode_silicon', 1), false, 'not enough water at the undiscounted rate');
 
   const withDiscount = makeState({ water: discountedCost }, { prof_mirrors: 30 });
-  assert.equal(applyTrade(withDiscount, 'water', 'geiger_mode_silicon', 1), true, 'the same amount should be enough once Trusted+ standing is reached');
+  assert.equal(applyTrade(withDiscount, 'water', 'geiger_mode_silicon', 1), discountedCost, 'the same amount should be enough once Trusted+ standing is reached, and the returned cost should match');
 });

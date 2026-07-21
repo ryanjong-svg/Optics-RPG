@@ -53,9 +53,8 @@ export function tradeMaterials(game) {
   const d = game.dom;
   const fromId = d.tradingFrom.value;
   const toId = d.tradingTo.value;
-  const cost = effectiveTradeCost(game.state, fromId, toId);
-  const ok = applyTrade(game.state, fromId, toId, 1);
-  if (!ok) return;
+  const cost = applyTrade(game.state, fromId, toId, 1);
+  if (!cost) return;
   audio.playCraftSuccess();
   if (d.tradingLast) {
     d.tradingLast.textContent = `Last trade: ${cost} ${MATERIALS[fromId].name} → 1 ${MATERIALS[toId].name}.`;

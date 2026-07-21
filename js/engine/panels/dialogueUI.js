@@ -1,6 +1,7 @@
 import { QUIZZES } from '../../data/narrative/quizzes.js';
 import { NPC_INTRO, NPC_TIER_FLAVOR } from '../../data/narrative/dialogue.js';
-import { pickQuestToPresent, isObjectiveMet, applyReputationChange } from '../../data/narrative/quests.js';
+import { pickQuestToPresent, isObjectiveMet } from '../../data/narrative/quests.js';
+import { applyReputationChange } from '../../data/meta/reputation.js';
 import { grantXp, claimHint } from '../core/state.js';
 import { saveGame } from '../core/save.js';
 import { checkNewAchievements, formatAchievementLines } from '../../data/meta/achievements.js';

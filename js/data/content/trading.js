@@ -1,4 +1,4 @@
-import { hasTrustedStanding } from '../narrative/quests.js';
+import { hasTrustedStanding } from '../meta/reputation.js';
 
 // A barter system, not a currency - the Workbench already tracks every
 // material the player holds, so exchanging one for another needs no new
@@ -46,10 +46,14 @@ export function canTrade(state, fromId, toId, toAmount = 1) {
 
 // Pure state mutation (no dom/save/audio side effects) so it stays
 // unit-testable; tradeMaterials() in tradingUI.js is the UI-wired version.
+// Returns the total amount of `fromId` actually spent on success (always a
+// positive number, so it's truthy) or false if the trade couldn't be made -
+// callers that need the price paid (e.g. a "Last trade" readout) get it back
+// directly instead of recomputing effectiveTradeCost a second time.
 export function applyTrade(state, fromId, toId, toAmount = 1) {
   if (!canTrade(state, fromId, toId, toAmount)) return false;
   const cost = effectiveTradeCost(state, fromId, toId) * toAmount;
   state.player.materials[fromId] -= cost;
   state.player.materials[toId] = (state.player.materials[toId] || 0) + toAmount;
-  return true;
+  return cost;
 }
