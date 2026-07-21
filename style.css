@@ -309,6 +309,16 @@ canvas#overworld-canvas {
 .recipe-effects { margin: 4px 0; padding-left: 18px; font-size: 0.95em; color: var(--green); }
 .recipe-effects li { margin-bottom: 2px; }
 .recipe-fact { font-size: 0.92em; color: var(--text-dim); margin: 4px 0 8px; }
+
+.slot-row { background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); padding: 8px; margin-bottom: 8px; }
+.slot-row-current { border-color: var(--orange); }
+.slot-row-head { font-family: 'Orbitron', sans-serif; font-size: 0.85em; color: var(--cyan); margin-bottom: 2px; }
+.slot-row-desc { font-size: 0.9em; color: var(--text-dim); margin-bottom: 6px; }
+.slot-row-actions { display: flex; gap: 8px; }
+.slot-row-actions .action-btn { flex: 1; }
+
+.whatsnew-list { margin: 4px 0 0; padding-left: 18px; font-size: 0.95em; color: var(--text-light); }
+.whatsnew-list li { margin-bottom: 4px; }
 .recipe-btn-row { display: flex; gap: 8px; }
 .recipe-btn-row .action-btn { flex: 1; }
 

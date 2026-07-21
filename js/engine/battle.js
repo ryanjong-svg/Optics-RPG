@@ -8,7 +8,7 @@ import { ACHIEVEMENTS, checkNewAchievements, formatAchievementLines } from '../d
 import { CODEX } from '../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../data/consumables.js';
 import { findDifficulty } from '../data/difficulty.js';
-import { drawSprite, drawZoneBackdrop, playerPaletteFor } from './pixelSprites.js';
+import { drawSprite, drawZoneBackdrop, playerPaletteFor, drawEliteAura } from './pixelSprites.js';
 import { buildGear } from './gear.js';
 import { grantXp, unlockCodex, claimHint } from './state.js';
 import { saveGame } from './save.js';
@@ -128,6 +128,43 @@ export function applyDifficultyScaling(enemy, difficultyId) {
   enemy.def = Math.round(enemy.def * mult);
 }
 
+// Ability combos: using one of these "setup" abilities right before the
+// matching "payoff" ability grants the payoff a damage bonus — a reason to
+// plan a short sequence instead of always picking whichever single ability
+// deals the most damage in isolation. Exported as its own pure function for
+// direct testing.
+const COMBOS = {
+  tir_shield: ['reflect_strike'],
+  interference_cancel: ['diffraction_wave'],
+  polarize_filter: ['photoelectric_shock'],
+  refraction_bend: ['laser_focus']
+};
+export const COMBO_MULT = 1.4;
+
+export function isComboFollowUp(lastAbilityId, abilityId) {
+  const followUps = COMBOS[lastAbilityId];
+  return !!(followUps && followUps.includes(abilityId));
+}
+
+// Elite variant: a rare, tougher, better-rewarding version of a normal
+// random encounter. Implemented as a stat multiplier applied at spawn time
+// rather than ~40 duplicated enemy entries — the sprite/id/zone stay the
+// same (so it still counts as the ordinary enemy for the Bestiary), only its
+// display name, stats, and rewards change.
+export const ELITE_CHANCE = 0.12;
+const ELITE_STAT_MULT = 1.6;
+const ELITE_XP_MULT = 2.2;
+
+export function applyEliteVariant(enemy) {
+  enemy.isElite = true;
+  enemy.name = `Elite ${enemy.name}`;
+  enemy.hp = Math.round(enemy.hp * ELITE_STAT_MULT);
+  enemy.curHp = enemy.hp;
+  enemy.atk = Math.round(enemy.atk * ELITE_STAT_MULT);
+  enemy.def = Math.round(enemy.def * ELITE_STAT_MULT);
+  enemy.xp = Math.round(enemy.xp * ELITE_XP_MULT);
+}
+
 // A practice-only opponent, deliberately kept out of ENEMIES — it must never
 // be reachable by ZONE_ENCOUNTERS, the Bestiary, or "defeat every enemy type"
 // completion tracking, since fighting it is meant to leave zero trace.
@@ -144,6 +181,7 @@ export function startBattle(game, enemyId, opts = {}) {
     applyDifficultyScaling(enemy, game.state.settings.difficulty);
     applyNgPlusScaling(enemy, game.state.flags.ngPlusCycle);
     if (opts.scaleToLevel && !enemy.isBoss) scaleEnemyToLevel(enemy, opts.scaleToLevel);
+    if (opts.elite) applyEliteVariant(enemy);
   }
   // Snapshot atk right after run-level scaling (NG+/difficulty) but before any
   // in-fight escalation (phase2/enrage) — telegraphed hits scale off this
@@ -172,13 +210,19 @@ export function startBattle(game, enemyId, opts = {}) {
   game.battle = {
     enemy, packMates, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
     damageTaken: 0, abilitiesUsed: new Set(), abilityUseCounts: {}, phase2Triggered: false, bossEnrageTriggered: false,
-    cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus
+    cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus, lastAbilityId: null
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
   if (enemy.flavor) logMsg(game, enemy.flavor);
   if (enemy.ngPlusBonusPhase) {
     logMsg(game, 'Something is different this cycle — The Null Medium has learned to borrow one more property: coherence itself.');
+  }
+  if (enemy.isElite) {
+    logMsg(game, '✨ This one is stronger than usual — but it hits harder, and drops more.');
+    if (claimHint(game.state, 'firstElite')) {
+      logMsg(game, '💡 Tip: Elite enemies are tougher random encounters with better rewards — watch for the amber glow.');
+    }
   }
   if (packMates.length) {
     logMsg(game, `${packMates.map(m => m.name).join(' and ')} join${packMates.length === 1 ? 's' : ''} the fight!`);
@@ -542,6 +586,7 @@ function applyOffensiveModifiers(game, ability, result) {
   // currently resolving — only one can be active per chooseAbility() call,
   // so a single shared field is enough regardless of which puzzle it was.
   if (battle.puzzleBonusMult) mult *= battle.puzzleBonusMult;
+  if (battle.comboBonusMult) mult *= battle.comboBonusMult;
   if (mult === 1) return result;
   if (result.dmg != null) result.dmg = Math.max(1, Math.round(result.dmg * mult));
   if (result.perHit != null) result.perHit = Math.max(1, Math.round(result.perHit * mult));
@@ -553,7 +598,7 @@ function applyOffensiveModifiers(game, ability, result) {
 // concepts, not defensive ones), scaling glareShield instead of dmg.
 function applyDefensiveModifiers(game, ability, result) {
   const battle = game.battle;
-  const mult = battle.puzzleBonusMult || 1;
+  const mult = (battle.puzzleBonusMult || 1) * (battle.comboBonusMult || 1);
   if (mult === 1) return result;
   if (result.glareShield != null) result.glareShield = Math.min(0.95, result.glareShield * mult);
   return result;
@@ -588,7 +633,17 @@ export function chooseAbility(game, abilityId) {
   battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
   battle.turnCount = (battle.turnCount || 0) + 1;
 
+  if (isComboFollowUp(battle.lastAbilityId, ability.id)) {
+    battle.comboBonusMult = COMBO_MULT;
+    logMsg(game, `⚡ Combo! ${findAbility(battle.lastAbilityId).name} into ${ability.name} adds a bonus.`);
+    if (claimHint(game.state, 'firstCombo')) {
+      logMsg(game, '💡 Tip: Certain abilities used back-to-back grant a bonus — check the Help panel for the full list.');
+    }
+  }
+  battle.lastAbilityId = ability.id;
+
   const actionResult = applyPlayerAction(game, ability, ctx);
+  delete battle.comboBonusMult;
   if (ability.cooldown) battle.cooldowns[abilityId] = ability.cooldown;
   if (chargeCost) player.charge -= chargeCost;
   if (ability.type === 'attack') {
@@ -597,6 +652,13 @@ export function chooseAbility(game, abilityId) {
       else audio.playHit();
     }
     showHitFx(game, game.dom.battleEnemyCanvas, actionResult.dmg, actionResult.isCrit);
+    // Per-fight breakdown for the post-battle report card - kept on the
+    // transient battle object (not state.flags), so this tracks a practice
+    // fight too without touching any persisted record.
+    if (!battle.damagePerAbility) battle.damagePerAbility = {};
+    battle.damagePerAbility[ability.id] = (battle.damagePerAbility[ability.id] || 0) + (actionResult.dmg || 0);
+    if (actionResult.landed) battle.hitsLanded = (battle.hitsLanded || 0) + 1;
+    else battle.hitsMissed = (battle.hitsMissed || 0) + 1;
   }
   // Lifetime stats (Field Log) - a practice fight is meant to leave zero
   // trace, so it's excluded here the same way it already skips XP/mats/save.
@@ -751,6 +813,23 @@ export function useItemInBattle(game, itemId) {
   renderBattle(game);
 }
 
+// A short per-fight breakdown shown right after the "defeated!" message -
+// how many turns it took, how many attacks actually landed, and which
+// ability carried the fight. Built from battle.damagePerAbility/hitsLanded/
+// hitsMissed (see chooseAbility), which live only on the transient battle
+// object, never state.flags, so this works the same for a practice fight.
+export function buildBattleReport(battle) {
+  const abilityLines = Object.entries(battle.damagePerAbility || {})
+    .filter(([, dmg]) => dmg > 0)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, dmg]) => `${findAbility(id).name}: ${dmg} dmg`);
+  const turns = battle.turnCount || 0;
+  const hits = battle.hitsLanded || 0;
+  const attempts = hits + (battle.hitsMissed || 0);
+  const header = `📊 Battle Report — ${turns} turn${turns === 1 ? '' : 's'}, ${hits}/${attempts} attacks landed`;
+  return abilityLines.length ? `${header}<br>${abilityLines.join('<br>')}` : header;
+}
+
 function resolveVictory(game) {
   const battle = game.battle;
   const enemy = battle.enemy;
@@ -758,6 +837,7 @@ function resolveVictory(game) {
   battle.over = true;
   if (battle.opts.practice) {
     logMsg(game, `${enemy.name} is defeated! No rewards or records in practice — come back anytime.`);
+    logMsg(game, buildBattleReport(battle));
     audio.stopMusic();
     audio.playVictory();
     return;
@@ -778,9 +858,10 @@ function resolveVictory(game) {
   const xpAward = Math.round(totalXp * findDifficulty(state.settings.difficulty).xpMult);
   grantXpWithSound(state, xpAward, m => logMsg(game, m));
   allDefeated.forEach(e => {
+    const matGain = e.isElite ? 2 : 1;
     (e.mats || []).forEach(matId => {
-      state.player.materials[matId] = (state.player.materials[matId] || 0) + 1;
-      logMsg(game, `Gained 1 ${MATERIALS[matId].name}.`);
+      state.player.materials[matId] = (state.player.materials[matId] || 0) + matGain;
+      logMsg(game, `Gained ${matGain} ${MATERIALS[matId].name}.`);
     });
   });
   if (battle.opts.guardianMap) {
@@ -801,6 +882,7 @@ function resolveVictory(game) {
     }
   }
   state.flags.totalVictories = (state.flags.totalVictories || 0) + 1;
+  logMsg(game, buildBattleReport(battle));
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
   formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
@@ -843,6 +925,9 @@ export function renderBattle(game) {
 
   const enemySprite = CHARACTER_SPRITES[enemy.id];
   drawZoneBackdrop(d.battleEnemyCtx, d.battleEnemyCanvas.width, d.battleEnemyCanvas.height, enemy.zone);
+  if (enemy.isElite) {
+    drawEliteAura(d.battleEnemyCtx, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, enemy.isBoss ? 34 : 26);
+  }
   if (enemySprite) {
     const px = enemy.isBoss ? PORTRAIT_PX * 1.15 : PORTRAIT_PX;
     drawSprite(d.battleEnemyCtx, enemySprite.shape, enemySprite.palette, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, px);

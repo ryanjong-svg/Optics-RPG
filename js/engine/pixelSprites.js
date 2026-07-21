@@ -144,6 +144,20 @@ export function drawZoneBackdrop(ctx, w, h, zone) {
   ctx.restore();
 }
 
+// A pulsing amber ring behind an elite enemy's battle portrait — the one
+// visual tell (besides the renamed "Elite ..." label) that this encounter is
+// tougher and better-rewarded than the ordinary version of the same enemy.
+export function drawEliteAura(ctx, cx, cy, radius) {
+  const pulse = (Math.sin(Date.now() / 300) + 1) / 2; // 0..1
+  ctx.save();
+  ctx.strokeStyle = `rgba(255, 200, 60, ${(0.4 + pulse * 0.4).toFixed(2)})`;
+  ctx.lineWidth = 2 + pulse * 1.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
 // Ambient overworld atmosphere — a handful of slow-drifting, zone-tinted
 // motes drawn over the whole board, using the same accent color (or the
 // rainbow spectrum, for the two themes with no single accent) as that zone's

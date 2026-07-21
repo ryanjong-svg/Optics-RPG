@@ -1,4 +1,5 @@
 import { MATERIAL_LIST } from '../data/materials.js';
+import { GAME_VERSION } from '../data/changelog.js';
 
 export function newGameState() {
   const materials = {};
@@ -41,7 +42,11 @@ export function newGameState() {
       abilityUseCountsLifetime: {},
       fastestBossKillTurns: null,
       totalVictories: 0,
-      allAchievementsEarned: false
+      allAchievementsEarned: false,
+      // A brand new game starts fully caught up - only saves that predate
+      // this system (backfilled to '1.0.0' in migrateState) should see the
+      // What's New panel light up.
+      lastSeenVersion: GAME_VERSION
     },
     settings: {
       difficulty: 'normal',

@@ -3,7 +3,7 @@ import { MATERIALS } from '../data/materials.js';
 import { ENEMIES } from '../data/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../data/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
-import { startBattle } from './battle.js';
+import { startBattle, ELITE_CHANCE } from './battle.js';
 import { openCraft } from './craft.js';
 import { showMessages, startNpcInteraction } from './dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../data/dialogue.js';
@@ -84,6 +84,17 @@ function tileAt(map, x, y) {
   const row = map.rows[y];
   if (x < 0 || x >= row.length) return '#';
   return row[x];
+}
+
+// The tile the player lands on when crossing an exit into `target` from
+// `fromMapId` - the target's own exit back to where they came from, if it
+// has one, rather than always its fixed spawn point. Otherwise stepping back
+// out of a depth zone (or any zone back to the village) would teleport the
+// player to that map's default entrance instead of where the passage
+// actually is. Exported as its own pure function for direct testing.
+export function exitLandingPos(target, fromMapId) {
+  const returnExit = (target.exits || []).find(e => e.to === fromMapId);
+  return returnExit ? { x: returnExit.x, y: returnExit.y } : { ...target.spawn };
 }
 
 function isItemTaken(state, mapId, x, y) {
@@ -408,8 +419,9 @@ export function handleMove(game, dx, dy) {
   if (exit) {
     const target = MAPS[exit.to];
     const firstVisit = !state.flags.visitedMaps[target.id];
+    const landingPos = exitLandingPos(target, state.currentMap);
     state.currentMap = target.id;
-    state.pos = { ...target.spawn };
+    state.pos = landingPos;
     state.flags.visitedMaps[target.id] = true;
     audio.playZoneAmbience(target.zone);
     if (firstVisit && target.codexConcept) {
@@ -429,6 +441,8 @@ export function handleMove(game, dx, dy) {
       const opts = { scaleToLevel: state.player.level };
       if (PACK_ELIGIBLE_ZONES.has(map.zone) && Math.random() < 0.3) {
         opts.packIds = [pool[Math.floor(Math.random() * pool.length)]];
+      } else if (Math.random() < ELITE_CHANCE) {
+        opts.elite = true;
       }
       startBattle(game, enemyId, opts);
       return;

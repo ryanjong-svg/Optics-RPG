@@ -69,5 +69,18 @@ export const HELP_TOPICS = [
     body: 'Refraction Bend opens a small puzzle instead of firing instantly: set the incident angle and Snell\'s ' +
       'Law (n₁sinθ₁ = n₂sinθ₂) determines exactly where the refracted ray lands. Hit the target zone for bonus ' +
       'damage — missing still lands a normal hit, so there is no risk in experimenting with the angle.'
+  },
+  {
+    title: 'Ability Combos',
+    body: 'Using certain abilities right before a matching follow-up grants a bonus on that follow-up: TIR Shield ' +
+      'into Reflect Strike, Interference Cancel into Diffraction Wave, Polarize Filter into Photoelectric Shock, ' +
+      'and Refraction Bend into Laser Focus. The battle log calls out a combo the moment it lands, so it is easy ' +
+      'to learn by playing rather than needing to memorize this list up front.'
+  },
+  {
+    title: 'Elite Enemies',
+    body: 'Random encounters occasionally spawn as a tougher "Elite" variant, marked by a pulsing amber glow on ' +
+      'its portrait and a renamed label in the battle log. Elites hit harder and have more HP, but drop double ' +
+      'materials and far more XP — worth the extra fight if you can spare the Charge.'
   }
 ];

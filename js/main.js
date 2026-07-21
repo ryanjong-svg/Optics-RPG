@@ -6,6 +6,7 @@ import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex, codexUnlockedCount } from './engine/codexUI.js';
 import { openBestiary, closeBestiary, bestiaryCaughtCount } from './engine/bestiaryUI.js';
 import { openHelp, closeHelp } from './engine/helpUI.js';
+import { openWhatsNew, closeWhatsNew, hasUnseenChangelog } from './engine/whatsNewUI.js';
 import { openChronicle, closeChronicle, chronicleUnlockedCount } from './engine/chronicleUI.js';
 import { openCompletion, closeCompletion } from './engine/completionUI.js';
 import { openMap, closeMap } from './engine/mapUI.js';
@@ -14,6 +15,7 @@ import { showMessages, advanceDialogue } from './engine/dialogueUI.js';
 import { renderSnellPuzzle, fireSnellPuzzle, closeSnellPuzzle } from './engine/snellPuzzleUI.js';
 import { renderDiffractionPuzzle, fireDiffractionPuzzle, closeDiffractionPuzzle } from './engine/diffractionPuzzleUI.js';
 import { renderBrewsterPuzzle, fireBrewsterPuzzle, closeBrewsterPuzzle } from './engine/brewsterPuzzleUI.js';
+import { renderSaveSlots } from './engine/saveSlotsUI.js';
 import { INTRO_LINES } from './data/dialogue.js';
 import { MAPS } from './data/maps.js';
 import * as audio from './engine/audio.js';
@@ -143,11 +145,17 @@ const dom = {
   settingsMusicVolume: q('settings-music-volume'),
   settingsSfxVolume: q('settings-sfx-volume'),
   settingsResetSave: q('settings-reset-save'),
+  settingsSlots: q('settings-slots'),
 
   helpPanel: q('help-panel'),
   helpList: q('help-list'),
   btnHelp: q('btn-help'),
   helpClose: q('help-close'),
+
+  whatsnewPanel: q('whatsnew-panel'),
+  whatsnewList: q('whatsnew-list'),
+  btnWhatsnew: q('btn-whatsnew'),
+  whatsnewClose: q('whatsnew-close'),
 
   dpadUp: q('dpad-up'),
   dpadDown: q('dpad-down'),
@@ -160,11 +168,11 @@ const dom = {
   victoryNgPlus: q('victory-ngplus')
 };
 
-const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel', 'victory-panel', 'dialogue-panel'];
+const PANELS = ['battle-panel', 'craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel', 'whatsnew-panel', 'victory-panel', 'dialogue-panel'];
 
 // Panels a player can back out of with Escape, each with a "<name>-close" button.
 // Battle, victory, and dialogue are deliberately excluded — they require an explicit choice, not a dismissal.
-const ESCAPABLE_PANELS = ['craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel'];
+const ESCAPABLE_PANELS = ['craft-panel', 'codex-panel', 'bestiary-panel', 'chronicle-panel', 'questlog-panel', 'completion-panel', 'map-panel', 'settings-panel', 'help-panel', 'whatsnew-panel'];
 
 const game = {
   state: loadGame() || newGameState(),
@@ -178,7 +186,7 @@ const game = {
     const map = {
       battle: 'battle-panel', craft: 'craft-panel', codex: 'codex-panel', bestiary: 'bestiary-panel',
       chronicle: 'chronicle-panel', questlog: 'questlog-panel', completion: 'completion-panel', map: 'map-panel',
-      settings: 'settings-panel', help: 'help-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
+      settings: 'settings-panel', help: 'help-panel', whatsnew: 'whatsnew-panel', victory: 'victory-panel', dialogue: 'dialogue-panel'
     };
     const el = document.getElementById(map[name]);
     if (el) el.classList.remove('hidden');
@@ -215,6 +223,7 @@ function updateBadges() {
   dom.btnCodex.classList.toggle('has-badge', codexUnlockedCount(state) > (seen.codex || 0));
   dom.btnChronicle.classList.toggle('has-badge', chronicleUnlockedCount(state) > (seen.chronicle || 0));
   dom.btnQuestlog.classList.toggle('has-badge', hasReadyQuest(state));
+  dom.btnWhatsnew.classList.toggle('has-badge', hasUnseenChangelog(state));
 }
 game.updateBadges = updateBadges;
 
@@ -282,6 +291,9 @@ dom.btnBestiary.addEventListener('click', () => openBestiary(game));
 dom.bestiaryClose.addEventListener('click', () => closeBestiary(game));
 dom.btnHelp.addEventListener('click', () => openHelp(game));
 dom.helpClose.addEventListener('click', () => closeHelp(game));
+
+dom.btnWhatsnew.addEventListener('click', () => openWhatsNew(game));
+dom.whatsnewClose.addEventListener('click', () => closeWhatsNew(game));
 dom.btnChronicle.addEventListener('click', () => openChronicle(game));
 dom.chronicleClose.addEventListener('click', () => closeChronicle(game));
 dom.btnQuestlog.addEventListener('click', () => openQuestLog(game));
@@ -408,6 +420,7 @@ dom.btnSettings.addEventListener('click', () => {
   game.showPanel('settings');
   dom.settingsDifficulty.value = game.state.settings.difficulty;
   renderSettingsDifficultyDesc();
+  renderSaveSlots(game);
 });
 dom.settingsClose.addEventListener('click', () => {
   game.state.mode = 'overworld';
