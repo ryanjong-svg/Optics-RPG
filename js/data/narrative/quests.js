@@ -66,6 +66,41 @@ export function isObjectiveMet(state, quest) {
   return false;
 }
 
+// A lightweight standing tracker per professor — a running total bumped by
+// answering their quizzes correctly and turning in their quests, mapped to
+// a small set of named tiers rather than shown as a raw number.
+export const REPUTATION_TIERS = [
+  { min: 0, label: 'Stranger' },
+  { min: 5, label: 'Acquainted' },
+  { min: 15, label: 'Trusted' },
+  { min: 30, label: 'Cherished' }
+];
+
+function reputationTierIndex(rep) {
+  let idx = 0;
+  for (let i = 0; i < REPUTATION_TIERS.length; i++) {
+    if (rep >= REPUTATION_TIERS[i].min) idx = i;
+  }
+  return idx;
+}
+
+export function reputationTier(rep) {
+  return REPUTATION_TIERS[reputationTierIndex(rep || 0)].label;
+}
+
+// Pure state mutation - returns the newly-reached tier label if this change
+// crossed into a higher one, or null if it didn't (so callers can decide
+// whether a "your standing improved" announcement is warranted).
+export function applyReputationChange(state, npcId, amount) {
+  if (!state.flags.npcReputation) state.flags.npcReputation = {};
+  const before = state.flags.npcReputation[npcId] || 0;
+  const after = before + amount;
+  state.flags.npcReputation[npcId] = after;
+  const tierBefore = reputationTierIndex(before);
+  const tierAfter = reputationTierIndex(after);
+  return tierAfter > tierBefore ? REPUTATION_TIERS[tierAfter].label : null;
+}
+
 export function findQuestsForNpc(npcId) {
   return Object.entries(QUESTS)
     .filter(([, q]) => q.npc === npcId)

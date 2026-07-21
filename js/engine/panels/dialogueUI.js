@@ -1,11 +1,17 @@
 import { QUIZZES } from '../../data/narrative/quizzes.js';
 import { NPC_INTRO } from '../../data/narrative/dialogue.js';
-import { pickQuestToPresent, isObjectiveMet } from '../../data/narrative/quests.js';
+import { pickQuestToPresent, isObjectiveMet, applyReputationChange } from '../../data/narrative/quests.js';
 import { grantXp, claimHint } from '../core/state.js';
 import { saveGame } from '../core/save.js';
 import { checkNewAchievements, formatAchievementLines } from '../../data/meta/achievements.js';
 import { showToast } from './toastUI.js';
+import { npcName } from './questLogUI.js';
 import * as audio from '../audio.js';
+
+function announceReputationTier(game, npcId, newTier) {
+  if (!newTier) return;
+  showToast(game, `${npcName(npcId)} now sees you as: ${newTier}.`);
+}
 
 function grantXpWithSound(state, amount, log) {
   grantXp(state, amount, msg => {
@@ -96,6 +102,8 @@ function completeQuest(game, questId, quest) {
   if (quest.reward.xp) grantXpWithSound(state, quest.reward.xp, () => {});
   audio.playQuestComplete();
   game.renderHud();
+  const newTier = applyReputationChange(state, quest.npc, 3);
+  announceReputationTier(game, quest.npc, newTier);
   const newlyUnlocked = checkNewAchievements(state);
   saveGame(state);
   return newlyUnlocked;
@@ -107,7 +115,7 @@ export function startQuiz(game, npcId) {
   game.state.flags.metNpc[npcId] = true;
   const q = pickQuizQuestion(game, npcId, questions);
   game.dialogue = {
-    kind: 'quiz', phase: 'intro',
+    kind: 'quiz', phase: 'intro', npcId,
     introText: NPC_INTRO[npcId] || 'Ready for a question?',
     quiz: q, resultText: ''
   };
@@ -150,6 +158,8 @@ export function answerQuiz(game, choiceIdx) {
     grantXpWithSound(game.state, 12, () => {});
     audio.playCorrect();
     dlg.resultText = 'Correct! ' + dlg.quiz.explain + ' (+12 XP)';
+    const newTier = applyReputationChange(game.state, dlg.npcId, 1);
+    announceReputationTier(game, dlg.npcId, newTier);
   } else {
     audio.playIncorrect();
     dlg.resultText = 'Not quite. ' + dlg.quiz.explain;

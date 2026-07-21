@@ -1,6 +1,8 @@
-import { QUESTS, isObjectiveMet } from '../../data/narrative/quests.js';
+import { QUESTS, isObjectiveMet, reputationTier } from '../../data/narrative/quests.js';
 import { MATERIALS } from '../../data/content/materials.js';
 import { MAPS } from '../../data/world/maps.js';
+
+const PROFESSOR_IDS = ['prof_lumen', 'prof_mirrors', 'prof_labs'];
 
 // A live "action needed" signal (not a since-last-seen diff, unlike the
 // Bestiary/Codex/Chronicle badges) — it should stay lit until the quest
@@ -39,6 +41,13 @@ export function npcName(npcId) {
 export function renderQuestLog(game) {
   const state = game.state;
   const entries = Object.entries(QUESTS);
+
+  if (game.dom.questlogStanding) {
+    game.dom.questlogStanding.innerHTML = PROFESSOR_IDS.map(npcId => {
+      const rep = (state.flags.npcReputation && state.flags.npcReputation[npcId]) || 0;
+      return `<div class="codex-entry"><h3>${npcName(npcId)}</h3><p>${reputationTier(rep)}</p></div>`;
+    }).join('');
+  }
 
   const active = entries.filter(([id]) => state.flags.quests[id] === 'active');
   const completed = entries.filter(([id]) => state.flags.quests[id] === 'completed');

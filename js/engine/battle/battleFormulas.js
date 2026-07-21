@@ -124,6 +124,39 @@ export function allEnemiesDefeated(battle) {
   return battle.enemy.curHp <= 0 && battle.packMates.every(m => m.curHp <= 0);
 }
 
+// Zone weather: a temporary "glare" condition that can roll in on the two
+// spectrum-themed zones (bright, prismatic light everywhere) each time the
+// player walks in, and boosts Polarize Filter's glare-blocking for a few
+// fights - a reason to revisit those zones beyond grinding materials.
+export const GLARE_EVENT_ZONES = ['prism', 'prism_deep'];
+const GLARE_EVENT_CHANCE = 0.15;
+const GLARE_EVENT_BATTLES = 3;
+export const GLARE_EVENT_GLARE_BONUS = 0.15;
+
+// `roll` is injectable so tests can force the trigger/non-trigger path
+// instead of depending on Math.random().
+export function maybeTriggerGlareEvent(state, zone, roll = Math.random()) {
+  if (!GLARE_EVENT_ZONES.includes(zone)) return false;
+  if (state.flags.glareEvent && state.flags.glareEvent.battlesLeft > 0) return false;
+  if (roll >= GLARE_EVENT_CHANCE) return false;
+  state.flags.glareEvent = { zone, battlesLeft: GLARE_EVENT_BATTLES };
+  return true;
+}
+
+export function glareEventActive(state, zone) {
+  const event = state.flags.glareEvent;
+  return !!(event && event.zone === zone && event.battlesLeft > 0);
+}
+
+// Called once per battle resolution (win or loss) - counts down and clears
+// itself once spent, regardless of which zone the fight happened in.
+export function decrementGlareEvent(state) {
+  const event = state.flags.glareEvent;
+  if (!event || event.battlesLeft <= 0) return;
+  event.battlesLeft -= 1;
+  if (event.battlesLeft <= 0) state.flags.glareEvent = null;
+}
+
 // A guardian that drops to half HP or below shudders and hits harder for the
 // rest of the fight — one-time, guardian-only (the boss already has its own
 // ability-phase mechanic and doesn't need a second one layered on top).

@@ -3,6 +3,7 @@ import { loadGame, saveGame, exportSaveString, importSaveString, clearSave } fro
 import { findDifficulty } from './data/content/difficulty.js';
 import { renderOverworld, handleMove } from './engine/world/overworld.js';
 import { closeCraft } from './engine/panels/craft.js';
+import { wireTrading } from './engine/panels/tradingUI.js';
 import { openCodex, closeCodex, codexUnlockedCount } from './engine/panels/codexUI.js';
 import { openBestiary, closeBestiary, bestiaryCaughtCount, renderBestiary } from './engine/panels/bestiaryUI.js';
 import { openHelp, closeHelp } from './engine/panels/helpUI.js';
@@ -73,6 +74,10 @@ const dom = {
   craftBounties: q('craft-bounties'),
   bountyStreak: q('bounty-streak'),
   craftConsumables: q('craft-consumables'),
+  tradingFrom: q('trading-from'),
+  tradingTo: q('trading-to'),
+  tradingRate: q('trading-rate'),
+  tradingTrade: q('trading-trade'),
 
   snellPuzzlePanel: q('snell-puzzle-panel'),
   snellCanvas: q('snell-canvas'),
@@ -119,6 +124,7 @@ const dom = {
   chronicleClose: q('chronicle-close'),
 
   questlogPanel: q('questlog-panel'),
+  questlogStanding: q('questlog-standing'),
   questlogActive: q('questlog-active'),
   questlogUnstarted: q('questlog-unstarted'),
   questlogCompleted: q('questlog-completed'),
@@ -359,6 +365,7 @@ bindVolumeSlider(dom.settingsMusicVolume, audio.setMusicVolume, 'musicVolume');
 bindVolumeSlider(dom.settingsSfxVolume, audio.setSfxVolume, 'sfxVolume');
 
 dom.craftClose.addEventListener('click', () => closeCraft(game));
+wireTrading(game);
 
 dom.snellAngle.addEventListener('input', () => renderSnellPuzzle(game));
 dom.snellFire.addEventListener('click', () => fireSnellPuzzle(game));

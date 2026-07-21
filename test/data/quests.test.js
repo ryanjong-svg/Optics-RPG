@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isObjectiveMet, pickQuestToPresent } from '../../js/data/narrative/quests.js';
+import { isObjectiveMet, pickQuestToPresent, reputationTier, applyReputationChange } from '../../js/data/narrative/quests.js';
 
 function makeState(overrides = {}) {
   return {
@@ -61,4 +61,49 @@ test('pickQuestToPresent: returns null once every quest for that npc is complete
 
 test('pickQuestToPresent: returns null for an npc with no quests at all', () => {
   assert.equal(pickQuestToPresent(makeState(), 'someone_with_no_quests'), null);
+});
+
+test('reputationTier: maps a raw reputation number to the right named tier', () => {
+  assert.equal(reputationTier(0), 'Stranger');
+  assert.equal(reputationTier(4), 'Stranger');
+  assert.equal(reputationTier(5), 'Acquainted');
+  assert.equal(reputationTier(14), 'Acquainted');
+  assert.equal(reputationTier(15), 'Trusted');
+  assert.equal(reputationTier(29), 'Trusted');
+  assert.equal(reputationTier(30), 'Cherished');
+  assert.equal(reputationTier(999), 'Cherished');
+  assert.equal(reputationTier(undefined), 'Stranger', 'a missing/undefined reputation should behave like zero');
+});
+
+test('applyReputationChange: accumulates per-NPC and returns the newly-reached tier only when one is crossed', () => {
+  const state = makeState({ flags: { quests: {}, guardianDefeated: {}, npcReputation: {} } });
+
+  // 4 single-point bumps stay within Stranger - no tier change yet.
+  let lastResult;
+  for (let i = 0; i < 4; i++) lastResult = applyReputationChange(state, 'prof_lumen', 1);
+  assert.equal(state.flags.npcReputation.prof_lumen, 4);
+  assert.equal(lastResult, null);
+
+  // The 5th point crosses into Acquainted.
+  assert.equal(applyReputationChange(state, 'prof_lumen', 1), 'Acquainted');
+  assert.equal(state.flags.npcReputation.prof_lumen, 5);
+
+  // Immediately re-checking (no further change) should not re-announce.
+  assert.equal(applyReputationChange(state, 'prof_lumen', 0), null);
+});
+
+test('applyReputationChange: tracks each NPC independently', () => {
+  const state = makeState({ flags: { quests: {}, guardianDefeated: {}, npcReputation: {} } });
+  applyReputationChange(state, 'prof_lumen', 10);
+  applyReputationChange(state, 'prof_mirrors', 1);
+  assert.equal(state.flags.npcReputation.prof_lumen, 10);
+  assert.equal(state.flags.npcReputation.prof_mirrors, 1);
+  assert.equal(reputationTier(state.flags.npcReputation.prof_lumen), 'Acquainted');
+  assert.equal(reputationTier(state.flags.npcReputation.prof_mirrors), 'Stranger');
+});
+
+test('applyReputationChange: lazily creates state.flags.npcReputation if missing', () => {
+  const state = makeState({ flags: { quests: {}, guardianDefeated: {} } });
+  applyReputationChange(state, 'prof_labs', 1);
+  assert.equal(state.flags.npcReputation.prof_labs, 1);
 });

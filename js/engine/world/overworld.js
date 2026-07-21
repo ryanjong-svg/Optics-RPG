@@ -4,7 +4,7 @@ import { ENEMIES } from '../../data/content/enemies.js';
 import { CHARACTER_SPRITES, itemSprite } from '../../data/world/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
 import { startBattle } from '../battle/battle.js';
-import { eliteChanceForCycle } from '../battle/battleFormulas.js';
+import { eliteChanceForCycle, maybeTriggerGlareEvent, glareEventActive } from '../battle/battleFormulas.js';
 import { openCraft } from '../panels/craft.js';
 import { showMessages, startNpcInteraction } from '../panels/dialogueUI.js';
 import { BOSS_LOCKED_MESSAGE } from '../../data/narrative/dialogue.js';
@@ -340,7 +340,7 @@ export function renderOverworld(game) {
 
   labelQueue.forEach(fn => fn());
 
-  drawZoneAmbience(ctx2d, canvas.width, canvas.height, map.zone);
+  drawZoneAmbience(ctx2d, canvas.width, canvas.height, map.zone, glareEventActive(state, map.zone));
 
   game.dom.mapLabel.textContent = map.name;
   renderExitsHint(game, map);
@@ -432,6 +432,9 @@ export function handleMove(game, dx, dy) {
     audio.playZoneAmbience(target.zone);
     if (firstVisit && target.codexConcept) {
       unlockCodex(state, target.codexConcept, null);
+    }
+    if (maybeTriggerGlareEvent(state, target.zone)) {
+      showToast(game, '☀️ Harsh glare rolls across the light here — Polarize Filter blocks even more for the next few fights.');
     }
     saveGame(state);
     renderOverworld(game);

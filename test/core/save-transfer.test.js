@@ -53,6 +53,8 @@ test('migrateState: backfills every field added after older saves were written',
   assert.equal(migrated.flags.bestBountyStreak, 0);
   assert.deepEqual(migrated.flags.bestiaryFavorites, {});
   assert.equal(migrated.flags.hardcorePuzzleHits, 0);
+  assert.deepEqual(migrated.flags.npcReputation, {});
+  assert.equal(migrated.flags.glareEvent, null);
   assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1, reducedMotion: false, puzzleHints: true });
 });
 

@@ -8,6 +8,7 @@ import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../core/
 import { SPECIALIZATIONS } from '../../data/content/specializations.js';
 import { startBattle } from '../battle/battle.js';
 import { renderBounties } from '../battle/bountyUI.js';
+import { renderTrading } from './tradingUI.js';
 import * as audio from '../audio.js';
 
 const SPECIALIZATION_LEVEL = 5;
@@ -223,6 +224,7 @@ export function renderCraft(game) {
   }
 
   renderBounties(game);
+  renderTrading(game);
 
   d.craftMaterials.innerHTML = Object.values(MATERIALS).map(m => {
     const count = player.materials[m.id] || 0;

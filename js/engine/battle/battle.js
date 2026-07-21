@@ -23,7 +23,8 @@ import {
   COMBOS, COMBO_MULT, CHAIN_MULT, isComboFollowUp, isComboChain, applyEliteVariant,
   allEnemiesDefeated, shouldTriggerGuardianPhase2, applyGuardianPhase2, shouldTriggerBossEnrage, applyBossEnrage,
   decrementCooldowns, isTelegraphEligible, telegraphDamageBase, regenCharge, specializationDamageMult,
-  effectiveChargeCost, shouldApplySurprise, shouldGrantHardcorePuzzleBonus
+  effectiveChargeCost, shouldApplySurprise, shouldGrantHardcorePuzzleBonus,
+  glareEventActive, decrementGlareEvent, GLARE_EVENT_GLARE_BONUS
 } from './battleFormulas.js';
 
 function unlockAchievement(state, id, log) {
@@ -455,7 +456,8 @@ export function chooseAbility(game, abilityId) {
     return;
   }
   const gear = buildGear(player);
-  const ctx = { player, enemy: battle.enemy, gear, log: m => logMsg(game, m) };
+  const glareBonus = glareEventActive(game.state, battle.enemy.zone) ? GLARE_EVENT_GLARE_BONUS : 0;
+  const ctx = { player, enemy: battle.enemy, gear, glareBonus, log: m => logMsg(game, m) };
   unlockCodex(game.state, ability.concept, m => logMsg(game, m));
   battle.abilitiesUsed.add(ability.id);
   battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
@@ -784,6 +786,7 @@ function resolveVictory(game) {
     }
   }
   state.flags.totalVictories = (state.flags.totalVictories || 0) + 1;
+  decrementGlareEvent(state);
   logMsg(game, buildBattleReport(battle));
   const newlyUnlocked = checkNewAchievements(state);
   if (newlyUnlocked.length) audio.playAchievement();
@@ -800,6 +803,7 @@ function resolveDefeat(game) {
   state.player.hp = state.player.maxHp;
   state.currentMap = 'village';
   state.pos = { x: 7, y: 8 };
+  decrementGlareEvent(state);
   saveGame(state);
 }
 

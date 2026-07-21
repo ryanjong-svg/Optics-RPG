@@ -1,9 +1,17 @@
 // Bumped whenever a batch of player-visible changes ships. Compared against
 // state.flags.lastSeenVersion (see save.js/whatsNewUI.js) to decide whether
 // the What's New panel has anything unread to show.
-export const GAME_VERSION = '1.11.0';
+export const GAME_VERSION = '1.12.0';
 
 export const CHANGELOG = [
+  {
+    version: '1.12.0',
+    highlights: [
+      'The three professors now track your standing with them (Stranger through Cherished), visible in a new "Standing" section of the Quest Log.',
+      'A new Trading Post at the Workbench lets you barter one material directly for another, at a rate based on rarity.',
+      'Prism Peak and the Rutile Chasm can now roll a temporary "glare" event that makes Polarize Filter block even more for a few fights.'
+    ]
+  },
   {
     version: '1.11.0',
     highlights: [

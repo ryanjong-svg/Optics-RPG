@@ -319,6 +319,12 @@ body.reduced-motion .bar-fill.hp.critical {
 }
 .equip-effect { font-size: 0.85em; color: var(--green); line-height: 1.3; }
 .recipe-list { display: flex; flex-direction: column; gap: 8px; }
+.trading-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.trading-row select {
+  background: #0a0e14; color: var(--text-light); border: 1px solid var(--cyan-dim); padding: 4px;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.9em; flex: 1; min-width: 120px;
+}
+.trading-row span { font-size: 0.85em; color: var(--text-dim); }
 .recipe-row { background: var(--panel-bg-2); border: 1px solid var(--cyan-dim); padding: 8px; }
 .recipe-head { margin-bottom: 4px; font-size: 1.05em; }
 .slot-tag { font-family: 'Orbitron', sans-serif; font-size: 0.55em; color: var(--orange); margin-left: 6px; text-transform: uppercase; }

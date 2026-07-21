@@ -100,6 +100,15 @@ test('photoelectric_shock: a larger bandgapPierceEV (e.g. the Avalanche Photodet
   assert.ok(bothClear.dmg > defaultClear.dmg, 'a bigger pierce bonus should deal more excess-energy damage once both clear the gap');
 });
 
+test('polarize_filter: an active glare event adds ctx.glareBonus on top of the gear\'s base reduction', () => {
+  const ability = findAbility('polarize_filter');
+  const base = ability.effect({ player: {}, gear: {}, log: noop, enemy: {} });
+  assert.equal(base.glareShield, 0.3);
+  const withGlareEvent = ability.effect({ player: {}, gear: {}, log: noop, enemy: {}, glareBonus: 0.15 });
+  assert.ok(Math.abs(withGlareEvent.glareShield - 0.45) < 1e-9);
+  assert.notEqual(withGlareEvent.note, base.note, 'the note should call out the active glare event');
+});
+
 test('laser_focus: a guaranteed crit applies the 1.8x crit multiplier on top of base damage', () => {
   const ability = findAbility('laser_focus');
   const player = { focus: 6 };

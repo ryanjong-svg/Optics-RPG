@@ -10,7 +10,8 @@ export const ENEMIES = {
   puddle_imp: {
     id: 'puddle_imp', name: 'Puddle Imp', hp: 18, atk: 4, def: 1, xp: 8, mats: ['water'],
     weakTo: ['refraction_bend'], weakNote: 'a shallow puddle bends light easily at any incidence angle.',
-    resists: [], zone: 'village', flavor: 'A mischievous ripple that mirrors and bends whatever pokes it.'
+    resists: ['reflect_strike'], resistNote: 'a still puddle already reflects like a mirror — sending more light at it barely changes anything.',
+    zone: 'village', flavor: 'A mischievous ripple that mirrors and bends whatever pokes it.'
   },
   glint_moth: {
     id: 'glint_moth', name: 'Glint Moth', hp: 20, atk: 5, def: 1, xp: 10, mats: ['water'],

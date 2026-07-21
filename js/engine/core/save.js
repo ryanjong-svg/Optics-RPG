@@ -102,6 +102,8 @@ export function migrateState(state) {
     if (state.flags.bestBountyStreak === undefined) state.flags.bestBountyStreak = 0;
     if (!state.flags.bestiaryFavorites) state.flags.bestiaryFavorites = {};
     if (state.flags.hardcorePuzzleHits === undefined) state.flags.hardcorePuzzleHits = 0;
+    if (!state.flags.npcReputation) state.flags.npcReputation = {};
+    if (state.flags.glareEvent === undefined) state.flags.glareEvent = null;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';

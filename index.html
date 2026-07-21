@@ -109,6 +109,15 @@
     <h3>Recovery Items</h3>
     <p class="ngplus-hint">Use anytime here, or right from the battle menu when your HP gets low.</p>
     <div id="craft-consumables" class="recipe-list"></div>
+    <h3>Trading Post</h3>
+    <p class="ngplus-hint">Barter a material you have plenty of for one you need — rarer materials cost more of the common one.</p>
+    <div class="trading-row">
+      <select id="trading-from"></select>
+      <span>for</span>
+      <select id="trading-to"></select>
+      <button id="trading-trade" type="button">Trade</button>
+    </div>
+    <p id="trading-rate" class="ngplus-hint"></p>
   </div>
 
   <div id="snell-puzzle-panel" class="panel bracketed hidden puzzle-overlay">
@@ -176,7 +185,9 @@
   <div id="questlog-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Quest Log</h2><button id="questlog-close" class="action-btn ghost">Close</button></div>
     <p class="ngplus-hint" style="margin-top:0;">Progress updates automatically — check back after collecting materials or defeating a guardian.</p>
-    <h3 class="completion-subhead" style="margin-top:0;border-top:none;padding-top:0;">Active</h3>
+    <h3 class="completion-subhead" style="margin-top:0;border-top:none;padding-top:0;">Standing</h3>
+    <div id="questlog-standing" class="codex-list"></div>
+    <h3 class="completion-subhead">Active</h3>
     <div id="questlog-active" class="codex-list"></div>
     <h3 class="completion-subhead">Undiscovered</h3>
     <div id="questlog-unstarted" class="codex-list"></div>

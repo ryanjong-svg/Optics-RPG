@@ -180,7 +180,9 @@ export function drawEliteAura(ctx, cx, cy, radius, zone, reducedMotion) {
 // frame the way idleBob() already does for sprites.
 const AMBIENCE_PARTICLE_COUNT = 10;
 
-export function drawZoneAmbience(ctx, w, h, zone) {
+// `glareActive` brightens and enlarges every particle - the one visual tell
+// (besides the toast on arrival) that a glare weather event is running here.
+export function drawZoneAmbience(ctx, w, h, zone, glareActive = false) {
   const theme = BACKDROP_THEMES[zone] || BACKDROP_THEMES.village;
   if (theme.pattern === 'none') return;
   const t = Date.now() / 1000;
@@ -194,11 +196,11 @@ export function drawZoneAmbience(ctx, w, h, zone) {
     const x = (baseX + driftX + w) % w;
     const y = (baseY + driftY + h) % h;
     const pulse = (Math.sin(t * 0.8 + seed) + 1) / 2; // 0..1
-    const color = theme.accent || SPECTRUM_COLORS[i % SPECTRUM_COLORS.length];
-    ctx.globalAlpha = 0.12 + pulse * 0.18;
+    const color = glareActive ? '#ffffff' : (theme.accent || SPECTRUM_COLORS[i % SPECTRUM_COLORS.length]);
+    ctx.globalAlpha = glareActive ? 0.22 + pulse * 0.3 : 0.12 + pulse * 0.18;
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(x, y, 1.2 + pulse * 1.3, 0, Math.PI * 2);
+    ctx.arc(x, y, (glareActive ? 1.8 : 1.2) + pulse * 1.3, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();

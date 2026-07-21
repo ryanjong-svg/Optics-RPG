@@ -49,8 +49,14 @@ export const ABILITIES = [
     id: 'polarize_filter', name: 'Polarize Filter', concept: 'polarization', slot: 'filter',
     type: 'defense', basePower: 0,
     effect(ctx) {
-      const reduction = ctx.gear.filter && ctx.gear.filter.glareReduction ? ctx.gear.filter.glareReduction : 0.3;
-      return { glareShield: reduction, note: 'Only light aligned with the filter axis gets through.' };
+      const base = ctx.gear.filter && ctx.gear.filter.glareReduction ? ctx.gear.filter.glareReduction : 0.3;
+      const reduction = base + (ctx.glareBonus || 0);
+      return {
+        glareShield: reduction,
+        note: ctx.glareBonus
+          ? 'Only light aligned with the filter axis gets through — and this glare-heavy air makes the effect even stronger.'
+          : 'Only light aligned with the filter axis gets through.'
+      };
     },
     desc: 'Block glare-based attacks at Brewster’s angle.'
   },
