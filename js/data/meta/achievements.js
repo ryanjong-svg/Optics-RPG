@@ -1,12 +1,12 @@
 // Named achievements, shown in the Field Log. Milestone achievements are
 // computed live from existing state; the three "special" ones are captured
 // at the moment they happen in battle.js and stored in state.flags.achievements.
-import { CODEX } from './codex.js';
-import { LORE, isLoreUnlocked } from './lore.js';
-import { RECIPES } from './equipment.js';
-import { QUESTS } from './quests.js';
-import { MAPS } from './maps.js';
-import { ENEMIES } from './enemies.js';
+import { CODEX } from '../narrative/codex.js';
+import { LORE, isLoreUnlocked } from '../narrative/lore.js';
+import { RECIPES } from '../content/equipment.js';
+import { QUESTS } from '../narrative/quests.js';
+import { MAPS } from '../world/maps.js';
+import { ENEMIES } from '../content/enemies.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);

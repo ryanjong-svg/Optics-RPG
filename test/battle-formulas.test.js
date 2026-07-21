@@ -2,7 +2,7 @@
 // involved) - these are the actual physics-derived numbers the player sees.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { findAbility } from '../js/data/abilities.js';
+import { findAbility } from '../js/data/content/abilities.js';
 
 const noop = () => {};
 

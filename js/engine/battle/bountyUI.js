@@ -1,10 +1,10 @@
 import { ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty, canRerollBounty, applyRerollBounty, bountyStreakMultiplier, BOUNTY_STREAK_BONUS_MAX_PCT } from './bounty.js';
-import { ENEMIES } from '../../data/enemies.js';
-import { MATERIALS } from '../../data/materials.js';
-import { findDifficulty } from '../../data/difficulty.js';
+import { ENEMIES } from '../../data/content/enemies.js';
+import { MATERIALS } from '../../data/content/materials.js';
+import { findDifficulty } from '../../data/content/difficulty.js';
 import { saveGame } from '../core/save.js';
 import { showToast } from '../panels/toastUI.js';
-import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
+import { checkNewAchievements, formatAchievementLines } from '../../data/meta/achievements.js';
 import * as audio from '../audio.js';
 
 export function renderBounties(game) {

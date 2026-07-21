@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { renderBestiary, sortBestiaryIds, toggleBestiaryFavorite } from '../js/engine/panels/bestiaryUI.js';
-import { ENEMIES } from '../js/data/enemies.js';
+import { ENEMIES } from '../js/data/content/enemies.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 // renderBestiary only ever assigns .textContent/.innerHTML, calls

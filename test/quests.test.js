@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isObjectiveMet, pickQuestToPresent } from '../js/data/quests.js';
+import { isObjectiveMet, pickQuestToPresent } from '../js/data/narrative/quests.js';
 
 function makeState(overrides = {}) {
   return {

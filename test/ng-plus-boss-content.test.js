@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ngPlusBonusPhaseAbility } from '../js/engine/battle/battle.js';
-import { ACHIEVEMENTS } from '../js/data/achievements.js';
+import { ngPlusBonusPhaseAbility } from '../js/engine/battle/battleFormulas.js';
+import { ACHIEVEMENTS } from '../js/data/meta/achievements.js';
 import { newGameState } from '../js/engine/core/state.js';
-import { findAbility } from '../js/data/abilities.js';
+import { findAbility } from '../js/data/content/abilities.js';
 
 test('ngPlusBonusPhaseAbility: null below cycle 2, a real attack ability from cycle 2 on', () => {
   assert.equal(ngPlusBonusPhaseAbility(0), null);

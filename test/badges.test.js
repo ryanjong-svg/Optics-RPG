@@ -7,9 +7,9 @@ import { bestiaryCaughtCount } from '../js/engine/panels/bestiaryUI.js';
 import { codexUnlockedCount } from '../js/engine/panels/codexUI.js';
 import { chronicleUnlockedCount } from '../js/engine/panels/chronicleUI.js';
 import { hasReadyQuest } from '../js/engine/panels/questLogUI.js';
-import { ENEMIES } from '../js/data/enemies.js';
-import { CODEX } from '../js/data/codex.js';
-import { QUESTS } from '../js/data/quests.js';
+import { ENEMIES } from '../js/data/content/enemies.js';
+import { CODEX } from '../js/data/narrative/codex.js';
+import { QUESTS } from '../js/data/narrative/quests.js';
 
 test('bestiaryCaughtCount: 0 on a fresh state, rises as enemies are cataloged', () => {
   const state = newGameState();

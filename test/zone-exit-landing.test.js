@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { exitLandingPos } from '../js/engine/world/overworld.js';
-import { MAPS } from '../js/data/maps.js';
+import { MAPS } from '../js/data/world/maps.js';
 
 test('exitLandingPos: lands on the target\'s own exit back to the zone being left, not its spawn', () => {
   // mirrors' entrance to mirrors_deep sits at (13,5), far from mirrors' own

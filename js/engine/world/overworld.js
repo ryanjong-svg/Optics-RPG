@@ -1,15 +1,16 @@
-import { MAPS, mapWidth, mapHeight } from '../../data/maps.js';
-import { MATERIALS } from '../../data/materials.js';
-import { ENEMIES } from '../../data/enemies.js';
-import { CHARACTER_SPRITES, itemSprite } from '../../data/pixelArt.js';
+import { MAPS, mapWidth, mapHeight } from '../../data/world/maps.js';
+import { MATERIALS } from '../../data/content/materials.js';
+import { ENEMIES } from '../../data/content/enemies.js';
+import { CHARACTER_SPRITES, itemSprite } from '../../data/world/pixelArt.js';
 import { drawSprite, spriteSize, drawGroundShadow, idleBob, drawZoneAmbience, playerPaletteFor } from './pixelSprites.js';
-import { startBattle, eliteChanceForCycle } from '../battle/battle.js';
+import { startBattle } from '../battle/battle.js';
+import { eliteChanceForCycle } from '../battle/battleFormulas.js';
 import { openCraft } from '../panels/craft.js';
 import { showMessages, startNpcInteraction } from '../panels/dialogueUI.js';
-import { BOSS_LOCKED_MESSAGE } from '../../data/dialogue.js';
+import { BOSS_LOCKED_MESSAGE } from '../../data/narrative/dialogue.js';
 import { saveGame } from '../core/save.js';
 import { unlockCodex } from '../core/state.js';
-import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
+import { checkNewAchievements, formatAchievementLines } from '../../data/meta/achievements.js';
 import { showToast } from '../panels/toastUI.js';
 import * as audio from '../audio.js';
 
@@ -39,6 +40,11 @@ function toScreen(x, y) {
   };
 }
 
+// If you add/remove a zone here, also update ELITE_HUNTABLE_ZONES in
+// data/achievements.js - it's a hand-duplicated list of the zones with a
+// non-empty pool below (kept separate to avoid a circular import, since this
+// module already imports achievements.js for checkNewAchievements), and a
+// test there will fail if the two drift apart.
 export const ZONE_ENCOUNTERS = {
   village: ['wisp', 'puddle_imp', 'glint_moth'],
   mirrors: ['mirror_golem', 'fractured_pane'],

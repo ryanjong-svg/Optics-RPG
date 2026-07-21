@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { newGameState, startNewGamePlus } from '../js/engine/core/state.js';
-import { checkNewAchievements, unlockedAchievements } from '../js/data/achievements.js';
+import { checkNewAchievements, unlockedAchievements } from '../js/data/meta/achievements.js';
 
 test('checkNewAchievements: returns nothing on a fresh state (nothing unlocked yet)', () => {
   const state = newGameState();

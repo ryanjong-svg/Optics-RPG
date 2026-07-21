@@ -1,4 +1,4 @@
-import { findConsumable } from '../../data/consumables.js';
+import { findConsumable } from '../../data/content/consumables.js';
 import { unlockCodex } from './state.js';
 import { saveGame } from './save.js';
 import * as audio from '../audio.js';

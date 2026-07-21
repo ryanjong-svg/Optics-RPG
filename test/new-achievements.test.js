@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { newGameState } from '../js/engine/core/state.js';
-import { ACHIEVEMENTS, unlockedAchievements, ELITE_HUNTABLE_ZONES } from '../js/data/achievements.js';
+import { ACHIEVEMENTS, unlockedAchievements, ELITE_HUNTABLE_ZONES } from '../js/data/meta/achievements.js';
 import { ZONE_ENCOUNTERS } from '../js/engine/world/overworld.js';
 
 test('perfect_refraction: locked below 10 puzzle hits, unlocks at 10', () => {

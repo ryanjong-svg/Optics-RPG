@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { applyEliteVariant, ELITE_CHANCE, eliteChanceForCycle } from '../js/engine/battle/battle.js';
+import { applyEliteVariant, ELITE_CHANCE, eliteChanceForCycle } from '../js/engine/battle/battleFormulas.js';
 
 test('applyEliteVariant: boosts hp/atk/def/xp and renames the enemy, without touching id/zone', () => {
   const enemy = { id: 'mirror_golem', name: 'Mirror Golem', hp: 40, atk: 10, def: 5, xp: 20, zone: 'mirrors' };

@@ -1,4 +1,4 @@
-import { HELP_TOPICS } from '../../data/helpTopics.js';
+import { HELP_TOPICS } from '../../data/narrative/helpTopics.js';
 
 export function openHelp(game) {
   game.state.mode = 'help';

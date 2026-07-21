@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ENEMIES, weaknessResistanceText } from '../js/data/enemies.js';
-import { bestiaryHintText } from '../js/engine/battle/battle.js';
-import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/achievements.js';
+import { ENEMIES, weaknessResistanceText } from '../js/data/content/enemies.js';
+import { bestiaryHintText } from '../js/engine/battle/battleFormulas.js';
+import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/meta/achievements.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 test('weaknessResistanceText: describes both weakness and resistance when present', () => {

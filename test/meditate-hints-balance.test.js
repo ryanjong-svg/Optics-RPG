@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { newGameState, claimHint } from '../js/engine/core/state.js';
 import { applyMeditate } from '../js/engine/panels/craft.js';
-import { telegraphDamageBase, applyGuardianPhase2, applyBossEnrage } from '../js/engine/battle/battle.js';
+import { telegraphDamageBase, applyGuardianPhase2, applyBossEnrage } from '../js/engine/battle/battleFormulas.js';
 
 test('applyMeditate: restores charge to max and reports success', () => {
   const player = { charge: 1, maxCharge: 4 };

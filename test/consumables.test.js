@@ -2,9 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { newGameState } from '../js/engine/core/state.js';
-import { CONSUMABLES, findConsumable } from '../js/data/consumables.js';
+import { CONSUMABLES, findConsumable } from '../js/data/content/consumables.js';
 import { canCraftConsumable, applyCraftConsumable, applyConsumable } from '../js/engine/core/consumables.js';
-import { CODEX } from '../js/data/codex.js';
+import { CODEX } from '../js/data/narrative/codex.js';
 
 test('applyCraftConsumable: refuses to craft without enough materials', () => {
   const state = newGameState();

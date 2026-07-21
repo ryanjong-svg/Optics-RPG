@@ -6,7 +6,7 @@ import {
   canRerollBounty, applyRerollBounty, MAX_REROLLS_PER_BOUNTY, bountyStreakMultiplier, BOUNTY_STREAK_BONUS_MAX_PCT
 } from '../js/engine/battle/bounty.js';
 import { ZONE_ENCOUNTERS } from '../js/engine/world/overworld.js';
-import { ENEMIES } from '../js/data/enemies.js';
+import { ENEMIES } from '../js/data/content/enemies.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 const ALL_CANDIDATES = new Set(Object.values(ZONE_ENCOUNTERS).flat());

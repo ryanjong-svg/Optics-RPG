@@ -1,9 +1,9 @@
-import { QUIZZES } from '../../data/quizzes.js';
-import { NPC_INTRO } from '../../data/dialogue.js';
-import { pickQuestToPresent, isObjectiveMet } from '../../data/quests.js';
+import { QUIZZES } from '../../data/narrative/quizzes.js';
+import { NPC_INTRO } from '../../data/narrative/dialogue.js';
+import { pickQuestToPresent, isObjectiveMet } from '../../data/narrative/quests.js';
 import { grantXp, claimHint } from '../core/state.js';
 import { saveGame } from '../core/save.js';
-import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
+import { checkNewAchievements, formatAchievementLines } from '../../data/meta/achievements.js';
 import { showToast } from './toastUI.js';
 import * as audio from '../audio.js';
 

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { hasUnseenChangelog } from '../js/engine/panels/whatsNewUI.js';
-import { GAME_VERSION, CHANGELOG } from '../js/data/changelog.js';
+import { GAME_VERSION, CHANGELOG } from '../js/data/meta/changelog.js';
 import { newGameState } from '../js/engine/core/state.js';
 import { migrateState } from '../js/engine/core/save.js';
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ACHIEVEMENTS } from '../js/data/achievements.js';
+import { ACHIEVEMENTS } from '../js/data/meta/achievements.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 test('elite_hunter: locked below 10 elites defeated, unlocked at 10', () => {

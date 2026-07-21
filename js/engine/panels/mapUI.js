@@ -1,4 +1,4 @@
-import { MAPS } from '../../data/maps.js';
+import { MAPS } from '../../data/world/maps.js';
 
 // Mirrors the real village exit layout: grating/mirrors/prism sit at the
 // north exits, fiber/hologram/lab at the south exits, village in the middle.

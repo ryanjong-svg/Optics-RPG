@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { LORE, isLoreUnlocked } from '../js/data/lore.js';
-import { ACHIEVEMENTS, checkNewAchievements } from '../js/data/achievements.js';
+import { LORE, isLoreUnlocked } from '../js/data/narrative/lore.js';
+import { ACHIEVEMENTS, checkNewAchievements } from '../js/data/meta/achievements.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 test('isLoreUnlocked: "always" entries are unlocked from a fresh game', () => {

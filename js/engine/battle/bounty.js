@@ -5,8 +5,8 @@
 // completely separate from state.flags.enemiesDefeated (a one-time "have you
 // ever beaten this?" flag, not a running count).
 import { ZONE_ENCOUNTERS } from '../world/overworld.js';
-import { ENEMIES } from '../../data/enemies.js';
-import { findDifficulty } from '../../data/difficulty.js';
+import { ENEMIES } from '../../data/content/enemies.js';
+import { findDifficulty } from '../../data/content/difficulty.js';
 import { grantXp } from '../core/state.js';
 
 export const BOUNTY_SLOT_COUNT = 3;

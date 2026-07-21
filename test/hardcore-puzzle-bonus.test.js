@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { shouldGrantHardcorePuzzleBonus } from '../js/engine/battle/battle.js';
+import { shouldGrantHardcorePuzzleBonus } from '../js/engine/battle/battleFormulas.js';
 
 test('shouldGrantHardcorePuzzleBonus: only on a hit, outside practice, with Puzzle Hints explicitly off', () => {
   assert.equal(shouldGrantHardcorePuzzleBonus(true, false, false), true);

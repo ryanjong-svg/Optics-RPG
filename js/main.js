@@ -1,6 +1,6 @@
 import { newGameState, startNewGamePlus } from './engine/core/state.js';
 import { loadGame, saveGame, exportSaveString, importSaveString, clearSave } from './engine/core/save.js';
-import { findDifficulty } from './data/difficulty.js';
+import { findDifficulty } from './data/content/difficulty.js';
 import { renderOverworld, handleMove } from './engine/world/overworld.js';
 import { closeCraft } from './engine/panels/craft.js';
 import { openCodex, closeCodex, codexUnlockedCount } from './engine/panels/codexUI.js';
@@ -16,8 +16,8 @@ import { renderSnellPuzzle, fireSnellPuzzle, closeSnellPuzzle } from './engine/p
 import { renderDiffractionPuzzle, fireDiffractionPuzzle, closeDiffractionPuzzle } from './engine/puzzles/diffractionPuzzleUI.js';
 import { renderBrewsterPuzzle, fireBrewsterPuzzle, closeBrewsterPuzzle } from './engine/puzzles/brewsterPuzzleUI.js';
 import { renderSaveSlots } from './engine/core/saveSlotsUI.js';
-import { INTRO_LINES } from './data/dialogue.js';
-import { MAPS } from './data/maps.js';
+import { INTRO_LINES } from './data/narrative/dialogue.js';
+import { MAPS } from './data/world/maps.js';
 import * as audio from './engine/audio.js';
 
 function q(id) { return document.getElementById(id); }

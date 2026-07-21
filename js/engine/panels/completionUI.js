@@ -1,12 +1,12 @@
-import { CODEX } from '../../data/codex.js';
-import { LORE, isLoreUnlocked } from '../../data/lore.js';
-import { RECIPES } from '../../data/equipment.js';
-import { QUESTS } from '../../data/quests.js';
-import { MAPS } from '../../data/maps.js';
-import { ACHIEVEMENTS, unlockedAchievements, ELITE_HUNTABLE_ZONES } from '../../data/achievements.js';
-import { ENEMIES } from '../../data/enemies.js';
-import { findAbility } from '../../data/abilities.js';
-import { COMBOS } from '../battle/battle.js';
+import { CODEX } from '../../data/narrative/codex.js';
+import { LORE, isLoreUnlocked } from '../../data/narrative/lore.js';
+import { RECIPES } from '../../data/content/equipment.js';
+import { QUESTS } from '../../data/narrative/quests.js';
+import { MAPS } from '../../data/world/maps.js';
+import { ACHIEVEMENTS, unlockedAchievements, ELITE_HUNTABLE_ZONES } from '../../data/meta/achievements.js';
+import { ENEMIES } from '../../data/content/enemies.js';
+import { findAbility } from '../../data/content/abilities.js';
+import { COMBOS } from '../battle/battleFormulas.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
@@ -133,7 +133,7 @@ export function renderCompletion(game) {
 
   if (game.dom.completionStats) {
     const s = computeLifetimeStats(game.state);
-    const rows = [
+    const combatRows = [
       `Total Damage Dealt: ${s.totalDamageDealt}`,
       `Battles Won: ${s.totalVictories}`,
       `Fastest Null Medium Kill: ${s.fastestBossKillTurns != null ? `${s.fastestBossKillTurns} turn${s.fastestBossKillTurns === 1 ? '' : 's'}` : 'Not yet defeated'}`,
@@ -141,11 +141,16 @@ export function renderCompletion(game) {
       `Elites Defeated: ${s.elitesDefeated}${s.eliteZoneBreakdown.length ? ` (${s.eliteZoneBreakdown.join(', ')})` : ''}`,
       `Elite Zones Conquered: ${s.eliteZonesDone} / ${s.eliteZonesTotal}${s.eliteZonesRemaining.length ? ` (remaining: ${s.eliteZonesRemaining.join(', ')})` : ' — all zones conquered!'}`,
       `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`,
-      `Combo Chains Landed: ${s.combosChained}`,
+      `Combo Chains Landed: ${s.combosChained}`
+    ];
+    const bountiesAndPuzzlesRows = [
       `Bounty Streak: ${s.bountyStreak} (best: ${s.bestBountyStreak})`,
       `Hardcore Puzzle Hits: ${s.hardcorePuzzleHits}`
     ];
-    game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
+    const rowHtml = r => `<div class="completion-row-head"><span>${r}</span></div>`;
+    game.dom.completionStats.innerHTML =
+      `<h4 class="completion-subhead">Combat</h4>${combatRows.map(rowHtml).join('')}` +
+      `<h4 class="completion-subhead">Bounties &amp; Puzzles</h4>${bountiesAndPuzzlesRows.map(rowHtml).join('')}`;
   }
 
   if (game.dom.completionAchievements) {

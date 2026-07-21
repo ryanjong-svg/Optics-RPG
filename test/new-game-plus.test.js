@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { newGameState, startNewGamePlus } from '../js/engine/core/state.js';
-import { applyNgPlusScaling } from '../js/engine/battle/battle.js';
-import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/achievements.js';
+import { applyNgPlusScaling } from '../js/engine/battle/battleFormulas.js';
+import { ACHIEVEMENTS, unlockedAchievements } from '../js/data/meta/achievements.js';
 
 test('startNewGamePlus: increments the cycle counter each time it is called', () => {
   const state = newGameState();

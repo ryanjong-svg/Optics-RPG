@@ -1,4 +1,4 @@
-import { LORE, isLoreUnlocked } from '../../data/lore.js';
+import { LORE, isLoreUnlocked } from '../../data/narrative/lore.js';
 
 export function chronicleUnlockedCount(state) {
   return Object.values(LORE).filter(entry => isLoreUnlocked(state, entry)).length;

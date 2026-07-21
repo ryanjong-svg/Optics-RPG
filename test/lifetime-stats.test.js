@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 
 import { computeLifetimeStats, computeComboProgress } from '../js/engine/panels/completionUI.js';
 import { newGameState } from '../js/engine/core/state.js';
-import { COMBOS } from '../js/engine/battle/battle.js';
-import { ELITE_HUNTABLE_ZONES } from '../js/data/achievements.js';
+import { COMBOS } from '../js/engine/battle/battleFormulas.js';
+import { ELITE_HUNTABLE_ZONES } from '../js/data/meta/achievements.js';
 
 const TOTAL_COMBOS = Object.values(COMBOS).reduce((sum, payoffs) => sum + payoffs.length, 0);
 

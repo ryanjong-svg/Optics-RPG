@@ -1,5 +1,5 @@
-import { ENEMIES, weaknessResistanceText } from '../../data/enemies.js';
-import { MAPS } from '../../data/maps.js';
+import { ENEMIES, weaknessResistanceText } from '../../data/content/enemies.js';
+import { MAPS } from '../../data/world/maps.js';
 
 const ZONE_NAMES = Object.fromEntries(Object.values(MAPS).map(m => [m.zone, m.name]));
 const ZONE_ORDER = [...new Set(Object.values(MAPS).map(m => m.zone))];

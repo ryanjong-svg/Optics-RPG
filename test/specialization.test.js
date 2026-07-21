@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import { newGameState } from '../js/engine/core/state.js';
 import { migrateState } from '../js/engine/core/save.js';
 import { applySetSpecialization } from '../js/engine/panels/craft.js';
-import { specializationDamageMult, effectiveChargeCost, adaptiveResistMultiplier } from '../js/engine/battle/battle.js';
-import { findAbility } from '../js/data/abilities.js';
-import { SPECIALIZATIONS } from '../js/data/specializations.js';
+import { adaptiveResistMultiplier } from '../js/engine/battle/battle.js';
+import { specializationDamageMult, effectiveChargeCost } from '../js/engine/battle/battleFormulas.js';
+import { findAbility } from '../js/data/content/abilities.js';
+import { SPECIALIZATIONS } from '../js/data/content/specializations.js';
 
 test('applySetSpecialization: refused below the level requirement', () => {
   const state = newGameState();

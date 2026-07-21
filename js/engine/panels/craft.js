@@ -1,11 +1,11 @@
-import { RECIPES, findRecipe } from '../../data/equipment.js';
-import { MATERIALS } from '../../data/materials.js';
-import { CONSUMABLES } from '../../data/consumables.js';
+import { RECIPES, findRecipe } from '../../data/content/equipment.js';
+import { MATERIALS } from '../../data/content/materials.js';
+import { CONSUMABLES } from '../../data/content/consumables.js';
 import { unlockCodex } from '../core/state.js';
 import { saveGame } from '../core/save.js';
 import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from '../core/consumables.js';
 import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../core/gear.js';
-import { SPECIALIZATIONS } from '../../data/specializations.js';
+import { SPECIALIZATIONS } from '../../data/content/specializations.js';
 import { startBattle } from '../battle/battle.js';
 import { renderBounties } from '../battle/bountyUI.js';
 import * as audio from '../audio.js';

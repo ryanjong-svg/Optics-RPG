@@ -1,4 +1,4 @@
-import { CHANGELOG, GAME_VERSION } from '../../data/changelog.js';
+import { CHANGELOG, GAME_VERSION } from '../../data/meta/changelog.js';
 import { saveGame } from '../core/save.js';
 
 export function hasUnseenChangelog(state) {

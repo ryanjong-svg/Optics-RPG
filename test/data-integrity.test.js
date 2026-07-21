@@ -7,18 +7,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { MATERIALS } from '../js/data/materials.js';
-import { RECIPES } from '../js/data/equipment.js';
-import { ABILITIES, findAbility } from '../js/data/abilities.js';
-import { ENEMIES } from '../js/data/enemies.js';
-import { MAPS } from '../js/data/maps.js';
-import { QUESTS } from '../js/data/quests.js';
-import { LORE } from '../js/data/lore.js';
-import { CODEX } from '../js/data/codex.js';
-import { CHARACTER_SPRITES, PALETTES, SHAPES, itemSprite } from '../js/data/pixelArt.js';
+import { MATERIALS } from '../js/data/content/materials.js';
+import { RECIPES } from '../js/data/content/equipment.js';
+import { ABILITIES, findAbility } from '../js/data/content/abilities.js';
+import { ENEMIES } from '../js/data/content/enemies.js';
+import { MAPS } from '../js/data/world/maps.js';
+import { QUESTS } from '../js/data/narrative/quests.js';
+import { LORE } from '../js/data/narrative/lore.js';
+import { CODEX } from '../js/data/narrative/codex.js';
+import { CHARACTER_SPRITES, PALETTES, SHAPES, itemSprite } from '../js/data/world/pixelArt.js';
 import { BACKDROP_THEMES } from '../js/engine/world/pixelSprites.js';
 import { ZONE_ENCOUNTERS, ZONE_WALL_COLORS } from '../js/engine/world/overworld.js';
-import { CONSUMABLES } from '../js/data/consumables.js';
+import { CONSUMABLES } from '../js/data/content/consumables.js';
 
 const VALID_SLOTS = new Set(['lens', 'mirror', 'prism', 'filter']);
 const ATTACK_ABILITY_IDS = new Set(ABILITIES.filter(a => a.type === 'attack').map(a => a.id));

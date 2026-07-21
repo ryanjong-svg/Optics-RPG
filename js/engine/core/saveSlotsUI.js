@@ -1,7 +1,7 @@
 import { allSlotSummaries, getCurrentSlot, setCurrentSlot, clearSlot, loadGame, saveGame, getSlotName, setSlotName } from './save.js';
 import { newGameState } from './state.js';
 import { renderOverworld } from '../world/overworld.js';
-import { MAPS } from '../../data/maps.js';
+import { MAPS } from '../../data/world/maps.js';
 import * as audio from '../audio.js';
 
 export function renderSaveSlots(game) {

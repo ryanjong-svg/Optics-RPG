@@ -1,6 +1,6 @@
-import { QUESTS, isObjectiveMet } from '../../data/quests.js';
-import { MATERIALS } from '../../data/materials.js';
-import { MAPS } from '../../data/maps.js';
+import { QUESTS, isObjectiveMet } from '../../data/narrative/quests.js';
+import { MATERIALS } from '../../data/content/materials.js';
+import { MAPS } from '../../data/world/maps.js';
 
 // A live "action needed" signal (not a since-last-seen diff, unlike the
 // Bestiary/Codex/Chronicle badges) — it should stay lit until the quest

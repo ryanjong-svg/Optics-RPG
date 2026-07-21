@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { ABILITIES } from '../js/data/abilities.js';
+import { ABILITIES } from '../js/data/content/abilities.js';
 import { newGameState } from '../js/engine/core/state.js';
-import { regenCharge, shouldApplySurprise, allEnemiesDefeated } from '../js/engine/battle/battle.js';
+import { regenCharge, shouldApplySurprise, allEnemiesDefeated } from '../js/engine/battle/battleFormulas.js';
 import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../js/engine/core/gear.js';
-import { MAPS } from '../js/data/maps.js';
+import { MAPS } from '../js/data/world/maps.js';
 
 test('every attack ability has a positive integer chargeCost; defense/utility abilities have none', () => {
   for (const a of ABILITIES) {

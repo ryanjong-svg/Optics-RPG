@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DIFFICULTIES, findDifficulty } from '../js/data/difficulty.js';
-import { applyDifficultyScaling, shouldTriggerGuardianPhase2, applyGuardianPhase2 } from '../js/engine/battle/battle.js';
+import { DIFFICULTIES, findDifficulty } from '../js/data/content/difficulty.js';
+import { applyDifficultyScaling, shouldTriggerGuardianPhase2, applyGuardianPhase2 } from '../js/engine/battle/battleFormulas.js';
 
 test('every difficulty has a positive enemyMult/xpMult and non-empty label/desc', () => {
   for (const [id, d] of Object.entries(DIFFICULTIES)) {

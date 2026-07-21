@@ -1,4 +1,4 @@
-import { CODEX } from '../../data/codex.js';
+import { CODEX } from '../../data/narrative/codex.js';
 
 export function codexUnlockedCount(state) {
   return Object.keys(CODEX).filter(id => state.codexUnlocked[id]).length;

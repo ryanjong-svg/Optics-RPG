@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { playerPaletteFor } from '../js/engine/world/pixelSprites.js';
-import { PALETTES } from '../js/data/pixelArt.js';
-import { ACHIEVEMENTS } from '../js/data/achievements.js';
+import { PALETTES } from '../js/data/world/pixelArt.js';
+import { ACHIEVEMENTS } from '../js/data/meta/achievements.js';
 import { newGameState } from '../js/engine/core/state.js';
 
 test('playerPaletteFor: the default palette below cycle 3, the ascended palette from cycle 3 on', () => {
