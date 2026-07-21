@@ -742,6 +742,25 @@ export function chooseAbility(game, abilityId) {
 // casting directly (see renderBattle) — this is the puzzle's onFire
 // callback, applying the resulting bonus/normal multiplier via the shared
 // battle.puzzleBonusMult hook applyOffensiveModifiers reads.
+
+// A small extra reward for landing a puzzle shot with Puzzle Hints off (see
+// Settings > Puzzles) - hints normally hand you the exact target angle, so
+// turning them off and still landing the shot is real skill, not luck, and
+// gets a bonus on top of the puzzle's own damage/block bonus. Excluded from
+// practice fights like every other real reward.
+const HARDCORE_PUZZLE_XP_BONUS = 5;
+
+export function shouldGrantHardcorePuzzleBonus(hit, isPractice, puzzleHints) {
+  return !!(hit && !isPractice && puzzleHints === false);
+}
+
+function grantHardcorePuzzleBonus(game, hit) {
+  const battle = game.battle;
+  if (!shouldGrantHardcorePuzzleBonus(hit, battle.opts.practice, game.state.settings.puzzleHints)) return;
+  grantXpWithSound(game.state, HARDCORE_PUZZLE_XP_BONUS, m => logMsg(game, m));
+  logMsg(game, `🎯 Hardcore hit! +${HARDCORE_PUZZLE_XP_BONUS} bonus XP for landing it with Puzzle Hints off.`);
+}
+
 function resolveSnellPuzzleShot(game, hit, refractedDeg) {
   const battle = game.battle;
   if (!battle || battle.over) return;
@@ -757,6 +776,7 @@ function resolveSnellPuzzleShot(game, hit, refractedDeg) {
       formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
     }
   }
+  grantHardcorePuzzleBonus(game, hit);
   chooseAbility(game, 'refraction_bend');
   delete battle.puzzleBonusMult;
 }
@@ -769,6 +789,7 @@ function resolveDiffractionPuzzleShot(game, hit, angleDeg) {
   logMsg(game, hit
     ? `The angle lands on the first bright fringe at ${angleDeg}° — constructive interference! Bonus damage.`
     : `${angleDeg}° falls between fringes, mostly destructive. Normal damage.`);
+  grantHardcorePuzzleBonus(game, hit);
   chooseAbility(game, 'diffraction_wave');
   delete battle.puzzleBonusMult;
 }
@@ -783,6 +804,7 @@ function resolveBrewsterPuzzleShot(game, hit, angleDeg) {
   logMsg(game, hit
     ? `The reflection at ${angleDeg}° comes back fully polarized — the filter blocks it almost entirely!`
     : `${angleDeg}° isn't Brewster's angle — some glare still gets through. Normal block.`);
+  grantHardcorePuzzleBonus(game, hit);
   chooseAbility(game, 'polarize_filter');
   delete battle.puzzleBonusMult;
 }

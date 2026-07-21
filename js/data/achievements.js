@@ -11,6 +11,16 @@ import { ENEMIES } from './enemies.js';
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
 
+// Every zone that actually spawns random encounters (mirrors
+// ZONE_ENCOUNTERS in engine/world/overworld.js - duplicated as a literal
+// rather than imported, since overworld.js already imports this module for
+// checkNewAchievements/formatAchievementLines and importing back would be
+// circular). 'lab' has an empty encounter pool and is deliberately excluded.
+const ELITE_HUNTABLE_ZONES = [
+  'village', 'mirrors', 'prism', 'fiber', 'grating', 'hologram',
+  'mirrors_deep', 'prism_deep', 'fiber_deep', 'grating_deep', 'hologram_deep', 'lab_deep'
+];
+
 export const ACHIEVEMENTS = {
   apprentice_no_more: {
     title: 'Apprentice No More',
@@ -117,8 +127,17 @@ export const ACHIEVEMENTS = {
     title: 'Chain Reaction',
     desc: 'Land a full 3-step combo chain 3 times.',
     check: state => (state.flags.combosChained || 0) >= 3
+  },
+  zone_conqueror: {
+    title: 'Zone Conqueror',
+    desc: 'Defeat an Elite enemy in every zone that has them.',
+    check: state => ELITE_HUNTABLE_ZONES.every(z => ((state.flags.eliteKillsByZone || {})[z] || 0) > 0)
   }
 };
+
+// Exported for direct testing, so a test can catch drift if a new zone with
+// encounters is ever added to ZONE_ENCOUNTERS without updating this list.
+export { ELITE_HUNTABLE_ZONES };
 
 export function unlockedAchievements(state) {
   return Object.entries(ACHIEVEMENTS).filter(([, a]) => a.check(state));

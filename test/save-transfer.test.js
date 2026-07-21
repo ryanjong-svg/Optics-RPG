@@ -50,6 +50,8 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.bounties, []);
   assert.equal(migrated.flags.bountiesClaimed, 0);
   assert.equal(migrated.flags.bountyStreak, 0);
+  assert.equal(migrated.flags.bestBountyStreak, 0);
+  assert.deepEqual(migrated.flags.bestiaryFavorites, {});
   assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1, reducedMotion: false, puzzleHints: true });
 });
 

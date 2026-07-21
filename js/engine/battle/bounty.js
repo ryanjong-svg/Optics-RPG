@@ -104,6 +104,7 @@ export function applyClaimBounty(state, slotIndex, log) {
   grantXp(state, Math.round(bounty.rewardXp * mult), log || (() => {}));
   state.flags.bountiesClaimed = (state.flags.bountiesClaimed || 0) + 1;
   state.flags.bountyStreak = streak + 1;
+  state.flags.bestBountyStreak = Math.max(state.flags.bestBountyStreak || 0, state.flags.bountyStreak);
   state.flags.bounties[slotIndex] = generateBounty(state, state.flags.bounties.map(b => b.enemyId));
   return true;
 }

@@ -85,7 +85,9 @@ export function computeLifetimeStats(state) {
     comboDoneCount: comboProgress.doneCount,
     comboTotal: comboProgress.total,
     comboDoneLabels: comboProgress.doneLabels,
-    combosChained: flags.combosChained || 0
+    combosChained: flags.combosChained || 0,
+    bountyStreak: flags.bountyStreak || 0,
+    bestBountyStreak: flags.bestBountyStreak || 0
   };
 }
 
@@ -125,7 +127,8 @@ export function renderCompletion(game) {
       `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`,
       `Elites Defeated: ${s.elitesDefeated}${s.eliteZoneBreakdown.length ? ` (${s.eliteZoneBreakdown.join(', ')})` : ''}`,
       `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`,
-      `Combo Chains Landed: ${s.combosChained}`
+      `Combo Chains Landed: ${s.combosChained}`,
+      `Bounty Streak: ${s.bountyStreak} (best: ${s.bestBountyStreak})`
     ];
     game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
   }

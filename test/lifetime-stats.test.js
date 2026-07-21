@@ -20,6 +20,17 @@ test('computeLifetimeStats: all zero/null on a fresh game', () => {
   assert.equal(stats.comboTotal, TOTAL_COMBOS);
   assert.deepEqual(stats.comboDoneLabels, []);
   assert.equal(stats.combosChained, 0);
+  assert.equal(stats.bountyStreak, 0);
+  assert.equal(stats.bestBountyStreak, 0);
+});
+
+test('computeLifetimeStats: reflects bountyStreak/bestBountyStreak', () => {
+  const state = newGameState();
+  state.flags.bountyStreak = 2;
+  state.flags.bestBountyStreak = 5;
+  const stats = computeLifetimeStats(state);
+  assert.equal(stats.bountyStreak, 2);
+  assert.equal(stats.bestBountyStreak, 5);
 });
 
 test('computeLifetimeStats: reflects combosChained', () => {

@@ -152,3 +152,20 @@ test('applyRerollBounty: resets the streak back to zero', () => {
   applyRerollBounty(state, 0);
   assert.equal(state.flags.bountyStreak, 0);
 });
+
+test('applyClaimBounty: tracks the best streak ever reached, surviving a later reroll reset', () => {
+  const state = newGameState();
+  state.flags.bounties = [{ enemyId: 'wisp', targetCount: 1, baseline: 0, rerollsUsed: 0, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 }];
+  state.flags.enemyKillCounts.wisp = 1;
+  applyClaimBounty(state, 0, () => {});
+  assert.equal(state.flags.bestBountyStreak, 1);
+
+  state.flags.bounties[0] = { enemyId: 'wisp', targetCount: 1, baseline: 1, rerollsUsed: 0, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 };
+  state.flags.enemyKillCounts.wisp = 2;
+  applyClaimBounty(state, 0, () => {});
+  assert.equal(state.flags.bestBountyStreak, 2);
+
+  applyRerollBounty(state, 0);
+  assert.equal(state.flags.bountyStreak, 0);
+  assert.equal(state.flags.bestBountyStreak, 2, 'the best-ever streak should not be erased by a reroll reset');
+});

@@ -24,18 +24,25 @@ export function closeBestiary(game) {
   game.showPanel('overworld');
 }
 
-function entryHtml(enemy, isDefeated) {
+function entryHtml(enemy, id, isDefeated, isFavorite) {
   if (!isDefeated) {
     return `<div class="codex-entry locked"><h3>??? (undiscovered)</h3><p>Defeat this enemy once to add it to your Bestiary.</p></div>`;
   }
   const matchup = weaknessResistanceText(enemy);
   return `
     <div class="codex-entry">
-      <h3>${enemy.name}</h3>
+      <h3>${enemy.name} <button class="action-btn ghost bestiary-fav-toggle" data-id="${id}" title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">${isFavorite ? '★' : '☆'}</button></h3>
       <p>${enemy.flavor || ''}</p>
       ${matchup ? `<p>${matchup}</p>` : ''}
     </div>
   `;
+}
+
+// Pure and exported for direct testing.
+export function toggleBestiaryFavorite(state, id) {
+  if (!state.flags.bestiaryFavorites) state.flags.bestiaryFavorites = {};
+  if (state.flags.bestiaryFavorites[id]) delete state.flags.bestiaryFavorites[id];
+  else state.flags.bestiaryFavorites[id] = true;
 }
 
 // Exported for direct testing. Discovered (named) entries always sort ahead
@@ -66,6 +73,7 @@ export function sortBestiaryIds(ids, defeated, mode) {
 export function renderBestiary(game) {
   const state = game.state;
   const defeated = state.flags.enemiesDefeated;
+  const favorites = state.flags.bestiaryFavorites || {};
   const ids = Object.keys(ENEMIES);
   const defeatedCount = ids.filter(id => defeated[id]).length;
   game.dom.bestiaryProgress.textContent = `${defeatedCount} / ${ids.length} enemies cataloged`;
@@ -75,41 +83,53 @@ export function renderBestiary(game) {
   // excluded from filtered results rather than shown as a false match.
   const query = (game.dom.bestiarySearch ? game.dom.bestiarySearch.value : '').trim().toLowerCase();
   const sortMode = game.dom.bestiarySort ? game.dom.bestiarySort.value : 'zone';
+  const matchesQuery = id => !query || (defeated[id] && ENEMIES[id].name.toLowerCase().includes(query));
 
+  // Favorites float to the top of every view, regardless of sort mode or an
+  // active search - pulled into their own section and excluded from
+  // whatever's rendered below so each entry only ever appears once.
+  const favoriteIds = ids.filter(id => defeated[id] && favorites[id] && matchesQuery(id));
+  const favoritesHtml = favoriteIds.length
+    ? `<h3 class="completion-subhead">★ Favorites</h3>${favoriteIds.map(id => entryHtml(ENEMIES[id], id, true, true)).join('')}`
+    : '';
+
+  let bodyHtml;
   if (sortMode !== 'zone') {
-    const visibleIds = query
-      ? ids.filter(id => defeated[id] && ENEMIES[id].name.toLowerCase().includes(query))
-      : ids;
-    if (query && !visibleIds.length) {
-      game.dom.bestiaryList.innerHTML = `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>`;
-      return;
+    const visibleIds = ids.filter(id => !favorites[id] && matchesQuery(id));
+    if (query && !favoriteIds.length && !visibleIds.length) {
+      bodyHtml = `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>`;
+    } else {
+      const sorted = sortBestiaryIds(visibleIds, defeated, sortMode);
+      bodyHtml = sorted.map(id => entryHtml(ENEMIES[id], id, !!defeated[id], false)).join('');
     }
-    const sorted = sortBestiaryIds(visibleIds, defeated, sortMode);
-    game.dom.bestiaryList.innerHTML = sorted.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
-    return;
+  } else {
+    const byZone = new Map();
+    for (const id of ids) {
+      const zone = ENEMIES[id].zone || BOSS_ZONE;
+      if (!byZone.has(zone)) byZone.set(zone, []);
+      byZone.get(zone).push(id);
+    }
+
+    const zoneOrder = ZONE_ORDER.filter(z => byZone.has(z));
+    if (byZone.has(BOSS_ZONE)) zoneOrder.push(BOSS_ZONE);
+
+    const sections = zoneOrder.map(zone => {
+      const label = zone === BOSS_ZONE ? 'The Null Medium' : ZONE_NAMES[zone];
+      const zoneIds = byZone.get(zone);
+      const zoneCaught = zoneIds.filter(id => defeated[id]).length;
+      const visibleIds = zoneIds.filter(id => !favorites[id] && matchesQuery(id));
+      if (query && !visibleIds.length) return '';
+      const entries = visibleIds.map(id => entryHtml(ENEMIES[id], id, !!defeated[id], false)).join('');
+      return `<h3 class="completion-subhead">${label} — ${zoneCaught} / ${zoneIds.length}</h3>${entries}`;
+    }).join('');
+    bodyHtml = sections || (query ? `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>` : '');
   }
 
-  const byZone = new Map();
-  for (const id of ids) {
-    const zone = ENEMIES[id].zone || BOSS_ZONE;
-    if (!byZone.has(zone)) byZone.set(zone, []);
-    byZone.get(zone).push(id);
-  }
-
-  const zoneOrder = ZONE_ORDER.filter(z => byZone.has(z));
-  if (byZone.has(BOSS_ZONE)) zoneOrder.push(BOSS_ZONE);
-
-  const sections = zoneOrder.map(zone => {
-    const label = zone === BOSS_ZONE ? 'The Null Medium' : ZONE_NAMES[zone];
-    const zoneIds = byZone.get(zone);
-    const zoneCaught = zoneIds.filter(id => defeated[id]).length;
-    const visibleIds = query
-      ? zoneIds.filter(id => defeated[id] && ENEMIES[id].name.toLowerCase().includes(query))
-      : zoneIds;
-    if (query && !visibleIds.length) return '';
-    const entries = visibleIds.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
-    return `<h3 class="completion-subhead">${label} — ${zoneCaught} / ${zoneIds.length}</h3>${entries}`;
-  }).join('');
-
-  game.dom.bestiaryList.innerHTML = sections || `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>`;
+  game.dom.bestiaryList.innerHTML = favoritesHtml + bodyHtml;
+  game.dom.bestiaryList.querySelectorAll('.bestiary-fav-toggle').forEach(btn => {
+    btn.onclick = () => {
+      toggleBestiaryFavorite(state, btn.dataset.id);
+      renderBestiary(game);
+    };
+  });
 }
