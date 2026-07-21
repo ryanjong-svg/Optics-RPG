@@ -11,6 +11,7 @@ import { grantXp } from './state.js';
 export const BOUNTY_SLOT_COUNT = 3;
 const MIN_TARGET = 3;
 const MAX_TARGET = 6;
+export const MAX_REROLLS_PER_BOUNTY = 1;
 
 function allBountyCandidates() {
   const ids = new Set();
@@ -32,7 +33,7 @@ export function generateBounty(state, excludeIds = []) {
   const rewardMaterialId = (enemy.mats && enemy.mats[0]) || null;
   const baseline = (state.flags.enemyKillCounts && state.flags.enemyKillCounts[enemyId]) || 0;
   return {
-    enemyId, targetCount, baseline,
+    enemyId, targetCount, baseline, rerollsUsed: 0,
     rewardMaterialId, rewardAmount: Math.max(1, Math.round(targetCount / 2)),
     rewardXp: targetCount * 8
   };
@@ -57,6 +58,23 @@ export function bountyProgress(state, bounty) {
 
 export function canClaimBounty(state, bounty) {
   return bountyProgress(state, bounty) >= bounty.targetCount;
+}
+
+export function canRerollBounty(bounty) {
+  return (bounty.rerollsUsed || 0) < MAX_REROLLS_PER_BOUNTY;
+}
+
+// A modest escape hatch for an inconvenient target - each slot gets exactly
+// one reroll before it must be claimed (the allowance resets once a new
+// bounty rolls into that slot), so it's a real choice, not an infinite skip.
+export function applyRerollBounty(state, slotIndex) {
+  const bounty = state.flags.bounties && state.flags.bounties[slotIndex];
+  if (!bounty || !canRerollBounty(bounty)) return false;
+  const usedIds = state.flags.bounties.map(b => b.enemyId);
+  const fresh = generateBounty(state, usedIds);
+  fresh.rerollsUsed = (bounty.rerollsUsed || 0) + 1;
+  state.flags.bounties[slotIndex] = fresh;
+  return true;
 }
 
 // Pure state mutation (no dom/save/audio side effects) so it stays

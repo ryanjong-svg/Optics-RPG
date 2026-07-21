@@ -101,6 +101,7 @@ export function migrateState(state) {
   if (state.settings.muted === undefined) state.settings.muted = false;
   if (state.settings.musicVolume === undefined) state.settings.musicVolume = 1;
   if (state.settings.sfxVolume === undefined) state.settings.sfxVolume = 1;
+  if (state.settings.reducedMotion === undefined) state.settings.reducedMotion = false;
   return state;
 }
 

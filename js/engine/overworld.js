@@ -202,8 +202,8 @@ function drawWallBlock(ctx2d, sx, sy, zone) {
 
 // Pulsing tactical-cursor diamond under the player's tile — the classic
 // XCOM "this is your active unit" selection indicator.
-function drawSelectionCursor(ctx2d, sx, sy) {
-  const pulse = (Math.sin(Date.now() / 260) + 1) / 2; // 0..1
+function drawSelectionCursor(ctx2d, sx, sy, reducedMotion) {
+  const pulse = reducedMotion ? 0.5 : (Math.sin(Date.now() / 260) + 1) / 2; // 0..1
   const inset = 3 + pulse * 2;
   const alpha = 0.5 + pulse * 0.4;
   ctx2d.strokeStyle = `rgba(79,216,255,${alpha.toFixed(2)})`;
@@ -312,7 +312,7 @@ export function renderOverworld(game) {
   }
 
   putEntity(state.pos.x, state.pos.y, (sx, sy) => {
-    drawSelectionCursor(ctx2d, sx, sy);
+    drawSelectionCursor(ctx2d, sx, sy, state.settings.reducedMotion);
     drawIsoSprite(ctx2d, 'humanoid', playerPaletteFor(state.flags.ngPlusCycle), sx, sy);
   });
 

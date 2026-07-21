@@ -4,7 +4,7 @@ import { findDifficulty } from './data/difficulty.js';
 import { renderOverworld, handleMove } from './engine/overworld.js';
 import { closeCraft } from './engine/craft.js';
 import { openCodex, closeCodex, codexUnlockedCount } from './engine/codexUI.js';
-import { openBestiary, closeBestiary, bestiaryCaughtCount } from './engine/bestiaryUI.js';
+import { openBestiary, closeBestiary, bestiaryCaughtCount, renderBestiary } from './engine/bestiaryUI.js';
 import { openHelp, closeHelp } from './engine/helpUI.js';
 import { openWhatsNew, closeWhatsNew, hasUnseenChangelog } from './engine/whatsNewUI.js';
 import { openChronicle, closeChronicle, chronicleUnlockedCount } from './engine/chronicleUI.js';
@@ -106,6 +106,7 @@ const dom = {
   codexClose: q('codex-close'),
 
   bestiaryPanel: q('bestiary-panel'),
+  bestiarySearch: q('bestiary-search'),
   bestiaryProgress: q('bestiary-progress'),
   bestiaryList: q('bestiary-list'),
   btnBestiary: q('btn-bestiary'),
@@ -143,6 +144,7 @@ const dom = {
   settingsDifficulty: q('settings-difficulty'),
   settingsDifficultyDesc: q('settings-difficulty-desc'),
   settingsMuteToggle: q('settings-mute-toggle'),
+  settingsReducedMotionToggle: q('settings-reduced-motion-toggle'),
   settingsMusicVolume: q('settings-music-volume'),
   settingsSfxVolume: q('settings-sfx-volume'),
   settingsResetSave: q('settings-reset-save'),
@@ -289,6 +291,7 @@ document.addEventListener('keydown', (e) => {
 
 dom.btnCodex.addEventListener('click', () => openCodex(game));
 dom.btnBestiary.addEventListener('click', () => openBestiary(game));
+dom.bestiarySearch.addEventListener('input', () => renderBestiary(game));
 dom.bestiaryClose.addEventListener('click', () => closeBestiary(game));
 dom.btnHelp.addEventListener('click', () => openHelp(game));
 dom.helpClose.addEventListener('click', () => closeHelp(game));
@@ -316,6 +319,17 @@ function setMuted(muted) {
 }
 dom.btnMute.addEventListener('click', () => setMuted(!audio.isMuted()));
 dom.settingsMuteToggle.addEventListener('click', () => setMuted(!audio.isMuted()));
+
+function syncReducedMotionUI(reducedMotion) {
+  dom.settingsReducedMotionToggle.textContent = `Reduced Motion: ${reducedMotion ? 'On' : 'Off'}`;
+  document.body.classList.toggle('reduced-motion', reducedMotion);
+}
+function setReducedMotion(reducedMotion) {
+  game.state.settings.reducedMotion = reducedMotion;
+  syncReducedMotionUI(reducedMotion);
+  saveGame(game.state);
+}
+dom.settingsReducedMotionToggle.addEventListener('click', () => setReducedMotion(!game.state.settings.reducedMotion));
 // 'input' fires continuously while dragging (live audio/state feedback);
 // saving is deferred to 'change' (fires once, on release) so a drag doesn't
 // re-serialize and re-persist the whole save file dozens of times.
@@ -452,6 +466,7 @@ function boot() {
   audio.setSfxVolume(game.state.settings.sfxVolume);
   dom.settingsMusicVolume.value = Math.round(game.state.settings.musicVolume * 100);
   dom.settingsSfxVolume.value = Math.round(game.state.settings.sfxVolume * 100);
+  syncReducedMotionUI(game.state.settings.reducedMotion);
   if (!game.state.flags.seenIntro) {
     game.state.flags.seenIntro = true;
     showMessages(game, INTRO_LINES, () => {

@@ -144,13 +144,26 @@ export function drawZoneBackdrop(ctx, w, h, zone) {
   ctx.restore();
 }
 
-// A pulsing amber ring behind an elite enemy's battle portrait — the one
-// visual tell (besides the renamed "Elite ..." label) that this encounter is
+// Falls back to amber for the two spectrum-pattern themes (prism/grating,
+// which have no single accent color) and for any unrecognized zone.
+const ELITE_AURA_FALLBACK = '#ffc83c';
+
+// A pulsing ring behind an elite enemy's battle portrait — the one visual
+// tell (besides the renamed "Elite ..." label) that this encounter is
 // tougher and better-rewarded than the ordinary version of the same enemy.
-export function drawEliteAura(ctx, cx, cy, radius) {
-  const pulse = (Math.sin(Date.now() / 300) + 1) / 2; // 0..1
+// Tinted with that zone's own battle-backdrop accent color, so an elite
+// reads as native to wherever it appears rather than always looking the same.
+export function eliteAuraColor(zone) {
+  const theme = BACKDROP_THEMES[zone];
+  return (theme && theme.accent) || ELITE_AURA_FALLBACK;
+}
+
+export function drawEliteAura(ctx, cx, cy, radius, zone, reducedMotion) {
+  const color = eliteAuraColor(zone);
+  const pulse = reducedMotion ? 0.5 : (Math.sin(Date.now() / 300) + 1) / 2; // 0..1
   ctx.save();
-  ctx.strokeStyle = `rgba(255, 200, 60, ${(0.4 + pulse * 0.4).toFixed(2)})`;
+  ctx.globalAlpha = 0.4 + pulse * 0.4;
+  ctx.strokeStyle = color;
   ctx.lineWidth = 2 + pulse * 1.5;
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);

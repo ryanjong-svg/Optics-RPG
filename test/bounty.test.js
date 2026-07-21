@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  BOUNTY_SLOT_COUNT, generateBounty, ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty
+  BOUNTY_SLOT_COUNT, generateBounty, ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty,
+  canRerollBounty, applyRerollBounty, MAX_REROLLS_PER_BOUNTY
 } from '../js/engine/bounty.js';
 import { ZONE_ENCOUNTERS } from '../js/engine/overworld.js';
 import { ENEMIES } from '../js/data/enemies.js';
@@ -94,4 +95,27 @@ test('applyClaimBounty: works with no reward material (grants XP only), if a bou
   const ok = applyClaimBounty(state, 0, () => {});
   assert.equal(ok, true);
   assert.ok(state.player.xp > xpBefore || state.player.level > 1, 'XP should have been granted');
+});
+
+test('canRerollBounty: allowed up to MAX_REROLLS_PER_BOUNTY, then refused', () => {
+  const bounty = { rerollsUsed: 0 };
+  assert.equal(canRerollBounty(bounty), true);
+  bounty.rerollsUsed = MAX_REROLLS_PER_BOUNTY;
+  assert.equal(canRerollBounty(bounty), false);
+});
+
+test('applyRerollBounty: swaps the slot for a fresh bounty and consumes the reroll allowance', () => {
+  const state = newGameState();
+  state.flags.bounties = [{ enemyId: 'wisp', targetCount: 3, baseline: 0, rerollsUsed: 0, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 }];
+  const ok = applyRerollBounty(state, 0);
+  assert.equal(ok, true);
+  const rerolled = state.flags.bounties[0];
+  assert.equal(rerolled.rerollsUsed, 1);
+  assert.equal(canRerollBounty(rerolled), false, 'the fresh bounty should already be out of rerolls');
+});
+
+test('applyRerollBounty: refuses once the slot\'s reroll allowance is used up', () => {
+  const state = newGameState();
+  state.flags.bounties = [{ enemyId: 'wisp', targetCount: 3, baseline: 0, rerollsUsed: MAX_REROLLS_PER_BOUNTY, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 }];
+  assert.equal(applyRerollBounty(state, 0), false);
 });

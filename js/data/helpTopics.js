@@ -2,6 +2,12 @@
 // one-time onboarding hint (see state.js's claimHint) — easy to miss or forget.
 export const HELP_TOPICS = [
   {
+    title: 'Keyboard Shortcuts',
+    body: 'Arrow keys or WASD move around the overworld. In battle, the number keys 1-9 select an ability ' +
+      'by its position on the action list (matching the small number shown on each button). Enter or Space ' +
+      'advances dialogue. Escape closes whichever panel or aiming puzzle is currently open.'
+  },
+  {
     title: 'Charge',
     body: 'Your strongest attacks cost Charge (shown as the ⚡ bar in battle). It regenerates slowly each ' +
       'completed turn, or you can fully restore it anytime by Meditating at the Workbench. Cheaper abilities ' +

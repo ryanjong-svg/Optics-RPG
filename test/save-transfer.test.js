@@ -46,7 +46,7 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.enemyKillCounts, {});
   assert.deepEqual(migrated.flags.bounties, []);
   assert.equal(migrated.flags.bountiesClaimed, 0);
-  assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1 });
+  assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1, reducedMotion: false });
 });
 
 test('migrateState: leaves already-present fields untouched', () => {

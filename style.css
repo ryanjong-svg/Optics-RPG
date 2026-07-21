@@ -129,6 +129,23 @@ canvas#overworld-canvas {
   box-shadow: inset 0 0 60px 20px rgba(0,0,0,0.65);
 }
 
+/* Reduced Motion (Settings > Display): drops the CRT scanline/vignette
+   overlay and every hit/crit/miss/pulse animation to a static equivalent,
+   for motion sensitivity. Toggled via a class on <body> rather than the
+   prefers-reduced-motion media query, since it's a game setting the player
+   can change from inside the app rather than relying on OS-level config. */
+body.reduced-motion::before,
+body.reduced-motion #stage::before {
+  display: none;
+}
+body.reduced-motion .portrait-hit,
+body.reduced-motion .portrait-crit,
+body.reduced-motion .portrait-miss,
+body.reduced-motion .dmg-popup,
+body.reduced-motion .bar-fill.hp.critical {
+  animation: none !important;
+}
+
 .hint { text-align: center; font-size: 0.85em; color: var(--text-dim); margin: 8px 0 0; }
 
 /* ---------- Bars (tactical readout meters) ---------- */

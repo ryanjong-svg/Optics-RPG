@@ -1,4 +1,4 @@
-import { ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty } from './bounty.js';
+import { ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty, canRerollBounty, applyRerollBounty } from './bounty.js';
 import { ENEMIES } from '../data/enemies.js';
 import { MATERIALS } from '../data/materials.js';
 import { saveGame } from './save.js';
@@ -14,6 +14,7 @@ export function renderBounties(game) {
     const enemy = ENEMIES[bounty.enemyId];
     const progress = bountyProgress(state, bounty);
     const claimable = canClaimBounty(state, bounty);
+    const rerollable = canRerollBounty(bounty);
     const reward = bounty.rewardMaterialId
       ? `${bounty.rewardAmount} ${MATERIALS[bounty.rewardMaterialId].name} + ${bounty.rewardXp} XP`
       : `${bounty.rewardXp} XP`;
@@ -23,6 +24,7 @@ export function renderBounties(game) {
         <div class="recipe-req">Progress: ${progress} / ${bounty.targetCount} — Reward: ${reward}</div>
         <div class="recipe-btn-row">
           <button class="action-btn bounty-claim" data-slot="${i}" ${claimable ? '' : 'disabled'}>${claimable ? 'Claim' : 'In Progress'}</button>
+          <button class="action-btn ghost bounty-reroll" data-slot="${i}" ${rerollable ? '' : 'disabled'}>${rerollable ? 'Reroll' : 'Rerolled'}</button>
         </div>
       </div>
     `;
@@ -31,6 +33,17 @@ export function renderBounties(game) {
   game.dom.craftBounties.querySelectorAll('.bounty-claim').forEach(btn => {
     btn.onclick = () => claimBounty(game, Number(btn.dataset.slot));
   });
+  game.dom.craftBounties.querySelectorAll('.bounty-reroll').forEach(btn => {
+    btn.onclick = () => rerollBounty(game, Number(btn.dataset.slot));
+  });
+}
+
+export function rerollBounty(game, slotIndex) {
+  const ok = applyRerollBounty(game.state, slotIndex);
+  if (!ok) return;
+  audio.playClick();
+  saveGame(game.state);
+  renderBounties(game);
 }
 
 export function claimBounty(game, slotIndex) {

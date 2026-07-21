@@ -39,10 +39,16 @@ function entryHtml(enemy, isDefeated) {
 }
 
 export function renderBestiary(game) {
-  const defeated = game.state.flags.enemiesDefeated;
+  const state = game.state;
+  const defeated = state.flags.enemiesDefeated;
   const ids = Object.keys(ENEMIES);
   const defeatedCount = ids.filter(id => defeated[id]).length;
   game.dom.bestiaryProgress.textContent = `${defeatedCount} / ${ids.length} enemies cataloged`;
+
+  // Filtering only ever matches a real (cataloged) enemy name - an
+  // undiscovered "???" entry has no name to search for, so it's simply
+  // excluded from filtered results rather than shown as a false match.
+  const query = (game.dom.bestiarySearch ? game.dom.bestiarySearch.value : '').trim().toLowerCase();
 
   const byZone = new Map();
   for (const id of ids) {
@@ -54,11 +60,17 @@ export function renderBestiary(game) {
   const zoneOrder = ZONE_ORDER.filter(z => byZone.has(z));
   if (byZone.has(BOSS_ZONE)) zoneOrder.push(BOSS_ZONE);
 
-  game.dom.bestiaryList.innerHTML = zoneOrder.map(zone => {
+  const sections = zoneOrder.map(zone => {
     const label = zone === BOSS_ZONE ? 'The Null Medium' : ZONE_NAMES[zone];
     const zoneIds = byZone.get(zone);
     const zoneCaught = zoneIds.filter(id => defeated[id]).length;
-    const entries = zoneIds.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
+    const visibleIds = query
+      ? zoneIds.filter(id => defeated[id] && ENEMIES[id].name.toLowerCase().includes(query))
+      : zoneIds;
+    if (query && !visibleIds.length) return '';
+    const entries = visibleIds.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
     return `<h3 class="completion-subhead">${label} — ${zoneCaught} / ${zoneIds.length}</h3>${entries}`;
   }).join('');
+
+  game.dom.bestiaryList.innerHTML = sections || `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>`;
 }

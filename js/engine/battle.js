@@ -946,7 +946,7 @@ export function renderBattle(game) {
   const enemySprite = CHARACTER_SPRITES[enemy.id];
   drawZoneBackdrop(d.battleEnemyCtx, d.battleEnemyCanvas.width, d.battleEnemyCanvas.height, enemy.zone);
   if (enemy.isElite) {
-    drawEliteAura(d.battleEnemyCtx, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, enemy.isBoss ? 34 : 26);
+    drawEliteAura(d.battleEnemyCtx, d.battleEnemyCanvas.width / 2, d.battleEnemyCanvas.height / 2 + 6, enemy.isBoss ? 34 : 26, enemy.zone, game.state.settings.reducedMotion);
   }
   if (enemySprite) {
     const px = enemy.isBoss ? PORTRAIT_PX * 1.15 : PORTRAIT_PX;

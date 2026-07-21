@@ -156,6 +156,7 @@
   <div id="bestiary-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Bestiary</h2><button id="bestiary-close" class="action-btn ghost">Close</button></div>
     <p class="ngplus-hint" style="margin-top:0;">Defeat an enemy once to catalog its known weakness and resistance here.</p>
+    <input id="bestiary-search" class="settings-select" type="text" placeholder="Search cataloged enemies by name...">
     <div id="bestiary-progress" class="codex-progress"></div>
     <div id="bestiary-list" class="codex-list"></div>
   </div>
@@ -196,6 +197,10 @@
       <label for="settings-sfx-volume">Sound Effects</label>
       <input id="settings-sfx-volume" type="range" min="0" max="100" step="5" value="100">
     </div>
+
+    <h3 class="completion-subhead">Display</h3>
+    <button id="settings-reduced-motion-toggle" class="action-btn">Reduced Motion: Off</button>
+    <p class="ngplus-hint">Turns off the CRT scanline/vignette overlay and battle-hit flash animations, for motion sensitivity.</p>
 
     <h3 class="completion-subhead">Save Slots</h3>
     <p class="ngplus-hint" style="margin-top:0;">Keep separate runs side by side — a clean playthrough alongside an experimental build.</p>

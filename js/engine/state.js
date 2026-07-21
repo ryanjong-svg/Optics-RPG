@@ -57,7 +57,8 @@ export function newGameState() {
       difficulty: 'normal',
       muted: false,
       musicVolume: 1,
-      sfxVolume: 1
+      sfxVolume: 1,
+      reducedMotion: false
     },
     codexUnlocked: {}
   };
