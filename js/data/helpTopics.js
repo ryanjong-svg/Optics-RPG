@@ -74,8 +74,9 @@ export const HELP_TOPICS = [
     title: 'Ability Combos',
     body: 'Using certain abilities right before a matching follow-up grants a bonus on that follow-up: TIR Shield ' +
       'into Reflect Strike, Interference Cancel into Diffraction Wave, Polarize Filter into Photoelectric Shock, ' +
-      'and Refraction Bend into Laser Focus. The battle log calls out a combo the moment it lands, so it is easy ' +
-      'to learn by playing rather than needing to memorize this list up front.'
+      'Refraction Bend into Laser Focus, Absorb & Re-emit into Dispersion Burst, and Dispersion Burst into ' +
+      'Photoelectric Shock. The battle log calls out a combo the moment it lands, so it is easy to learn by ' +
+      'playing rather than needing to memorize this list up front.'
   },
   {
     title: 'Elite Enemies',

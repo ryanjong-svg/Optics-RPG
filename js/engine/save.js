@@ -26,6 +26,36 @@ export function setCurrentSlot(slot) {
   }
 }
 
+// Slot names are player-chosen labels ("Speedrun", "NG+3 file"), stored
+// separately from the save data itself so a slot can be named even while
+// empty, and clearing/overwriting a slot's save never touches its name.
+const SLOT_NAMES_KEY = 'optics-rpg-slot-names';
+
+function readSlotNames() {
+  try {
+    const raw = localStorage.getItem(SLOT_NAMES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+export function getSlotName(slot) {
+  const names = readSlotNames();
+  return names[slot] || null;
+}
+
+export function setSlotName(slot, name) {
+  try {
+    const names = readSlotNames();
+    if (name) names[slot] = name;
+    else delete names[slot];
+    localStorage.setItem(SLOT_NAMES_KEY, JSON.stringify(names));
+  } catch (e) {
+    console.warn('Could not rename save slot', e);
+  }
+}
+
 // Backfills fields added after a given save was written, so older saves
 // (including imported ones from an earlier version of the game) don't crash.
 // Exported (alongside looksLikeSave below) so both are unit-testable without
@@ -60,6 +90,8 @@ export function migrateState(state) {
     // Any save from before version tracking existed is treated as being on
     // '1.0.0', so it sees every changelog entry added since as unread.
     if (state.flags.lastSeenVersion === undefined) state.flags.lastSeenVersion = '1.0.0';
+    if (state.flags.elitesDefeated === undefined) state.flags.elitesDefeated = 0;
+    if (state.flags.combosLanded === undefined) state.flags.combosLanded = 0;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';
@@ -152,6 +184,7 @@ export function slotSummary(slot) {
   if (!state) return null;
   return {
     slot,
+    name: getSlotName(slot),
     playerName: state.player.name,
     level: state.player.level,
     currentMap: state.currentMap,

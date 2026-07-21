@@ -41,6 +41,8 @@ test('migrateState: backfills every field added after older saves were written',
   assert.equal(migrated.flags.totalVictories, 0);
   assert.equal(migrated.flags.allAchievementsEarned, false);
   assert.equal(migrated.flags.lastSeenVersion, '1.0.0');
+  assert.equal(migrated.flags.elitesDefeated, 0);
+  assert.equal(migrated.flags.combosLanded, 0);
   assert.deepEqual(migrated.settings, { difficulty: 'normal', muted: false, musicVolume: 1, sfxVolume: 1 });
 });
 

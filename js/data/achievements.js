@@ -97,6 +97,16 @@ export const ACHIEVEMENTS = {
     title: 'Ascendant',
     desc: 'Reach New Game+ cycle 3.',
     check: state => (state.flags.ngPlusCycle || 0) >= 3
+  },
+  elite_hunter: {
+    title: 'Elite Hunter',
+    desc: 'Defeat 10 Elite enemies.',
+    check: state => (state.flags.elitesDefeated || 0) >= 10
+  },
+  combo_master: {
+    title: 'Combo Master',
+    desc: 'Land 15 ability combos.',
+    check: state => (state.flags.combosLanded || 0) >= 15
   }
 };
 

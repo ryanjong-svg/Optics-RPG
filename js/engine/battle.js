@@ -137,7 +137,9 @@ const COMBOS = {
   tir_shield: ['reflect_strike'],
   interference_cancel: ['diffraction_wave'],
   polarize_filter: ['photoelectric_shock'],
-  refraction_bend: ['laser_focus']
+  refraction_bend: ['laser_focus'],
+  absorb_reemit: ['dispersion_burst'],
+  dispersion_burst: ['photoelectric_shock']
 };
 export const COMBO_MULT = 1.4;
 
@@ -633,7 +635,8 @@ export function chooseAbility(game, abilityId) {
   battle.abilityUseCounts[ability.id] = (battle.abilityUseCounts[ability.id] || 0) + 1;
   battle.turnCount = (battle.turnCount || 0) + 1;
 
-  if (isComboFollowUp(battle.lastAbilityId, ability.id)) {
+  const comboTriggered = isComboFollowUp(battle.lastAbilityId, ability.id);
+  if (comboTriggered) {
     battle.comboBonusMult = COMBO_MULT;
     logMsg(game, `⚡ Combo! ${findAbility(battle.lastAbilityId).name} into ${ability.name} adds a bonus.`);
     if (claimHint(game.state, 'firstCombo')) {
@@ -667,6 +670,7 @@ export function chooseAbility(game, abilityId) {
     flags.totalDamageDealt = (flags.totalDamageDealt || 0) + (actionResult.dmg || 0);
     if (!flags.abilityUseCountsLifetime) flags.abilityUseCountsLifetime = {};
     flags.abilityUseCountsLifetime[ability.id] = (flags.abilityUseCountsLifetime[ability.id] || 0) + 1;
+    if (comboTriggered) flags.combosLanded = (flags.combosLanded || 0) + 1;
   }
 
   if (allEnemiesDefeated(battle)) {
@@ -863,6 +867,7 @@ function resolveVictory(game) {
       state.player.materials[matId] = (state.player.materials[matId] || 0) + matGain;
       logMsg(game, `Gained ${matGain} ${MATERIALS[matId].name}.`);
     });
+    if (e.isElite) state.flags.elitesDefeated = (state.flags.elitesDefeated || 0) + 1;
   });
   if (battle.opts.guardianMap) {
     state.flags.guardianDefeated[battle.opts.guardianMap] = true;

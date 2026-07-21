@@ -14,7 +14,7 @@ global.localStorage = new MemoryStorage();
 
 import {
   SLOT_COUNT, getCurrentSlot, setCurrentSlot, saveGameToSlot, loadGameFromSlot,
-  clearSlot, slotSummary, allSlotSummaries
+  clearSlot, slotSummary, allSlotSummaries, getSlotName, setSlotName
 } from '../js/engine/save.js';
 import { newGameState } from '../js/engine/state.js';
 
@@ -97,4 +97,43 @@ test('allSlotSummaries: returns exactly SLOT_COUNT entries, in slot order', () =
   assert.ok(summaries[1]);
   assert.equal(summaries[1].slot, 2);
   assert.equal(summaries[2], null);
+});
+
+test('getSlotName/setSlotName: round-trips, null when never named, and can be named while empty', () => {
+  global.localStorage = new MemoryStorage();
+  assert.equal(getSlotName(1), null);
+  setSlotName(1, 'Speedrun');
+  assert.equal(getSlotName(1), 'Speedrun');
+  assert.equal(slotSummary(1), null, 'naming an empty slot should not create a save');
+});
+
+test('setSlotName: an empty/blank name clears it back to null', () => {
+  global.localStorage = new MemoryStorage();
+  setSlotName(1, 'Temp Name');
+  setSlotName(1, '');
+  assert.equal(getSlotName(1), null);
+});
+
+test('setSlotName: slots are named independently of each other', () => {
+  global.localStorage = new MemoryStorage();
+  setSlotName(1, 'Main File');
+  setSlotName(2, 'NG+3 File');
+  assert.equal(getSlotName(1), 'Main File');
+  assert.equal(getSlotName(2), 'NG+3 File');
+  assert.equal(getSlotName(3), null);
+});
+
+test('slotSummary: includes the slot\'s name when one has been set', () => {
+  global.localStorage = new MemoryStorage();
+  setSlotName(1, 'Main File');
+  saveGameToSlot(newGameState(), 1);
+  assert.equal(slotSummary(1).name, 'Main File');
+});
+
+test('clearSlot: does not clear the slot\'s name', () => {
+  global.localStorage = new MemoryStorage();
+  setSlotName(1, 'Main File');
+  saveGameToSlot(newGameState(), 1);
+  clearSlot(1);
+  assert.equal(getSlotName(1), 'Main File');
 });

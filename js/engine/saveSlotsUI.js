@@ -1,4 +1,4 @@
-import { allSlotSummaries, getCurrentSlot, setCurrentSlot, clearSlot, loadGame, saveGame } from './save.js';
+import { allSlotSummaries, getCurrentSlot, setCurrentSlot, clearSlot, loadGame, saveGame, getSlotName, setSlotName } from './save.js';
 import { newGameState } from './state.js';
 import { renderOverworld } from './overworld.js';
 import { MAPS } from '../data/maps.js';
@@ -10,15 +10,18 @@ export function renderSaveSlots(game) {
   game.dom.settingsSlots.innerHTML = summaries.map((s, i) => {
     const slot = i + 1;
     const isCurrent = slot === current;
+    const name = getSlotName(slot);
+    const heading = `Slot ${slot}${name ? ` — ${name}` : ''}${isCurrent ? ' (current)' : ''}`;
     const label = s
       ? `Lv.${s.level} · ${(MAPS[s.currentMap] || {}).name || s.currentMap}${s.ngPlusCycle ? ` · NG+${s.ngPlusCycle}` : ''}`
       : 'Empty — start a new game here';
     return `
       <div class="slot-row${isCurrent ? ' slot-row-current' : ''}">
-        <div class="slot-row-head"><span>Slot ${slot}${isCurrent ? ' (current)' : ''}</span></div>
+        <div class="slot-row-head"><span>${heading}</span></div>
         <div class="slot-row-desc">${label}</div>
         <div class="slot-row-actions">
           <button class="action-btn slot-switch" data-slot="${slot}" ${isCurrent ? 'disabled' : ''}>${isCurrent ? 'Playing' : 'Switch'}</button>
+          <button class="action-btn ghost slot-rename" data-slot="${slot}">Rename</button>
           ${s ? `<button class="action-btn ghost slot-clear" data-slot="${slot}">Clear</button>` : ''}
         </div>
       </div>
@@ -27,6 +30,15 @@ export function renderSaveSlots(game) {
 
   game.dom.settingsSlots.querySelectorAll('.slot-switch').forEach(btn => {
     btn.onclick = () => switchToSlot(game, Number(btn.dataset.slot));
+  });
+  game.dom.settingsSlots.querySelectorAll('.slot-rename').forEach(btn => {
+    btn.onclick = () => {
+      const slot = Number(btn.dataset.slot);
+      const name = window.prompt('Name this save slot (leave blank to clear the name):', getSlotName(slot) || '');
+      if (name === null) return;
+      setSlotName(slot, name.trim());
+      renderSaveSlots(game);
+    };
   });
   game.dom.settingsSlots.querySelectorAll('.slot-clear').forEach(btn => {
     btn.onclick = () => {
