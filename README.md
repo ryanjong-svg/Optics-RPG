@@ -54,21 +54,30 @@ Tests run automatically on every push and pull request via GitHub Actions
   confrontation) each teaching a distinct optics concept, with a guardian and a hidden
   secret per zone
 - Turn-based battles with a matchup system (abilities are strong/weak against specific
-  enemies, mirroring real physical mechanisms), ability cooldowns, and a Charge
-  resource that gates your strongest attacks
+  enemies, mirroring real physical mechanisms), ability cooldowns, a Charge resource
+  that gates your strongest attacks, and ability combos (certain abilities used
+  back-to-back grant a bonus, and chaining two combos in a row completes an even
+  bigger "combo chain")
+- Elite enemy variants that occasionally replace a normal encounter — tougher and
+  better-rewarded, with a zone-tinted aura and their own Field Log tracking
 - Multi-enemy pack encounters, overworld "wanderers" with a surprise-attack bonus, and
   telegraphed heavy attacks from guardians/the boss
 - Crafting system (materials → gear) with end-game recipes that combine/upgrade an
-  owned predecessor item instead of building from scratch, gear loadout presets,
-  consumable recovery items, and a Meditate action to restore Charge
-- Codex (physics concepts), Chronicle (world lore), Quest Log, a personal Bestiary of
-  every enemy you've fought, and a Field Log tracking overall completion and named
-  achievements
+  owned predecessor item instead of building from scratch, gear loadout presets that
+  can be swapped mid-battle, consumable recovery items, a Meditate action to restore
+  Charge, and a repeatable Bounty Board with a streak bonus for claiming goals
+  back-to-back
+- Codex (physics concepts), Chronicle (world lore), Quest Log, a personal Bestiary
+  (searchable, sortable, and favoritable) of every enemy you've fought, and a Field
+  Log tracking overall completion and named achievements
 - Difficulty settings, a New Game+ cycle with escalating enemy stats and adaptive
   guardian/boss resistance to an overused ability, and save export/import for backing
   up or transferring progress
-- An interactive Snell's-Law aiming puzzle (real n₁sinθ₁ = n₂sinθ₂ math) that Refraction
-  Bend fires through instead of an instant cast, and a free-to-switch specialization
-  system (Photon Focus / Wave Mechanics) unlocked at level 5
+- Three interactive aiming puzzles grounded in real physics — Snell's Law
+  (n₁sinθ₁ = n₂sinθ₂) for Refraction Bend, double-slit interference for Diffraction
+  Wave, and Brewster's angle for Polarize Filter — each fired through instead of an
+  instant cast, with an optional "Puzzle Hints" setting to hide the target for a
+  harder, hint-free challenge; plus a free-to-switch specialization system (Photon
+  Focus / Wave Mechanics) unlocked at level 5
 - Procedural audio (SFX + music via the Web Audio API) and a hand-authored pixel-art
   sprite system rendered in an isometric overworld with an XCOM-2-inspired tactical UI
