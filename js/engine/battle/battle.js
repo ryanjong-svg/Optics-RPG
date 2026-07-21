@@ -9,7 +9,7 @@ import { CODEX } from '../../data/codex.js';
 import { CONSUMABLES, findConsumable } from '../../data/consumables.js';
 import { findDifficulty } from '../../data/difficulty.js';
 import { drawSprite, drawZoneBackdrop, playerPaletteFor, drawEliteAura } from '../world/pixelSprites.js';
-import { buildGear } from '../core/gear.js';
+import { buildGear, applyLoadLoadout } from '../core/gear.js';
 import { grantXp, unlockCodex, claimHint } from '../core/state.js';
 import { saveGame } from '../core/save.js';
 import { applyConsumable } from '../core/consumables.js';
@@ -757,8 +757,14 @@ export function shouldGrantHardcorePuzzleBonus(hit, isPractice, puzzleHints) {
 function grantHardcorePuzzleBonus(game, hit) {
   const battle = game.battle;
   if (!shouldGrantHardcorePuzzleBonus(hit, battle.opts.practice, game.state.settings.puzzleHints)) return;
+  game.state.flags.hardcorePuzzleHits = (game.state.flags.hardcorePuzzleHits || 0) + 1;
   grantXpWithSound(game.state, HARDCORE_PUZZLE_XP_BONUS, m => logMsg(game, m));
   logMsg(game, `🎯 Hardcore hit! +${HARDCORE_PUZZLE_XP_BONUS} bonus XP for landing it with Puzzle Hints off.`);
+  const newlyUnlocked = checkNewAchievements(game.state);
+  if (newlyUnlocked.length) {
+    audio.playAchievement();
+    formatAchievementLines(newlyUnlocked).forEach(m => showToast(game, m));
+  }
 }
 
 function resolveSnellPuzzleShot(game, hit, refractedDeg) {
@@ -854,6 +860,33 @@ export function useItemInBattle(game, itemId) {
   const healed = applyConsumable(game.state, itemId);
   audio.playHeal();
   logMsg(game, `You use the ${item.name}, recovering ${healed} HP.`);
+
+  decrementCooldowns(battle);
+  regenCharge(game.state.player);
+  const enemyResult = resolveEnemyTurn(game);
+  battle.damageTaken += enemyResult.dmg;
+  showHitFx(game, game.dom.battlePlayerCanvas, enemyResult.dmg, false);
+
+  if (game.state.player.hp <= 0) {
+    resolveDefeat(game);
+    renderBattle(game);
+    return;
+  }
+
+  renderBattle(game);
+}
+
+// Re-gearing mid-fight - like Use Item, this costs the player's turn (the
+// enemy still gets to act), since freely re-optimizing gear every turn for
+// free would trivialize matchups the loadout system is meant to reward
+// planning for ahead of time, not during.
+export function quickSwapLoadout(game, slot) {
+  const battle = game.battle;
+  if (!battle || battle.over) return;
+  if (!applyLoadLoadout(game.state, slot)) return;
+  const loadout = game.state.player.loadouts[slot];
+  logMsg(game, `Swapped to Loadout ${slot}${loadout.name ? ` (${loadout.name})` : ''}.`);
+  audio.playClick();
 
   decrementCooldowns(battle);
   regenCharge(game.state.player);
@@ -1097,6 +1130,18 @@ export function renderBattle(game) {
     btn.innerHTML = `<strong>${keyHint()}Use ${item.name} (x${owned})</strong><span class="ability-desc">Restores ${item.heal} HP.</span>`;
     if (item.fact) btn.title = item.fact;
     btn.onclick = () => useItemInBattle(game, item.id);
+    d.battleActions.appendChild(btn);
+  });
+
+  // A saved loadout is available to swap to mid-fight, same as an item -
+  // costs the turn, so it's a real tactical choice, not a free re-gear.
+  [1, 2].forEach(slot => {
+    const loadout = player.loadouts[slot];
+    if (!loadout) return;
+    const btn = document.createElement('button');
+    btn.className = 'action-btn ability-btn';
+    btn.innerHTML = `<strong>${keyHint()}Swap to Loadout ${slot}${loadout.name ? ` — ${loadout.name}` : ''}</strong><span class="ability-desc">Re-gears mid-fight; uses your turn.</span>`;
+    btn.onclick = () => quickSwapLoadout(game, slot);
     d.battleActions.appendChild(btn);
   });
 

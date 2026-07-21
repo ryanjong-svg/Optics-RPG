@@ -53,3 +53,11 @@ test('zone_conqueror: locked until every huntable zone has at least one Elite ki
   delete state.flags.eliteKillsByZone[ELITE_HUNTABLE_ZONES[0]];
   assert.equal(ACHIEVEMENTS.zone_conqueror.check(state), false, 'missing even one zone should keep it locked');
 });
+
+test('blind_marksman: locked below 5 hardcore puzzle hits, unlocks at 5', () => {
+  const state = newGameState();
+  state.flags.hardcorePuzzleHits = 4;
+  assert.equal(ACHIEVEMENTS.blind_marksman.check(state), false);
+  state.flags.hardcorePuzzleHits = 5;
+  assert.equal(ACHIEVEMENTS.blind_marksman.check(state), true);
+});

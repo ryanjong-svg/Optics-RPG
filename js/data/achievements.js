@@ -132,6 +132,11 @@ export const ACHIEVEMENTS = {
     title: 'Zone Conqueror',
     desc: 'Defeat an Elite enemy in every zone that has them.',
     check: state => ELITE_HUNTABLE_ZONES.every(z => ((state.flags.eliteKillsByZone || {})[z] || 0) > 0)
+  },
+  blind_marksman: {
+    title: 'Blind Marksman',
+    desc: 'Land 5 aiming-puzzle hits with Puzzle Hints off.',
+    check: state => (state.flags.hardcorePuzzleHits || 0) >= 5
   }
 };
 

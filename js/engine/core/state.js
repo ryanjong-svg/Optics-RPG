@@ -54,6 +54,7 @@ export function newGameState() {
       bountyStreak: 0,
       bestBountyStreak: 0,
       bestiaryFavorites: {},
+      hardcorePuzzleHits: 0,
       // A brand new game starts fully caught up - only saves that predate
       // this system (backfilled to '1.0.0' in migrateState) should see the
       // What's New panel light up.

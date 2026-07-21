@@ -3,7 +3,7 @@ import { LORE, isLoreUnlocked } from '../../data/lore.js';
 import { RECIPES } from '../../data/equipment.js';
 import { QUESTS } from '../../data/quests.js';
 import { MAPS } from '../../data/maps.js';
-import { ACHIEVEMENTS, unlockedAchievements } from '../../data/achievements.js';
+import { ACHIEVEMENTS, unlockedAchievements, ELITE_HUNTABLE_ZONES } from '../../data/achievements.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { findAbility } from '../../data/abilities.js';
 import { COMBOS } from '../battle/battle.js';
@@ -72,6 +72,15 @@ export function computeLifetimeStats(state) {
     .filter(([, count]) => count > 0)
     .map(([zone, count]) => `${ZONE_NAMES[zone] || zone} ${count}`);
 
+  // Progress toward the Zone Conqueror achievement - a count plus the
+  // remaining zone names, since "which zones are left" is the actionable
+  // part (the breakdown above already covers "how many kills per zone").
+  const eliteKillsByZone = flags.eliteKillsByZone || {};
+  const eliteZonesRemaining = ELITE_HUNTABLE_ZONES
+    .filter(z => !(eliteKillsByZone[z] > 0))
+    .map(z => ZONE_NAMES[z] || z);
+  const eliteZonesDone = ELITE_HUNTABLE_ZONES.length - eliteZonesRemaining.length;
+
   const comboProgress = computeComboProgress(state);
 
   return {
@@ -82,12 +91,16 @@ export function computeLifetimeStats(state) {
     mostUsedAbilityCount: mostUsedCount,
     elitesDefeated: flags.elitesDefeated || 0,
     eliteZoneBreakdown,
+    eliteZonesDone,
+    eliteZonesTotal: ELITE_HUNTABLE_ZONES.length,
+    eliteZonesRemaining,
     comboDoneCount: comboProgress.doneCount,
     comboTotal: comboProgress.total,
     comboDoneLabels: comboProgress.doneLabels,
     combosChained: flags.combosChained || 0,
     bountyStreak: flags.bountyStreak || 0,
-    bestBountyStreak: flags.bestBountyStreak || 0
+    bestBountyStreak: flags.bestBountyStreak || 0,
+    hardcorePuzzleHits: flags.hardcorePuzzleHits || 0
   };
 }
 
@@ -126,9 +139,11 @@ export function renderCompletion(game) {
       `Fastest Null Medium Kill: ${s.fastestBossKillTurns != null ? `${s.fastestBossKillTurns} turn${s.fastestBossKillTurns === 1 ? '' : 's'}` : 'Not yet defeated'}`,
       `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`,
       `Elites Defeated: ${s.elitesDefeated}${s.eliteZoneBreakdown.length ? ` (${s.eliteZoneBreakdown.join(', ')})` : ''}`,
+      `Elite Zones Conquered: ${s.eliteZonesDone} / ${s.eliteZonesTotal}${s.eliteZonesRemaining.length ? ` (remaining: ${s.eliteZonesRemaining.join(', ')})` : ' — all zones conquered!'}`,
       `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`,
       `Combo Chains Landed: ${s.combosChained}`,
-      `Bounty Streak: ${s.bountyStreak} (best: ${s.bestBountyStreak})`
+      `Bounty Streak: ${s.bountyStreak} (best: ${s.bestBountyStreak})`,
+      `Hardcore Puzzle Hits: ${s.hardcorePuzzleHits}`
     ];
     game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
   }

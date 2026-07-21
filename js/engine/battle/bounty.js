@@ -6,6 +6,7 @@
 // ever beaten this?" flag, not a running count).
 import { ZONE_ENCOUNTERS } from '../world/overworld.js';
 import { ENEMIES } from '../../data/enemies.js';
+import { findDifficulty } from '../../data/difficulty.js';
 import { grantXp } from '../core/state.js';
 
 export const BOUNTY_SLOT_COUNT = 3;
@@ -101,7 +102,11 @@ export function applyClaimBounty(state, slotIndex, log) {
     const amount = Math.round(bounty.rewardAmount * mult);
     state.player.materials[bounty.rewardMaterialId] = (state.player.materials[bounty.rewardMaterialId] || 0) + amount;
   }
-  grantXp(state, Math.round(bounty.rewardXp * mult), log || (() => {}));
+  // XP (not materials) scales with difficulty, matching every other XP
+  // grant in the game (post-battle victory, quests) - materials never scale
+  // with difficulty anywhere, so bounties stay consistent with that too.
+  const xpMult = findDifficulty(state.settings.difficulty).xpMult;
+  grantXp(state, Math.round(bounty.rewardXp * mult * xpMult), log || (() => {}));
   state.flags.bountiesClaimed = (state.flags.bountiesClaimed || 0) + 1;
   state.flags.bountyStreak = streak + 1;
   state.flags.bestBountyStreak = Math.max(state.flags.bestBountyStreak || 0, state.flags.bountyStreak);

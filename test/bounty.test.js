@@ -169,3 +169,26 @@ test('applyClaimBounty: tracks the best streak ever reached, surviving a later r
   assert.equal(state.flags.bountyStreak, 0);
   assert.equal(state.flags.bestBountyStreak, 2, 'the best-ever streak should not be erased by a reroll reset');
 });
+
+test('applyClaimBounty: XP reward scales with the difficulty xpMult; materials never do', () => {
+  const grantedXp = difficultyId => {
+    const state = newGameState();
+    state.settings.difficulty = difficultyId;
+    state.flags.bounties = [{ enemyId: 'wisp', targetCount: 1, baseline: 0, rewardMaterialId: 'water', rewardAmount: 4, rewardXp: 100 }];
+    state.flags.enemyKillCounts.wisp = 1;
+    const msgs = [];
+    applyClaimBounty(state, 0, m => msgs.push(m));
+    const xpMsg = msgs.find(m => /^Gained \d+ XP\.$/.test(m));
+    return { xp: Number(xpMsg.match(/\d+/)[0]), material: state.player.materials.water };
+  };
+
+  const normal = grantedXp('normal');
+  const hard = grantedXp('hard');
+  const easy = grantedXp('easy');
+  assert.equal(normal.xp, 100, 'normal has xpMult 1');
+  assert.equal(hard.xp, 90, 'hard has xpMult 0.9');
+  assert.equal(easy.xp, 115, 'easy has xpMult 1.15');
+  assert.equal(normal.material, 4);
+  assert.equal(hard.material, 4, 'materials do not scale with difficulty, unlike XP');
+  assert.equal(easy.material, 4);
+});

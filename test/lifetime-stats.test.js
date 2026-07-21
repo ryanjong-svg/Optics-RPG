@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { computeLifetimeStats, computeComboProgress } from '../js/engine/panels/completionUI.js';
 import { newGameState } from '../js/engine/core/state.js';
 import { COMBOS } from '../js/engine/battle/battle.js';
+import { ELITE_HUNTABLE_ZONES } from '../js/data/achievements.js';
 
 const TOTAL_COMBOS = Object.values(COMBOS).reduce((sum, payoffs) => sum + payoffs.length, 0);
 
@@ -22,6 +23,25 @@ test('computeLifetimeStats: all zero/null on a fresh game', () => {
   assert.equal(stats.combosChained, 0);
   assert.equal(stats.bountyStreak, 0);
   assert.equal(stats.bestBountyStreak, 0);
+  assert.equal(stats.eliteZonesDone, 0);
+  assert.equal(stats.eliteZonesTotal, ELITE_HUNTABLE_ZONES.length);
+  assert.equal(stats.eliteZonesRemaining.length, ELITE_HUNTABLE_ZONES.length, 'every huntable zone starts remaining');
+  assert.equal(stats.hardcorePuzzleHits, 0);
+});
+
+test('computeLifetimeStats: elite zone checklist tracks done/remaining as kills come in', () => {
+  const state = newGameState();
+  state.flags.eliteKillsByZone = { [ELITE_HUNTABLE_ZONES[0]]: 2, [ELITE_HUNTABLE_ZONES[1]]: 1 };
+  const stats = computeLifetimeStats(state);
+  assert.equal(stats.eliteZonesDone, 2);
+  assert.equal(stats.eliteZonesRemaining.length, ELITE_HUNTABLE_ZONES.length - 2);
+  assert.ok(!stats.eliteZonesRemaining.includes(ELITE_HUNTABLE_ZONES[0]));
+});
+
+test('computeLifetimeStats: reflects hardcorePuzzleHits', () => {
+  const state = newGameState();
+  state.flags.hardcorePuzzleHits = 3;
+  assert.equal(computeLifetimeStats(state).hardcorePuzzleHits, 3);
 });
 
 test('computeLifetimeStats: reflects bountyStreak/bestBountyStreak', () => {

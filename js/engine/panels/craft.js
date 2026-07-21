@@ -4,6 +4,7 @@ import { CONSUMABLES } from '../../data/consumables.js';
 import { unlockCodex } from '../core/state.js';
 import { saveGame } from '../core/save.js';
 import { canCraftConsumable, craftConsumable, useConsumableOutOfBattle } from '../core/consumables.js';
+import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../core/gear.js';
 import { SPECIALIZATIONS } from '../../data/specializations.js';
 import { startBattle } from '../battle/battle.js';
 import { renderBounties } from '../battle/bountyUI.js';
@@ -114,37 +115,6 @@ export function equipItem(game, slot, recipeId) {
   game.state.player.equipped[slot] = recipeId || null;
   saveGame(game.state);
   renderCraft(game);
-}
-
-// Loadouts are just a saved snapshot of `equipped` - no new gear is created,
-// so switching builds mid-adventure doesn't need a trip through every dropdown.
-// Pure state mutations (no dom/save side effects) so they stay unit-testable;
-// saveLoadout()/loadLoadout() below are the UI-wired versions callers use.
-export function applySaveLoadout(state, slot) {
-  // A re-save overwrites the equipped snapshot but keeps whatever name was
-  // already set - naming a loadout shouldn't need to be redone every time
-  // its gear changes.
-  const existing = state.player.loadouts[slot];
-  const name = existing ? existing.name : null;
-  state.player.loadouts[slot] = { ...state.player.equipped, name: name || null };
-}
-
-export function applyLoadLoadout(state, slot) {
-  const player = state.player;
-  const loadout = player.loadouts[slot];
-  if (!loadout) return false;
-  ['lens', 'mirror', 'prism', 'filter'].forEach(s => {
-    const recipeId = loadout[s];
-    player.equipped[s] = (recipeId && player.ownedGear[recipeId]) ? recipeId : null;
-  });
-  return true;
-}
-
-export function applyRenameLoadout(state, slot, name) {
-  const loadout = state.player.loadouts[slot];
-  if (!loadout) return false;
-  loadout.name = name || null;
-  return true;
 }
 
 export function saveLoadout(game, slot) {

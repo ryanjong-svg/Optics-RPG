@@ -1,6 +1,7 @@
 import { ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty, canRerollBounty, applyRerollBounty, bountyStreakMultiplier, BOUNTY_STREAK_BONUS_MAX_PCT } from './bounty.js';
 import { ENEMIES } from '../../data/enemies.js';
 import { MATERIALS } from '../../data/materials.js';
+import { findDifficulty } from '../../data/difficulty.js';
 import { saveGame } from '../core/save.js';
 import { showToast } from '../panels/toastUI.js';
 import { checkNewAchievements, formatAchievementLines } from '../../data/achievements.js';
@@ -13,13 +14,14 @@ export function renderBounties(game) {
   const streak = state.flags.bountyStreak || 0;
   const mult = bountyStreakMultiplier(streak);
   const bonusPct = Math.round((mult - 1) * 100);
+  const xpMult = findDifficulty(state.settings.difficulty).xpMult;
   game.dom.craftBounties.innerHTML = bounties.map((bounty, i) => {
     const enemy = ENEMIES[bounty.enemyId];
     const progress = bountyProgress(state, bounty);
     const claimable = canClaimBounty(state, bounty);
     const rerollable = canRerollBounty(bounty);
     const matAmount = Math.round(bounty.rewardAmount * mult);
-    const xpAmount = Math.round(bounty.rewardXp * mult);
+    const xpAmount = Math.round(bounty.rewardXp * mult * xpMult);
     const reward = bounty.rewardMaterialId
       ? `${matAmount} ${MATERIALS[bounty.rewardMaterialId].name} + ${xpAmount} XP`
       : `${xpAmount} XP`;

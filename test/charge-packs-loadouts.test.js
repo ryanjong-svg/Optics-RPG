@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { ABILITIES } from '../js/data/abilities.js';
 import { newGameState } from '../js/engine/core/state.js';
 import { regenCharge, shouldApplySurprise, allEnemiesDefeated } from '../js/engine/battle/battle.js';
-import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../js/engine/panels/craft.js';
+import { applySaveLoadout, applyLoadLoadout, applyRenameLoadout } from '../js/engine/core/gear.js';
 import { MAPS } from '../js/data/maps.js';
 
 test('every attack ability has a positive integer chargeCost; defense/utility abilities have none', () => {
