@@ -45,6 +45,7 @@ test('migrateState: backfills every field added after older saves were written',
   assert.deepEqual(migrated.flags.eliteKillsByZone, {});
   assert.equal(migrated.flags.combosLanded, 0);
   assert.deepEqual(migrated.flags.combosTriggered, {});
+  assert.equal(migrated.flags.combosChained, 0);
   assert.deepEqual(migrated.flags.enemyKillCounts, {});
   assert.deepEqual(migrated.flags.bounties, []);
   assert.equal(migrated.flags.bountiesClaimed, 0);

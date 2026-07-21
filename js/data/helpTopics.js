@@ -82,7 +82,9 @@ export const HELP_TOPICS = [
       'into Reflect Strike, Interference Cancel into Diffraction Wave, Polarize Filter into Photoelectric Shock, ' +
       'Refraction Bend into Laser Focus, Absorb & Re-emit into Dispersion Burst, and Dispersion Burst into ' +
       'Photoelectric Shock. The battle log calls out a combo the moment it lands, so it is easy to learn by ' +
-      'playing rather than needing to memorize this list up front.'
+      'playing rather than needing to memorize this list up front. Landing two of these hops back-to-back — ' +
+      'Absorb & Re-emit into Dispersion Burst into Photoelectric Shock — completes a full combo chain for an ' +
+      'even bigger bonus on that final hit.'
   },
   {
     title: 'Elite Enemies',

@@ -112,6 +112,11 @@ export const ACHIEVEMENTS = {
     title: 'Bounty Hunter',
     desc: 'Claim 10 bounties from the Workbench board.',
     check: state => (state.flags.bountiesClaimed || 0) >= 10
+  },
+  chain_reaction: {
+    title: 'Chain Reaction',
+    desc: 'Land a full 3-step combo chain 3 times.',
+    check: state => (state.flags.combosChained || 0) >= 3
   }
 };
 

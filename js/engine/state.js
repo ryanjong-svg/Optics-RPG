@@ -47,6 +47,7 @@ export function newGameState() {
       eliteKillsByZone: {},
       combosLanded: 0,
       combosTriggered: {},
+      combosChained: 0,
       enemyKillCounts: {},
       bounties: [],
       bountiesClaimed: 0,

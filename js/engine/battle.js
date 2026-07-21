@@ -143,9 +143,20 @@ export const COMBOS = {
 };
 export const COMBO_MULT = 1.4;
 
+// A chain is two combo hops landed back-to-back in the same fight (e.g.
+// Absorb & Re-emit -> Dispersion Burst -> Photoelectric Shock, the one
+// sequence in COMBOS where a payoff is itself another pair's setup) - a
+// bigger, rarer bonus for planning a full 3-step sequence instead of just
+// one combo. Exported as its own pure function for direct testing.
+export const CHAIN_MULT = 1.75;
+
 export function isComboFollowUp(lastAbilityId, abilityId) {
   const followUps = COMBOS[lastAbilityId];
   return !!(followUps && followUps.includes(abilityId));
+}
+
+export function isComboChain(comboTriggered, prevTurnWasCombo) {
+  return !!(comboTriggered && prevTurnWasCombo);
 }
 
 // Elite variant: a rare, tougher, better-rewarding version of a normal
@@ -221,7 +232,7 @@ export function startBattle(game, enemyId, opts = {}) {
   game.battle = {
     enemy, packMates, log: [], playerBuff: null, storedEnergy: 0, opts, over: false,
     damageTaken: 0, abilitiesUsed: new Set(), abilityUseCounts: {}, phase2Triggered: false, bossEnrageTriggered: false,
-    cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus, lastAbilityId: null
+    cooldowns: {}, enemyTelegraphed: false, surpriseAvailable: !!opts.surpriseBonus, lastAbilityId: null, lastWasCombo: false
   };
   game.state.mode = 'battle';
   logMsg(game, opts.introText || GUARDIAN_INTRO[enemyId] || (enemy.isBoss ? BOSS_INTRO : `A wild ${enemy.name} appears!`));
@@ -647,14 +658,18 @@ export function chooseAbility(game, abilityId) {
 
   const comboTriggered = isComboFollowUp(battle.lastAbilityId, ability.id);
   const comboSetupId = battle.lastAbilityId; // captured before it's overwritten below
+  const chainTriggered = isComboChain(comboTriggered, battle.lastWasCombo);
   if (comboTriggered) {
-    battle.comboBonusMult = COMBO_MULT;
-    logMsg(game, `⚡ Combo! ${findAbility(battle.lastAbilityId).name} into ${ability.name} adds a bonus.`);
+    battle.comboBonusMult = chainTriggered ? CHAIN_MULT : COMBO_MULT;
+    logMsg(game, chainTriggered
+      ? `⚡⚡ Combo Chain! ${findAbility(battle.lastAbilityId).name} into ${ability.name} caps off a 3-step chain for a bigger bonus.`
+      : `⚡ Combo! ${findAbility(battle.lastAbilityId).name} into ${ability.name} adds a bonus.`);
     if (claimHint(game.state, 'firstCombo')) {
       logMsg(game, '💡 Tip: Certain abilities used back-to-back grant a bonus — check the Help panel for the full list.');
     }
   }
   battle.lastAbilityId = ability.id;
+  battle.lastWasCombo = comboTriggered;
 
   const actionResult = applyPlayerAction(game, ability, ctx);
   delete battle.comboBonusMult;
@@ -685,6 +700,7 @@ export function chooseAbility(game, abilityId) {
       flags.combosLanded = (flags.combosLanded || 0) + 1;
       if (!flags.combosTriggered) flags.combosTriggered = {};
       flags.combosTriggered[`${comboSetupId}>${ability.id}`] = true;
+      if (chainTriggered) flags.combosChained = (flags.combosChained || 0) + 1;
     }
   }
 

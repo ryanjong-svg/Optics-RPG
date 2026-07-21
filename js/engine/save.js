@@ -94,6 +94,7 @@ export function migrateState(state) {
     if (!state.flags.eliteKillsByZone) state.flags.eliteKillsByZone = {};
     if (state.flags.combosLanded === undefined) state.flags.combosLanded = 0;
     if (!state.flags.combosTriggered) state.flags.combosTriggered = {};
+    if (state.flags.combosChained === undefined) state.flags.combosChained = 0;
     if (!state.flags.enemyKillCounts) state.flags.enemyKillCounts = {};
     if (!state.flags.bounties) state.flags.bounties = [];
     if (state.flags.bountiesClaimed === undefined) state.flags.bountiesClaimed = 0;

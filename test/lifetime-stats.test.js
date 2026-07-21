@@ -19,6 +19,13 @@ test('computeLifetimeStats: all zero/null on a fresh game', () => {
   assert.equal(stats.comboDoneCount, 0);
   assert.equal(stats.comboTotal, TOTAL_COMBOS);
   assert.deepEqual(stats.comboDoneLabels, []);
+  assert.equal(stats.combosChained, 0);
+});
+
+test('computeLifetimeStats: reflects combosChained', () => {
+  const state = newGameState();
+  state.flags.combosChained = 4;
+  assert.equal(computeLifetimeStats(state).combosChained, 4);
 });
 
 test('computeLifetimeStats: elite zone breakdown only lists zones with at least one kill', () => {

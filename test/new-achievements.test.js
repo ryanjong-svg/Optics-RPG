@@ -29,3 +29,11 @@ test('both new achievements appear in unlockedAchievements once their conditions
   assert.ok(ids.includes('perfect_refraction'));
   assert.ok(ids.includes('dual_nature'));
 });
+
+test('chain_reaction: locked below 3 combo chains landed, unlocks at 3', () => {
+  const state = newGameState();
+  state.flags.combosChained = 2;
+  assert.equal(ACHIEVEMENTS.chain_reaction.check(state), false);
+  state.flags.combosChained = 3;
+  assert.equal(ACHIEVEMENTS.chain_reaction.check(state), true);
+});

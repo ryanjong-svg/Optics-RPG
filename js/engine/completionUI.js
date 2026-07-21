@@ -84,7 +84,8 @@ export function computeLifetimeStats(state) {
     eliteZoneBreakdown,
     comboDoneCount: comboProgress.doneCount,
     comboTotal: comboProgress.total,
-    comboDoneLabels: comboProgress.doneLabels
+    comboDoneLabels: comboProgress.doneLabels,
+    combosChained: flags.combosChained || 0
   };
 }
 
@@ -123,7 +124,8 @@ export function renderCompletion(game) {
       `Fastest Null Medium Kill: ${s.fastestBossKillTurns != null ? `${s.fastestBossKillTurns} turn${s.fastestBossKillTurns === 1 ? '' : 's'}` : 'Not yet defeated'}`,
       `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`,
       `Elites Defeated: ${s.elitesDefeated}${s.eliteZoneBreakdown.length ? ` (${s.eliteZoneBreakdown.join(', ')})` : ''}`,
-      `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`
+      `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`,
+      `Combo Chains Landed: ${s.combosChained}`
     ];
     game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
   }

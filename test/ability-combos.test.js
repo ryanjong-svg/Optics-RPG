@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { isComboFollowUp, COMBO_MULT } from '../js/engine/battle.js';
+import { isComboFollowUp, COMBO_MULT, isComboChain, CHAIN_MULT } from '../js/engine/battle.js';
 import { ABILITIES } from '../js/data/abilities.js';
 
 test('isComboFollowUp: recognizes every documented setup/payoff pair', () => {
@@ -34,4 +34,16 @@ test('isComboFollowUp: false for unrelated pairs, a null/undefined last ability,
 
 test('COMBO_MULT: a modest bonus, not a trivial or game-breaking one', () => {
   assert.ok(COMBO_MULT > 1 && COMBO_MULT < 2);
+});
+
+test('isComboChain: true only when this hop AND the previous hop were both combos', () => {
+  assert.equal(isComboChain(true, true), true);
+  assert.equal(isComboChain(true, false), false, 'this hop alone is just a regular combo, not a chain');
+  assert.equal(isComboChain(false, true), false, 'this hop must itself be a combo too');
+  assert.equal(isComboChain(false, false), false);
+});
+
+test('CHAIN_MULT: bigger than a single combo, but still not game-breaking', () => {
+  assert.ok(CHAIN_MULT > COMBO_MULT, 'a full chain should beat a single combo');
+  assert.ok(CHAIN_MULT < 3);
 });
