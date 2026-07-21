@@ -91,10 +91,13 @@ export function migrateState(state) {
     // '1.0.0', so it sees every changelog entry added since as unread.
     if (state.flags.lastSeenVersion === undefined) state.flags.lastSeenVersion = '1.0.0';
     if (state.flags.elitesDefeated === undefined) state.flags.elitesDefeated = 0;
+    if (!state.flags.eliteKillsByZone) state.flags.eliteKillsByZone = {};
     if (state.flags.combosLanded === undefined) state.flags.combosLanded = 0;
+    if (!state.flags.combosTriggered) state.flags.combosTriggered = {};
     if (!state.flags.enemyKillCounts) state.flags.enemyKillCounts = {};
     if (!state.flags.bounties) state.flags.bounties = [];
     if (state.flags.bountiesClaimed === undefined) state.flags.bountiesClaimed = 0;
+    if (state.flags.bountyStreak === undefined) state.flags.bountyStreak = 0;
   }
   if (!state.settings) state.settings = {};
   if (!state.settings.difficulty) state.settings.difficulty = 'normal';
@@ -102,6 +105,7 @@ export function migrateState(state) {
   if (state.settings.musicVolume === undefined) state.settings.musicVolume = 1;
   if (state.settings.sfxVolume === undefined) state.settings.sfxVolume = 1;
   if (state.settings.reducedMotion === undefined) state.settings.reducedMotion = false;
+  if (state.settings.puzzleHints === undefined) state.settings.puzzleHints = true;
   return state;
 }
 

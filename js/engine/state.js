@@ -44,10 +44,13 @@ export function newGameState() {
       totalVictories: 0,
       allAchievementsEarned: false,
       elitesDefeated: 0,
+      eliteKillsByZone: {},
       combosLanded: 0,
+      combosTriggered: {},
       enemyKillCounts: {},
       bounties: [],
       bountiesClaimed: 0,
+      bountyStreak: 0,
       // A brand new game starts fully caught up - only saves that predate
       // this system (backfilled to '1.0.0' in migrateState) should see the
       // What's New panel light up.
@@ -58,7 +61,8 @@ export function newGameState() {
       muted: false,
       musicVolume: 1,
       sfxVolume: 1,
-      reducedMotion: false
+      reducedMotion: false,
+      puzzleHints: true
     },
     codexUnlocked: {}
   };

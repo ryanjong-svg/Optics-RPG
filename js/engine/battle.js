@@ -133,7 +133,7 @@ export function applyDifficultyScaling(enemy, difficultyId) {
 // plan a short sequence instead of always picking whichever single ability
 // deals the most damage in isolation. Exported as its own pure function for
 // direct testing.
-const COMBOS = {
+export const COMBOS = {
   tir_shield: ['reflect_strike'],
   interference_cancel: ['diffraction_wave'],
   polarize_filter: ['photoelectric_shock'],
@@ -646,6 +646,7 @@ export function chooseAbility(game, abilityId) {
   battle.turnCount = (battle.turnCount || 0) + 1;
 
   const comboTriggered = isComboFollowUp(battle.lastAbilityId, ability.id);
+  const comboSetupId = battle.lastAbilityId; // captured before it's overwritten below
   if (comboTriggered) {
     battle.comboBonusMult = COMBO_MULT;
     logMsg(game, `⚡ Combo! ${findAbility(battle.lastAbilityId).name} into ${ability.name} adds a bonus.`);
@@ -680,7 +681,11 @@ export function chooseAbility(game, abilityId) {
     flags.totalDamageDealt = (flags.totalDamageDealt || 0) + (actionResult.dmg || 0);
     if (!flags.abilityUseCountsLifetime) flags.abilityUseCountsLifetime = {};
     flags.abilityUseCountsLifetime[ability.id] = (flags.abilityUseCountsLifetime[ability.id] || 0) + 1;
-    if (comboTriggered) flags.combosLanded = (flags.combosLanded || 0) + 1;
+    if (comboTriggered) {
+      flags.combosLanded = (flags.combosLanded || 0) + 1;
+      if (!flags.combosTriggered) flags.combosTriggered = {};
+      flags.combosTriggered[`${comboSetupId}>${ability.id}`] = true;
+    }
   }
 
   if (allEnemiesDefeated(battle)) {
@@ -882,7 +887,12 @@ function resolveVictory(game) {
       state.player.materials[matId] = (state.player.materials[matId] || 0) + matGain;
       logMsg(game, `Gained ${matGain} ${MATERIALS[matId].name}.`);
     });
-    if (e.isElite) state.flags.elitesDefeated = (state.flags.elitesDefeated || 0) + 1;
+    if (e.isElite) {
+      state.flags.elitesDefeated = (state.flags.elitesDefeated || 0) + 1;
+      if (!state.flags.eliteKillsByZone) state.flags.eliteKillsByZone = {};
+      const zoneKey = e.zone || 'unknown';
+      state.flags.eliteKillsByZone[zoneKey] = (state.flags.eliteKillsByZone[zoneKey] || 0) + 1;
+    }
   });
   if (battle.opts.guardianMap) {
     state.flags.guardianDefeated[battle.opts.guardianMap] = true;

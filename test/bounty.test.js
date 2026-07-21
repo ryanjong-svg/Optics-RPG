@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   BOUNTY_SLOT_COUNT, generateBounty, ensureBounties, bountyProgress, canClaimBounty, applyClaimBounty,
-  canRerollBounty, applyRerollBounty, MAX_REROLLS_PER_BOUNTY
+  canRerollBounty, applyRerollBounty, MAX_REROLLS_PER_BOUNTY, bountyStreakMultiplier, BOUNTY_STREAK_BONUS_MAX_PCT
 } from '../js/engine/bounty.js';
 import { ZONE_ENCOUNTERS } from '../js/engine/overworld.js';
 import { ENEMIES } from '../js/data/enemies.js';
@@ -118,4 +118,37 @@ test('applyRerollBounty: refuses once the slot\'s reroll allowance is used up', 
   const state = newGameState();
   state.flags.bounties = [{ enemyId: 'wisp', targetCount: 3, baseline: 0, rerollsUsed: MAX_REROLLS_PER_BOUNTY, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 }];
   assert.equal(applyRerollBounty(state, 0), false);
+});
+
+test('bountyStreakMultiplier: grows 10% per streak point, capped at BOUNTY_STREAK_BONUS_MAX_PCT', () => {
+  assert.equal(bountyStreakMultiplier(0), 1);
+  assert.equal(bountyStreakMultiplier(1), 1.1);
+  assert.equal(bountyStreakMultiplier(3), 1.3);
+  assert.equal(bountyStreakMultiplier(5), 1 + BOUNTY_STREAK_BONUS_MAX_PCT / 100);
+  assert.equal(bountyStreakMultiplier(50), 1 + BOUNTY_STREAK_BONUS_MAX_PCT / 100, 'should not keep growing past the cap');
+  assert.equal(bountyStreakMultiplier(undefined), 1, 'a missing streak should behave like zero');
+});
+
+test('applyClaimBounty: increments the streak and applies its reward bonus on the next claim', () => {
+  const state = newGameState();
+  state.flags.bounties = [{ enemyId: 'wisp', targetCount: 1, baseline: 0, rewardMaterialId: 'water', rewardAmount: 5, rewardXp: 100 }];
+  state.flags.enemyKillCounts.wisp = 1;
+  applyClaimBounty(state, 0, () => {});
+  assert.equal(state.flags.bountyStreak, 1, 'streak should advance after a claim');
+  assert.equal(state.player.materials.water, 5, 'no bonus yet on this first claim (streak was 0 going in)');
+
+  // Second claim, now at streak 1 going in -> a 10% bonus should apply.
+  state.flags.bounties[0] = { enemyId: 'wisp', targetCount: 1, baseline: 1, rewardMaterialId: 'water', rewardAmount: 5, rewardXp: 100 };
+  state.flags.enemyKillCounts.wisp = 2;
+  applyClaimBounty(state, 0, () => {});
+  assert.equal(state.player.materials.water, 5 + 6, 'Math.round(5 * 1.1) = 6 bonus material granted');
+  assert.equal(state.flags.bountyStreak, 2);
+});
+
+test('applyRerollBounty: resets the streak back to zero', () => {
+  const state = newGameState();
+  state.flags.bountyStreak = 3;
+  state.flags.bounties = [{ enemyId: 'wisp', targetCount: 3, baseline: 0, rerollsUsed: 0, rewardMaterialId: 'water', rewardAmount: 1, rewardXp: 10 }];
+  applyRerollBounty(state, 0);
+  assert.equal(state.flags.bountyStreak, 0);
 });

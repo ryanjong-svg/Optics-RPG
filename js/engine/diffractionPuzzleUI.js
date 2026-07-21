@@ -15,7 +15,7 @@ export function closeDiffractionPuzzle(game) {
   game.diffractionPuzzle = null;
 }
 
-function drawFringeDiagram(canvas, puzzle, angleDeg) {
+function drawFringeDiagram(canvas, puzzle, angleDeg, showHint) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   const cx = w / 2, cy = h - 16;
@@ -36,15 +36,17 @@ function drawFringeDiagram(canvas, puzzle, angleDeg) {
   ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - rayLen); ctx.stroke();
   ctx.setLineDash([]);
 
-  // target fringe wedge
-  const targetRad = puzzle.targetDeg * Math.PI / 180;
-  const tolRad = puzzle.tolerance * Math.PI / 180;
-  ctx.fillStyle = 'rgba(92,255,157,0.25)';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.arc(cx, cy, rayLen, -Math.PI / 2 - (targetRad + tolRad), -Math.PI / 2 - (targetRad - tolRad));
-  ctx.closePath();
-  ctx.fill();
+  // target fringe wedge - hidden with Puzzle Hints off
+  if (showHint) {
+    const targetRad = puzzle.targetDeg * Math.PI / 180;
+    const tolRad = puzzle.tolerance * Math.PI / 180;
+    ctx.fillStyle = 'rgba(92,255,157,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, rayLen, -Math.PI / 2 - (targetRad + tolRad), -Math.PI / 2 - (targetRad - tolRad));
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // chosen angle ray
   const rad = angleDeg * Math.PI / 180;
@@ -61,10 +63,12 @@ export function renderDiffractionPuzzle(game) {
   if (!game.diffractionPuzzle) return;
   const { puzzle } = game.diffractionPuzzle;
   const angleDeg = Number(game.dom.diffractionAngle.value);
+  const showHint = game.state.settings.puzzleHints !== false;
   game.dom.diffractionAngleValue.textContent = `${angleDeg}°`;
-  game.dom.diffractionReadout.textContent =
-    `d/λ = ${puzzle.dOverLambda} — first bright fringe at ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`;
-  drawFringeDiagram(game.dom.diffractionCanvas, puzzle, angleDeg);
+  game.dom.diffractionReadout.textContent = showHint
+    ? `d/λ = ${puzzle.dOverLambda} — first bright fringe at ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`
+    : `d/λ = ${puzzle.dOverLambda} — Puzzle Hints are off — work out the first bright fringe from sinθ = λ/d.`;
+  drawFringeDiagram(game.dom.diffractionCanvas, puzzle, angleDeg, showHint);
 }
 
 export function fireDiffractionPuzzle(game) {

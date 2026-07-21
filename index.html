@@ -98,6 +98,7 @@
     <div id="craft-practice" class="recipe-list"></div>
     <h3>Bounty Board</h3>
     <p class="ngplus-hint">Always-available side goals — claim a completed bounty for materials and XP, and a fresh one takes its place.</p>
+    <p id="bounty-streak" class="ngplus-hint"></p>
     <div id="craft-bounties" class="recipe-list"></div>
     <h3>Recovery Items</h3>
     <p class="ngplus-hint">Use anytime here, or right from the battle menu when your HP gets low.</p>
@@ -156,7 +157,14 @@
   <div id="bestiary-panel" class="panel bracketed hidden">
     <div class="panel-header"><h2>Bestiary</h2><button id="bestiary-close" class="action-btn ghost">Close</button></div>
     <p class="ngplus-hint" style="margin-top:0;">Defeat an enemy once to catalog its known weakness and resistance here.</p>
-    <input id="bestiary-search" class="settings-select" type="text" placeholder="Search cataloged enemies by name...">
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <input id="bestiary-search" class="settings-select" style="flex:1;" type="text" placeholder="Search cataloged enemies by name...">
+      <select id="bestiary-sort" class="settings-select" style="flex:0 0 150px;">
+        <option value="zone">Zone Order</option>
+        <option value="alpha">Alphabetical</option>
+        <option value="uncaught">Uncaught First</option>
+      </select>
+    </div>
     <div id="bestiary-progress" class="codex-progress"></div>
     <div id="bestiary-list" class="codex-list"></div>
   </div>
@@ -201,6 +209,10 @@
     <h3 class="completion-subhead">Display</h3>
     <button id="settings-reduced-motion-toggle" class="action-btn">Reduced Motion: Off</button>
     <p class="ngplus-hint">Turns off the CRT scanline/vignette overlay and battle-hit flash animations, for motion sensitivity.</p>
+
+    <h3 class="completion-subhead">Puzzles</h3>
+    <button id="settings-puzzle-hints-toggle" class="action-btn">Puzzle Hints: On</button>
+    <p class="ngplus-hint">When on, aiming puzzles (Snell's Law, diffraction, Brewster's angle) show the exact target angle. Turn off to work it out yourself from the formula shown.</p>
 
     <h3 class="completion-subhead">Save Slots</h3>
     <p class="ngplus-hint" style="margin-top:0;">Keep separate runs side by side — a clean playthrough alongside an experimental build.</p>

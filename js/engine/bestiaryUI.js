@@ -38,6 +38,31 @@ function entryHtml(enemy, isDefeated) {
   `;
 }
 
+// Exported for direct testing. Discovered (named) entries always sort ahead
+// of undiscovered "???" ones in every mode except plain zone order, so a
+// sort position can never leak which undiscovered enemy is which - ties
+// among undiscovered entries keep their original (zone) order rather than
+// being reordered by anything tied to their real, still-hidden name.
+export function sortBestiaryIds(ids, defeated, mode) {
+  if (mode !== 'alpha' && mode !== 'uncaught') return ids;
+  const arr = [...ids];
+  if (mode === 'alpha') {
+    arr.sort((a, b) => {
+      const da = !!defeated[a], db = !!defeated[b];
+      if (da && db) return ENEMIES[a].name.localeCompare(ENEMIES[b].name);
+      if (da !== db) return da ? -1 : 1;
+      return 0;
+    });
+  } else {
+    arr.sort((a, b) => {
+      const da = !!defeated[a], db = !!defeated[b];
+      if (da !== db) return da ? 1 : -1;
+      return 0;
+    });
+  }
+  return arr;
+}
+
 export function renderBestiary(game) {
   const state = game.state;
   const defeated = state.flags.enemiesDefeated;
@@ -49,6 +74,20 @@ export function renderBestiary(game) {
   // undiscovered "???" entry has no name to search for, so it's simply
   // excluded from filtered results rather than shown as a false match.
   const query = (game.dom.bestiarySearch ? game.dom.bestiarySearch.value : '').trim().toLowerCase();
+  const sortMode = game.dom.bestiarySort ? game.dom.bestiarySort.value : 'zone';
+
+  if (sortMode !== 'zone') {
+    const visibleIds = query
+      ? ids.filter(id => defeated[id] && ENEMIES[id].name.toLowerCase().includes(query))
+      : ids;
+    if (query && !visibleIds.length) {
+      game.dom.bestiaryList.innerHTML = `<p class="ngplus-hint">No cataloged enemies match "${query}".</p>`;
+      return;
+    }
+    const sorted = sortBestiaryIds(visibleIds, defeated, sortMode);
+    game.dom.bestiaryList.innerHTML = sorted.map(id => entryHtml(ENEMIES[id], !!defeated[id])).join('');
+    return;
+  }
 
   const byZone = new Map();
   for (const id of ids) {

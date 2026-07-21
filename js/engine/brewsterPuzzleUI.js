@@ -16,7 +16,7 @@ export function closeBrewsterPuzzle(game) {
   game.brewsterPuzzle = null;
 }
 
-function drawBrewsterDiagram(canvas, puzzle, angleDeg) {
+function drawBrewsterDiagram(canvas, puzzle, angleDeg, showHint) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   const cx = w / 2, cy = h / 2;
@@ -34,15 +34,18 @@ function drawBrewsterDiagram(canvas, puzzle, angleDeg) {
   ctx.beginPath(); ctx.moveTo(cx, cy - h / 2); ctx.lineTo(cx, cy + h / 2); ctx.stroke();
   ctx.setLineDash([]);
 
-  // target wedge for the reflected ray (angle of reflection = angle of incidence)
-  const targetRad = puzzle.targetDeg * Math.PI / 180;
-  const tolRad = puzzle.tolerance * Math.PI / 180;
-  ctx.fillStyle = 'rgba(92,255,157,0.25)';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.arc(cx, cy, rayLen, -Math.PI / 2 - (targetRad + tolRad), -Math.PI / 2 - (targetRad - tolRad));
-  ctx.closePath();
-  ctx.fill();
+  // target wedge for the reflected ray (angle of reflection = angle of
+  // incidence) - hidden with Puzzle Hints off
+  if (showHint) {
+    const targetRad = puzzle.targetDeg * Math.PI / 180;
+    const tolRad = puzzle.tolerance * Math.PI / 180;
+    ctx.fillStyle = 'rgba(92,255,157,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, rayLen, -Math.PI / 2 - (targetRad + tolRad), -Math.PI / 2 - (targetRad - tolRad));
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // incident ray, from the upper-left
   const incRad = angleDeg * Math.PI / 180;
@@ -66,10 +69,12 @@ export function renderBrewsterPuzzle(game) {
   if (!game.brewsterPuzzle) return;
   const { puzzle } = game.brewsterPuzzle;
   const angleDeg = Number(game.dom.brewsterAngle.value);
+  const showHint = game.state.settings.puzzleHints !== false;
   game.dom.brewsterAngleValue.textContent = `${angleDeg}°`;
-  game.dom.brewsterReadout.textContent =
-    `n = ${puzzle.n} — Brewster's angle: arctan(n) = ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`;
-  drawBrewsterDiagram(game.dom.brewsterCanvas, puzzle, angleDeg);
+  game.dom.brewsterReadout.textContent = showHint
+    ? `n = ${puzzle.n} — Brewster's angle: arctan(n) = ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`
+    : `n = ${puzzle.n} — Puzzle Hints are off — work out Brewster's angle from arctan(n).`;
+  drawBrewsterDiagram(game.dom.brewsterCanvas, puzzle, angleDeg, showHint);
 }
 
 export function fireBrewsterPuzzle(game) {

@@ -15,7 +15,7 @@ export function closeSnellPuzzle(game) {
   game.snellPuzzle = null;
 }
 
-function drawSnellDiagram(canvas, puzzle, incidentDeg) {
+function drawSnellDiagram(canvas, puzzle, incidentDeg, showHint) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   const cx = w / 2, cy = h / 2;
@@ -33,15 +33,18 @@ function drawSnellDiagram(canvas, puzzle, incidentDeg) {
   ctx.beginPath(); ctx.moveTo(cx, cy - h / 2); ctx.lineTo(cx, cy + h / 2); ctx.stroke();
   ctx.setLineDash([]);
 
-  // target wedge, in the refracted (lower) medium
-  const targetRad = puzzle.targetDeg * Math.PI / 180;
-  const tolRad = puzzle.tolerance * Math.PI / 180;
-  ctx.fillStyle = 'rgba(92,255,157,0.25)';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.arc(cx, cy, rayLen, Math.PI / 2 - (targetRad + tolRad), Math.PI / 2 - (targetRad - tolRad));
-  ctx.closePath();
-  ctx.fill();
+  // target wedge, in the refracted (lower) medium - hidden with Puzzle
+  // Hints off, so the only way to line it up is computing it from n2.
+  if (showHint) {
+    const targetRad = puzzle.targetDeg * Math.PI / 180;
+    const tolRad = puzzle.tolerance * Math.PI / 180;
+    ctx.fillStyle = 'rgba(92,255,157,0.25)';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, rayLen, Math.PI / 2 - (targetRad + tolRad), Math.PI / 2 - (targetRad - tolRad));
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // incident ray, in the upper (air) medium
   const incRad = incidentDeg * Math.PI / 180;
@@ -68,10 +71,12 @@ export function renderSnellPuzzle(game) {
   const { puzzle } = game.snellPuzzle;
   const incidentDeg = Number(game.dom.snellAngle.value);
   const refractedDeg = computeRefractedDeg(puzzle.n2, incidentDeg);
+  const showHint = game.state.settings.puzzleHints !== false;
   game.dom.snellAngleValue.textContent = `${incidentDeg}°`;
-  game.dom.snellReadout.textContent =
-    `n₂ = ${puzzle.n2} — refracted ray: ${refractedDeg.toFixed(1)}° from normal. Target: ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`;
-  drawSnellDiagram(game.dom.snellCanvas, puzzle, incidentDeg);
+  game.dom.snellReadout.textContent = showHint
+    ? `n₂ = ${puzzle.n2} — refracted ray: ${refractedDeg.toFixed(1)}° from normal. Target: ${puzzle.targetDeg}° ± ${puzzle.tolerance}°.`
+    : `n₂ = ${puzzle.n2} — refracted ray: ${refractedDeg.toFixed(1)}° from normal. Puzzle Hints are off — work out the target from n₁sinθ₁ = n₂sinθ₂.`;
+  drawSnellDiagram(game.dom.snellCanvas, puzzle, incidentDeg, showHint);
 }
 
 export function fireSnellPuzzle(game) {

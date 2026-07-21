@@ -71,6 +71,7 @@ const dom = {
   craftMeditate: q('craft-meditate'),
   craftPractice: q('craft-practice'),
   craftBounties: q('craft-bounties'),
+  bountyStreak: q('bounty-streak'),
   craftConsumables: q('craft-consumables'),
 
   snellPuzzlePanel: q('snell-puzzle-panel'),
@@ -107,6 +108,7 @@ const dom = {
 
   bestiaryPanel: q('bestiary-panel'),
   bestiarySearch: q('bestiary-search'),
+  bestiarySort: q('bestiary-sort'),
   bestiaryProgress: q('bestiary-progress'),
   bestiaryList: q('bestiary-list'),
   btnBestiary: q('btn-bestiary'),
@@ -145,6 +147,7 @@ const dom = {
   settingsDifficultyDesc: q('settings-difficulty-desc'),
   settingsMuteToggle: q('settings-mute-toggle'),
   settingsReducedMotionToggle: q('settings-reduced-motion-toggle'),
+  settingsPuzzleHintsToggle: q('settings-puzzle-hints-toggle'),
   settingsMusicVolume: q('settings-music-volume'),
   settingsSfxVolume: q('settings-sfx-volume'),
   settingsResetSave: q('settings-reset-save'),
@@ -292,6 +295,7 @@ document.addEventListener('keydown', (e) => {
 dom.btnCodex.addEventListener('click', () => openCodex(game));
 dom.btnBestiary.addEventListener('click', () => openBestiary(game));
 dom.bestiarySearch.addEventListener('input', () => renderBestiary(game));
+dom.bestiarySort.addEventListener('change', () => renderBestiary(game));
 dom.bestiaryClose.addEventListener('click', () => closeBestiary(game));
 dom.btnHelp.addEventListener('click', () => openHelp(game));
 dom.helpClose.addEventListener('click', () => closeHelp(game));
@@ -330,6 +334,16 @@ function setReducedMotion(reducedMotion) {
   saveGame(game.state);
 }
 dom.settingsReducedMotionToggle.addEventListener('click', () => setReducedMotion(!game.state.settings.reducedMotion));
+
+function syncPuzzleHintsUI(puzzleHints) {
+  dom.settingsPuzzleHintsToggle.textContent = `Puzzle Hints: ${puzzleHints ? 'On' : 'Off'}`;
+}
+function setPuzzleHints(puzzleHints) {
+  game.state.settings.puzzleHints = puzzleHints;
+  syncPuzzleHintsUI(puzzleHints);
+  saveGame(game.state);
+}
+dom.settingsPuzzleHintsToggle.addEventListener('click', () => setPuzzleHints(!game.state.settings.puzzleHints));
 // 'input' fires continuously while dragging (live audio/state feedback);
 // saving is deferred to 'change' (fires once, on release) so a drag doesn't
 // re-serialize and re-persist the whole save file dozens of times.
@@ -467,6 +481,7 @@ function boot() {
   dom.settingsMusicVolume.value = Math.round(game.state.settings.musicVolume * 100);
   dom.settingsSfxVolume.value = Math.round(game.state.settings.sfxVolume * 100);
   syncReducedMotionUI(game.state.settings.reducedMotion);
+  syncPuzzleHintsUI(game.state.settings.puzzleHints);
   if (!game.state.flags.seenIntro) {
     game.state.flags.seenIntro = true;
     showMessages(game, INTRO_LINES, () => {

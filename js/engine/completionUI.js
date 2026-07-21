@@ -6,9 +6,26 @@ import { MAPS } from '../data/maps.js';
 import { ACHIEVEMENTS, unlockedAchievements } from '../data/achievements.js';
 import { ENEMIES } from '../data/enemies.js';
 import { findAbility } from '../data/abilities.js';
+import { COMBOS } from './battle.js';
 
 const GUARDIAN_MAP_IDS = Object.values(MAPS).filter(m => m.guardian).map(m => m.id);
 const SECRET_MAP_IDS = Object.values(MAPS).filter(m => m.secret).map(m => m.id);
+const ZONE_NAMES = Object.fromEntries(Object.values(MAPS).map(m => [m.zone, m.name]));
+const COMBO_PAIRS = Object.entries(COMBOS).flatMap(([setup, payoffs]) => payoffs.map(payoff => ({ setup, payoff })));
+
+// Pure and exported for direct testing - which of the game's fixed set of
+// ability combos has the player actually landed at least once, by name
+// rather than just a bare count, since the pairs are few enough to name.
+export function computeComboProgress(state) {
+  const triggered = state.flags.combosTriggered || {};
+  const doneLabels = [];
+  COMBO_PAIRS.forEach(({ setup, payoff }) => {
+    if (triggered[`${setup}>${payoff}`]) {
+      doneLabels.push(`${findAbility(setup).name}→${findAbility(payoff).name}`);
+    }
+  });
+  return { doneCount: doneLabels.length, total: COMBO_PAIRS.length, doneLabels };
+}
 
 function computeStats(state) {
   const guardiansDefeated = GUARDIAN_MAP_IDS.filter(id => state.flags.guardianDefeated[id]).length;
@@ -51,12 +68,23 @@ export function computeLifetimeStats(state) {
   }
   const mostUsedName = mostUsedAbility ? (findAbility(mostUsedAbility) || {}).name || mostUsedAbility : null;
 
+  const eliteZoneBreakdown = Object.entries(flags.eliteKillsByZone || {})
+    .filter(([, count]) => count > 0)
+    .map(([zone, count]) => `${ZONE_NAMES[zone] || zone} ${count}`);
+
+  const comboProgress = computeComboProgress(state);
+
   return {
     totalDamageDealt: flags.totalDamageDealt || 0,
     totalVictories: flags.totalVictories || 0,
     fastestBossKillTurns: flags.fastestBossKillTurns != null ? flags.fastestBossKillTurns : null,
     mostUsedAbilityName: mostUsedName,
-    mostUsedAbilityCount: mostUsedCount
+    mostUsedAbilityCount: mostUsedCount,
+    elitesDefeated: flags.elitesDefeated || 0,
+    eliteZoneBreakdown,
+    comboDoneCount: comboProgress.doneCount,
+    comboTotal: comboProgress.total,
+    comboDoneLabels: comboProgress.doneLabels
   };
 }
 
@@ -93,7 +121,9 @@ export function renderCompletion(game) {
       `Total Damage Dealt: ${s.totalDamageDealt}`,
       `Battles Won: ${s.totalVictories}`,
       `Fastest Null Medium Kill: ${s.fastestBossKillTurns != null ? `${s.fastestBossKillTurns} turn${s.fastestBossKillTurns === 1 ? '' : 's'}` : 'Not yet defeated'}`,
-      `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`
+      `Most-Used Ability: ${s.mostUsedAbilityName ? `${s.mostUsedAbilityName} (${s.mostUsedAbilityCount}x)` : 'None yet'}`,
+      `Elites Defeated: ${s.elitesDefeated}${s.eliteZoneBreakdown.length ? ` (${s.eliteZoneBreakdown.join(', ')})` : ''}`,
+      `Combos Discovered: ${s.comboDoneCount} / ${s.comboTotal}${s.comboDoneLabels.length ? ` (${s.comboDoneLabels.join(', ')})` : ''}`
     ];
     game.dom.completionStats.innerHTML = rows.map(r => `<div class="completion-row-head"><span>${r}</span></div>`).join('');
   }

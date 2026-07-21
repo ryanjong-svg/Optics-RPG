@@ -13,6 +13,18 @@ const MIN_TARGET = 3;
 const MAX_TARGET = 6;
 export const MAX_REROLLS_PER_BOUNTY = 1;
 
+// A small reward bonus for claiming bounties back-to-back, capped so it
+// never dominates the base reward. Rerolling breaks the streak - it's the
+// cost of dodging an inconvenient target, so the bonus stays a reward for
+// actually working through what the board asks rather than a free stack.
+const BOUNTY_STREAK_BONUS_STEP = 0.1;
+const BOUNTY_STREAK_BONUS_MAX_STEPS = 5;
+export const BOUNTY_STREAK_BONUS_MAX_PCT = Math.round(BOUNTY_STREAK_BONUS_STEP * BOUNTY_STREAK_BONUS_MAX_STEPS * 100);
+
+export function bountyStreakMultiplier(streak) {
+  return 1 + Math.min(Math.max(streak || 0, 0), BOUNTY_STREAK_BONUS_MAX_STEPS) * BOUNTY_STREAK_BONUS_STEP;
+}
+
 function allBountyCandidates() {
   const ids = new Set();
   Object.values(ZONE_ENCOUNTERS).forEach(pool => pool.forEach(id => ids.add(id)));
@@ -74,6 +86,7 @@ export function applyRerollBounty(state, slotIndex) {
   const fresh = generateBounty(state, usedIds);
   fresh.rerollsUsed = (bounty.rerollsUsed || 0) + 1;
   state.flags.bounties[slotIndex] = fresh;
+  state.flags.bountyStreak = 0;
   return true;
 }
 
@@ -82,11 +95,15 @@ export function applyRerollBounty(state, slotIndex) {
 export function applyClaimBounty(state, slotIndex, log) {
   const bounty = state.flags.bounties && state.flags.bounties[slotIndex];
   if (!bounty || !canClaimBounty(state, bounty)) return false;
+  const streak = state.flags.bountyStreak || 0;
+  const mult = bountyStreakMultiplier(streak);
   if (bounty.rewardMaterialId) {
-    state.player.materials[bounty.rewardMaterialId] = (state.player.materials[bounty.rewardMaterialId] || 0) + bounty.rewardAmount;
+    const amount = Math.round(bounty.rewardAmount * mult);
+    state.player.materials[bounty.rewardMaterialId] = (state.player.materials[bounty.rewardMaterialId] || 0) + amount;
   }
-  grantXp(state, bounty.rewardXp, log || (() => {}));
+  grantXp(state, Math.round(bounty.rewardXp * mult), log || (() => {}));
   state.flags.bountiesClaimed = (state.flags.bountiesClaimed || 0) + 1;
+  state.flags.bountyStreak = streak + 1;
   state.flags.bounties[slotIndex] = generateBounty(state, state.flags.bounties.map(b => b.enemyId));
   return true;
 }
